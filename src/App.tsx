@@ -118,7 +118,7 @@ function AppContent() {
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
 
   useEffect(() => {
-    const data = generateDummyPhotos(200);
+    const data = generateDummyPhotos();
     setPhotos(data);
   }, []);
 

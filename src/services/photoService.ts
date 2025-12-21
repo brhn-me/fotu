@@ -21,66 +21,83 @@ function getRandomArrayElement<T>(arr: T[]): T {
     return arr[Math.floor(Math.random() * arr.length)];
 }
 
-export const generateDummyPhotos = (totalCount: number = 200): Photo[] => {
+export const generateDummyPhotos = (): Photo[] => {
     const photos: Photo[] = [];
     const endDate = new Date();
 
-    let photosGenerated = 0;
+    // Helper to generate a photo object
+    const createPhoto = (date: Date, index: number): Photo => {
+        const id = uuidv4();
+        const width = getRandomInt(800, 1600);
+        const height = getRandomInt(600, 1200);
+        const hasLocation = Math.random() > 0.2;
+
+        let location: Location | null = null;
+        if (hasLocation) {
+            const city = getRandomArrayElement(CITIES);
+            location = {
+                latitude: city.lat + (Math.random() - 0.5) * 0.1,
+                longitude: city.lng + (Math.random() - 0.5) * 0.1,
+                name: city.name,
+            };
+        }
+
+        return {
+            id,
+            url: `https://picsum.photos/seed/${id}/1920/1080`,
+            thumbnailUrl: `https://picsum.photos/seed/${id}/400/400`,
+            title: `Photo ${index}`,
+            description: Math.random() > 0.5 ? `A beautiful shot from my travels.` : null,
+            timestamp: date,
+            location,
+            metadata: {
+                width,
+                height,
+                cameraModel: Math.random() > 0.3 ? getRandomArrayElement(CAMERAS) : null,
+                focalLength: `${getRandomInt(16, 200)}mm`,
+                iso: getRandomInt(100, 3200),
+                aperture: `f/${(getRandomInt(14, 56) / 10).toFixed(1)}`,
+                shutterSpeed: `1/${getRandomInt(60, 8000)}`,
+            },
+        };
+    };
+
+    let photoIndex = 1;
+
+    // --- PART 1: 2024 and 2025 High Density ---
     let currentDate = new Date(endDate);
+    while (currentDate.getFullYear() >= 2024) {
+        // Generate a cluster of 4-12 photos
+        const clusterSize = getRandomInt(4, 12);
+        for (let i = 0; i < clusterSize; i++) {
+            const date = new Date(currentDate);
+            date.setHours(getRandomInt(8, 20), getRandomInt(0, 59));
+            photos.push(createPhoto(date, photoIndex++));
+        }
+        // Skip 1-4 days
+        currentDate.setDate(currentDate.getDate() - getRandomInt(1, 4));
+    }
 
-    while (photosGenerated < totalCount) {
-        // Go back a few days to create some gaps, or stick to a few dates
-        const daysToSkip = getRandomInt(0, 3);
-        currentDate.setDate(currentDate.getDate() - daysToSkip);
+    // --- PART 2: 2015-2023 Sparse Data ---
+    for (let year = 2023; year >= 2015; year--) {
+        // Pick 1-5 random months
+        const numMonths = getRandomInt(1, 5);
+        const months = Array.from({ length: 12 }, (_, i) => i)
+            .sort(() => 0.5 - Math.random())
+            .slice(0, numMonths);
 
-        // Generate a cluster of photos for this specific date
-        const photosInThisCluster = Math.min(getRandomInt(4, 12), totalCount - photosGenerated);
+        months.forEach(month => {
+            const day = getRandomInt(1, 28);
+            const dateBase = new Date(year, month, day);
 
-        for (let i = 0; i < photosInThisCluster; i++) {
-            const id = uuidv4();
-            const width = getRandomInt(800, 1600);
-            const height = getRandomInt(600, 1200);
-            const hasLocation = Math.random() > 0.2;
-
-            let location: Location | null = null;
-            if (hasLocation) {
-                const city = getRandomArrayElement(CITIES);
-                location = {
-                    latitude: city.lat + (Math.random() - 0.5) * 0.1,
-                    longitude: city.lng + (Math.random() - 0.5) * 0.1,
-                    name: city.name,
-                };
+            // Generate one row (1-5 photos)
+            const rowSize = getRandomInt(1, 5);
+            for (let i = 0; i < rowSize; i++) {
+                const date = new Date(dateBase);
+                date.setHours(getRandomInt(8, 20), getRandomInt(0, 59));
+                photos.push(createPhoto(date, photoIndex++));
             }
-
-            // Create a specific timestamp for this day with random time
-            const timestamp = new Date(currentDate);
-            timestamp.setHours(getRandomInt(8, 20), getRandomInt(0, 59), getRandomInt(0, 59));
-
-            photos.push({
-                id,
-                url: `https://picsum.photos/seed/${id}/1920/1080`,
-                thumbnailUrl: `https://picsum.photos/seed/${id}/400/400`, // Make square thumbnails
-                title: `Photo ${photosGenerated + 1}`,
-                description: Math.random() > 0.5 ? `A beautiful shot from my travels.` : null,
-                timestamp,
-                location,
-                metadata: {
-                    width,
-                    height,
-                    cameraModel: Math.random() > 0.3 ? getRandomArrayElement(CAMERAS) : null,
-                    focalLength: `${getRandomInt(16, 200)}mm`,
-                    iso: getRandomInt(100, 3200),
-                    aperture: `f/${(getRandomInt(14, 56) / 10).toFixed(1)}`,
-                    shutterSpeed: `1/${getRandomInt(60, 8000)}`,
-                },
-            });
-            photosGenerated++;
-        }
-
-        // Jump further back occasionally for older years
-        if (Math.random() > 0.8) {
-            currentDate.setMonth(currentDate.getMonth() - getRandomInt(1, 3));
-        }
+        });
     }
 
     return photos.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
