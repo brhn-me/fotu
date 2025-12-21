@@ -35,7 +35,7 @@ export function groupPhotosByDate(photos: Photo[]): DateGroup[] {
         const dayKey = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString();
 
         if (!groups[dayKey]) {
-            let label = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            let label = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
             // Check for Today/Yesterday
             const checkDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());

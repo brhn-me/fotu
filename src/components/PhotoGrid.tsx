@@ -20,31 +20,23 @@ export function PhotoGrid({ photos, onPhotoClick }: PhotoGridProps) {
             }}
         >
             {groups.map((group) => (
-                <section key={group.id} id={group.id} style={{ marginBottom: '48px' }}>
+                <section key={group.id} id={group.id} style={{ marginBottom: '16px' }}>
                     {/* Date Header */}
                     <div style={{
-                        padding: '24px 24px 16px 24px',
+                        padding: '12px 24px 4px 24px',
                         position: 'sticky',
                         top: 0,
                         backgroundColor: 'var(--bg-primary)',
                         zIndex: 10,
-                        borderBottom: '1px solid var(--border-subtle)',
                     }}>
                         <h2 style={{
-                            fontSize: '18px',
-                            fontWeight: 600,
+                            fontSize: '15px',
+                            fontWeight: 400,
                             color: 'var(--text-primary)',
                             margin: 0,
                         }}>
                             {group.label}
                         </h2>
-                        <p style={{
-                            fontSize: '13px',
-                            color: 'var(--text-muted)',
-                            margin: '4px 0 0 0',
-                        }}>
-                            {group.photos.length} {group.photos.length === 1 ? 'photo' : 'photos'}
-                        </p>
                     </div>
 
                     {/* Photo Grid for this date group */}
@@ -52,7 +44,7 @@ export function PhotoGrid({ photos, onPhotoClick }: PhotoGridProps) {
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
                         gap: '16px',
-                        padding: '24px',
+                        padding: '4px 24px 12px 24px',
                     }}>
                         {group.photos.map((photo) => (
                             <div

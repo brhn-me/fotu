@@ -12,9 +12,6 @@ const CITIES: { name: string; lat: number; lng: number }[] = [
 
 const CAMERAS = ['Canon EOS R5', 'Sony A7IV', 'Fujifilm X-T4', 'iPhone 13 Pro', 'Leica Q2'];
 
-function getRandomDate(start: Date, end: Date): Date {
-    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-}
 
 function getRandomInt(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -24,46 +21,66 @@ function getRandomArrayElement<T>(arr: T[]): T {
     return arr[Math.floor(Math.random() * arr.length)];
 }
 
-export const generateDummyPhotos = (count: number = 50): Photo[] => {
+export const generateDummyPhotos = (totalCount: number = 200): Photo[] => {
     const photos: Photo[] = [];
-    const startDate = new Date(2020, 0, 1);
     const endDate = new Date();
 
-    for (let i = 0; i < count; i++) {
-        const id = uuidv4();
-        const width = getRandomInt(800, 1600);
-        const height = getRandomInt(600, 1200);
-        const hasLocation = Math.random() > 0.2; // 80% have location
+    let photosGenerated = 0;
+    let currentDate = new Date(endDate);
 
-        let location: Location | null = null;
-        if (hasLocation) {
-            const city = getRandomArrayElement(CITIES);
-            // Add some jitter
-            location = {
-                latitude: city.lat + (Math.random() - 0.5) * 0.1,
-                longitude: city.lng + (Math.random() - 0.5) * 0.1,
-                name: city.name,
-            };
+    while (photosGenerated < totalCount) {
+        // Go back a few days to create some gaps, or stick to a few dates
+        const daysToSkip = getRandomInt(0, 3);
+        currentDate.setDate(currentDate.getDate() - daysToSkip);
+
+        // Generate a cluster of photos for this specific date
+        const photosInThisCluster = Math.min(getRandomInt(4, 12), totalCount - photosGenerated);
+
+        for (let i = 0; i < photosInThisCluster; i++) {
+            const id = uuidv4();
+            const width = getRandomInt(800, 1600);
+            const height = getRandomInt(600, 1200);
+            const hasLocation = Math.random() > 0.2;
+
+            let location: Location | null = null;
+            if (hasLocation) {
+                const city = getRandomArrayElement(CITIES);
+                location = {
+                    latitude: city.lat + (Math.random() - 0.5) * 0.1,
+                    longitude: city.lng + (Math.random() - 0.5) * 0.1,
+                    name: city.name,
+                };
+            }
+
+            // Create a specific timestamp for this day with random time
+            const timestamp = new Date(currentDate);
+            timestamp.setHours(getRandomInt(8, 20), getRandomInt(0, 59), getRandomInt(0, 59));
+
+            photos.push({
+                id,
+                url: `https://picsum.photos/seed/${id}/1920/1080`,
+                thumbnailUrl: `https://picsum.photos/seed/${id}/400/400`, // Make square thumbnails
+                title: `Photo ${photosGenerated + 1}`,
+                description: Math.random() > 0.5 ? `A beautiful shot from my travels.` : null,
+                timestamp,
+                location,
+                metadata: {
+                    width,
+                    height,
+                    cameraModel: Math.random() > 0.3 ? getRandomArrayElement(CAMERAS) : null,
+                    focalLength: `${getRandomInt(16, 200)}mm`,
+                    iso: getRandomInt(100, 3200),
+                    aperture: `f/${(getRandomInt(14, 56) / 10).toFixed(1)}`,
+                    shutterSpeed: `1/${getRandomInt(60, 8000)}`,
+                },
+            });
+            photosGenerated++;
         }
 
-        photos.push({
-            id,
-            url: `https://picsum.photos/seed/${id}/1920/1080`,
-            thumbnailUrl: `https://picsum.photos/seed/${id}/400/300`,
-            title: `Photo ${i + 1}`,
-            description: Math.random() > 0.5 ? `A beautiful shot from my travels.` : null,
-            timestamp: getRandomDate(startDate, endDate),
-            location,
-            metadata: {
-                width,
-                height,
-                cameraModel: Math.random() > 0.3 ? getRandomArrayElement(CAMERAS) : null,
-                focalLength: `${getRandomInt(16, 200)}mm`,
-                iso: getRandomInt(100, 3200),
-                aperture: `f/${(getRandomInt(14, 56) / 10).toFixed(1)}`,
-                shutterSpeed: `1/${getRandomInt(60, 8000)}`,
-            },
-        });
+        // Jump further back occasionally for older years
+        if (Math.random() > 0.8) {
+            currentDate.setMonth(currentDate.getMonth() - getRandomInt(1, 3));
+        }
     }
 
     return photos.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
