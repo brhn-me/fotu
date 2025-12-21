@@ -4,8 +4,11 @@ interface SelectionContextType {
     selectedIds: Set<string>;
     toggleSelection: (id: string) => void;
     selectMultiple: (ids: string[]) => void;
+    deselectMultiple: (ids: string[]) => void;
+    toggleGroup: (ids: string[]) => void;
     clearSelection: () => void;
     isSelected: (id: string) => boolean;
+    getGroupStatus: (ids: string[]) => 'all' | 'partial' | 'none';
 }
 
 const SelectionContext = createContext<SelectionContextType | undefined>(undefined);
@@ -33,6 +36,30 @@ export function SelectionProvider({ children }: { children: React.ReactNode }) {
         });
     }, []);
 
+    const deselectMultiple = useCallback((ids: string[]) => {
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            ids.forEach(id => next.delete(id));
+            return next;
+        });
+    }, []);
+
+    const getGroupStatus = useCallback((ids: string[]) => {
+        const count = ids.filter(id => selectedIds.has(id)).length;
+        if (count === 0) return 'none';
+        if (count === ids.length) return 'all';
+        return 'partial';
+    }, [selectedIds]);
+
+    const toggleGroup = useCallback((ids: string[]) => {
+        const status = getGroupStatus(ids);
+        if (status === 'all') {
+            deselectMultiple(ids);
+        } else {
+            selectMultiple(ids);
+        }
+    }, [getGroupStatus, selectMultiple, deselectMultiple]);
+
     const clearSelection = useCallback(() => {
         setSelectedIds(new Set());
     }, []);
@@ -42,7 +69,16 @@ export function SelectionProvider({ children }: { children: React.ReactNode }) {
     }, [selectedIds]);
 
     return (
-        <SelectionContext.Provider value={{ selectedIds, toggleSelection, selectMultiple, clearSelection, isSelected }}>
+        <SelectionContext.Provider value={{
+            selectedIds,
+            toggleSelection,
+            selectMultiple,
+            deselectMultiple,
+            toggleGroup,
+            clearSelection,
+            isSelected,
+            getGroupStatus
+        }}>
             {children}
         </SelectionContext.Provider>
     );
