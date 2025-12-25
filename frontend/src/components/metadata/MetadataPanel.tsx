@@ -25,6 +25,8 @@ export function MetadataPanel({ photo, onChange }: MetadataPanelProps) {
         });
     };
 
+
+
     return (
         <div
             style={{
@@ -92,9 +94,26 @@ export function MetadataPanel({ photo, onChange }: MetadataPanelProps) {
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <label style={{ fontSize: "12px", color: "var(--text-muted)" }}>Location</label>
                         <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                            {photo.location
-                                ? `${photo.location.latitude.toFixed(4)}, ${photo.location.longitude.toFixed(4)}`
-                                : "No location"}
+                            {photo.location ? (
+                                `${photo.location.latitude.toFixed(4)}, ${photo.location.longitude.toFixed(4)}`
+                            ) : (
+                                <button
+                                    onClick={() => handleLocationChange(51.505, -0.09)} // Default to London or map center if possible
+                                    style={{
+                                        background: "none",
+                                        border: "none",
+                                        padding: 0,
+                                        color: "var(--primary)",
+                                        fontSize: "12px",
+                                        cursor: "pointer",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "4px"
+                                    }}
+                                >
+                                    <span style={{ fontSize: "14px" }}>📍</span> Add location
+                                </button>
+                            )}
                         </span>
                     </div>
                     <MapWidget

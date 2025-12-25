@@ -28,7 +28,7 @@ export function Lightbox({ photo, onClose, onUpdatePhoto }: LightboxProps) {
             right: 0,
             bottom: 0,
             backgroundColor: 'var(--bg-primary)',
-            zIndex: 100,
+            zIndex: 2000,
             display: 'flex',
             flexDirection: 'row',
             animation: 'fadeIn 0.2s ease-out'

@@ -73,7 +73,8 @@ export function PhotoGrid({ photos, onPhotoClick }: PhotoGridProps) {
                 virtuosoRef.current.scrollToIndex({
                     index: itemIndex,
                     align: 'start',
-                    offset: 0 // Optional offset
+                    offset: 0, // Optional offset
+                    behavior: 'smooth'
                 });
 
                 // Reset the command so it can be triggered again later

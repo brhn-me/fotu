@@ -1,83 +1,20 @@
 // src/components/MapWidget.tsx
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+// ... (imports)
 
-import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
-import iconUrl from "leaflet/dist/images/marker-icon.png";
-import shadowUrl from "leaflet/dist/images/marker-shadow.png";
-
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl,
-    iconUrl,
-    shadowUrl,
-});
+// ... (L.Icon.Default fix)
 
 interface MapWidgetProps {
     latitude: number | null;
     longitude: number | null;
     onChangeLocation: (lat: number, lng: number) => void;
-    onClearLocation?: () => void; // NEW
 }
 
-function MapControls({
-    hasLocation,
-    onAddAtCenter,
-    onClear,
-}: {
-    hasLocation: boolean;
-    onAddAtCenter: () => void;
-    onClear?: (() => void) | undefined;
-}) {
-    return (
-        <div
-            style={{
-                position: "absolute",
-                top: 10,
-                left: 10,
-                zIndex: 1000,
-                display: "flex",
-                gap: 8,
-            }}
-        >
-            {!hasLocation ? (
-                <button
-                    type="button"
-                    onClick={onAddAtCenter}
-                    style={{
-                        background: "var(--bg-primary)",
-                        border: "1px solid var(--border-subtle)",
-                        color: "var(--text-primary)",
-                        padding: "6px 10px",
-                        borderRadius: "var(--radius-sm)",
-                        cursor: "pointer",
-                        fontSize: 12,
-                    }}
-                >
-                    Add location
-                </button>
-            ) : (
-                <button
-                    type="button"
-                    onClick={onClear}
-                    style={{
-                        background: "var(--bg-primary)",
-                        border: "1px solid var(--border-subtle)",
-                        color: "var(--text-primary)",
-                        padding: "6px 10px",
-                        borderRadius: "var(--radius-sm)",
-                        cursor: "pointer",
-                        fontSize: 12,
-                    }}
-                >
-                    Remove
-                </button>
-            )}
-        </div>
-    );
-}
+
 
 function LocationMarker({
     lat,
@@ -124,15 +61,9 @@ function LocationMarker({
     );
 }
 
-function MapInstanceBridge({ onReady }: { onReady: (map: L.Map) => void }) {
-    const map = useMap();
-    useEffect(() => {
-        onReady(map);
-    }, [map, onReady]);
-    return null;
-}
 
-export function MapWidget({ latitude, longitude, onChangeLocation, onClearLocation }: MapWidgetProps) {
+
+export function MapWidget({ latitude, longitude, onChangeLocation }: MapWidgetProps) {
     const hasCoords = latitude != null && longitude != null;
 
     // Default center if none, but user can still click to set.
@@ -141,15 +72,6 @@ export function MapWidget({ latitude, longitude, onChangeLocation, onClearLocati
         : ([51.505, -0.09] as [number, number]);
 
     const zoom = hasCoords ? 13 : 2;
-
-    const [mapRef, setMapRef] = useState<L.Map | null>(null);
-
-    const addAtCenter = () => {
-        if (!mapRef) return;
-        const c = mapRef.getCenter();
-        onChangeLocation(c.lat, c.lng);
-        mapRef.flyTo(c, Math.max(mapRef.getZoom(), 10));
-    };
 
     return (
         <div
@@ -160,12 +82,10 @@ export function MapWidget({ latitude, longitude, onChangeLocation, onClearLocati
                 overflow: "hidden",
                 position: "relative",
                 isolation: "isolate",
-                zIndex: 0,
+                zIndex: 10,
             }}
         >
             <MapContainer center={center} zoom={zoom} style={{ height: "100%", width: "100%" }}>
-                <MapInstanceBridge onReady={setMapRef} />
-
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -176,11 +96,7 @@ export function MapWidget({ latitude, longitude, onChangeLocation, onClearLocati
             </MapContainer>
 
             {/* Overlay controls */}
-            <MapControls
-                hasLocation={hasCoords}
-                onAddAtCenter={addAtCenter}
-                onClear={onClearLocation}
-            />
+
         </div>
     );
 }
