@@ -1,3 +1,5 @@
+// src/components/Lightbox.tsx
+
 import { useEffect } from 'react';
 import { X } from 'lucide-react';
 import type { Photo } from '../types';

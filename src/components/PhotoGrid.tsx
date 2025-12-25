@@ -1,3 +1,5 @@
+// src/components/PhotoGrid.tsx
+
 import type { Photo } from '../types';
 import { groupPhotosByDate } from '../utils/photoUtils';
 import { useMemo } from 'react';
