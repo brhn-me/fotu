@@ -4,19 +4,19 @@ import { useMemo, useState } from "react";
 import {
     ArrowLeft,
     ClipboardList,
-    ListChecks,
     AlertTriangle,
     XCircle,
     Cpu,
-    RefreshCw,
+    CheckCircle2,
     Pause,
     Play,
     RotateCcw,
     Loader2,
+    TerminalSquare,
 } from "lucide-react";
 import type { Job } from "./JobsPage";
 
-type TabKey = "queue" | "processing" | "done" | "failed" | "errors";
+type TabKey = "queue" | "processing" | "done" | "failed" | "errors" | "logs";
 
 type LogLevel = "info" | "warn" | "error";
 type JobLog = { id: string; ts: string; level: LogLevel; message: string };
@@ -28,6 +28,7 @@ type JobItem = {
     updatedAt: string;
 };
 
+// ... utility functions (clamp, makeItems, makeLogs, fmtTs) remain the same ...
 function clamp(n: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, n));
 }
@@ -60,9 +61,7 @@ function makeLogs(jobTitle: string): JobLog[] {
     return logs.sort((a, b) => (a.ts < b.ts ? 1 : -1));
 }
 
-function fmtTs(ts: string): string {
-    return ts.slice(0, 19).replace("T", " ");
-}
+
 
 export function JobDetailsPage({
     job,
@@ -93,8 +92,6 @@ export function JobDetailsPage({
         const done = makeItems("Done", Math.min(120, doneCount));
         const failed = makeItems("Failed", Math.min(120, failedCount));
         const errors = makeItems("Error", Math.min(120, errorCount));
-
-        const currentProcessing = processing[0] ?? null;
         const logs = makeLogs(job.title);
 
         return {
@@ -103,7 +100,6 @@ export function JobDetailsPage({
             doneCount,
             failedCount,
             errorCount,
-            currentProcessing,
             queued,
             processing,
             done,
@@ -118,356 +114,336 @@ export function JobDetailsPage({
     return (
         <div
             style={{
-                padding: "28px 24px",
                 height: "100%",
-                overflowY: "auto",
+                display: "flex",
+                flexDirection: "column",
                 backgroundColor: "var(--bg-primary)",
-                scrollbarWidth: "none",
             }}
         >
-            <div style={{ maxWidth: 980, margin: "0 auto", display: "flex", flexDirection: "column", gap: 14 }}>
-                {/* Top bar */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <button
-                            type="button"
-                            onClick={onBack}
-                            style={{
-                                width: 36,
-                                height: 36,
-                                borderRadius: 10,
-                                background: "var(--bg-surface)",
-                                border: "1px solid var(--border-subtle)",
-                                color: "var(--text-primary)",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                            }}
-                            title="Back"
-                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-secondary)")}
-                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-surface)")}
-                        >
-                            <ArrowLeft size={18} />
-                        </button>
-
-                        <div
-                            style={{
-                                width: 44,
-                                height: 44,
-                                borderRadius: 12,
-                                background: "var(--bg-surface)",
-                                border: "1px solid var(--border-subtle)",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                color: "var(--accent-primary)",
-                            }}
-                        >
-                            <Icon size={22} />
-                        </div>
-
-                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <div>
-                                <div style={{ fontSize: 18, fontWeight: 650, color: "var(--text-primary)", lineHeight: 1.15 }}>{job.title}</div>
-                                <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>{job.description}</div>
-                            </div>
-
-                            {job.status === "running" ? <Loader2 size={16} className="animate-spin" style={{ color: "var(--accent-primary)" }} /> : null}
-                        </div>
-                    </div>
-
-                    {/* Controls (match JobsPage: icon-only hoverable buttons) */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        {job.status !== "completed" ? (
-                            <IconActionButton
-                                onClick={onPauseResume}
-                                title={job.status === "running" ? "Pause" : "Resume"}
-                                icon={job.status === "running" ? <Pause size={18} /> : <Play size={18} fill="currentColor" />}
-                                accent={false}
-                            />
-                        ) : null}
-
-                        <IconActionButton
-                            onClick={onRestart}
-                            title="Restart"
-                            icon={<RotateCcw size={18} />}
-                            accent={job.status === "completed"}
-                        />
-
-                        <IconActionButton onClick={() => { }} title="Refresh" icon={<RefreshCw size={18} />} accent={false} />
-                    </div>
-                </div>
-
-                {/* Progress card */}
-                <div style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: 16, padding: 16 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                        <div style={{ fontSize: 13, color: "var(--text-secondary)", fontWeight: 700 }}>Progress</div>
-                        <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 700 }}>{Math.round(progress)}%</div>
-                    </div>
-
-                    <div style={{ height: 10, background: "var(--bg-secondary)", borderRadius: 999, overflow: "hidden", position: "relative" }}>
-                        <div
-                            style={{
-                                width: `${progress}%`,
-                                height: "100%",
-                                background: job.status === "completed" ? "var(--status-success)" : "var(--accent-primary)",
-                                transition: "width 0.4s cubic-bezier(0.4,0,0.2,1)",
-                            }}
-                        />
-                        {job.status === "running" && progress > 0 && progress < 100 ? (
-                            <div
-                                style={{
-                                    position: "absolute",
-                                    top: 0,
-                                    bottom: 0,
-                                    width: "40%",
-                                    opacity: 0.28,
-                                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent)",
-                                    animation: "progressShimmer 1.15s ease-in-out infinite",
-                                }}
-                            />
-                        ) : null}
-                    </div>
-
-                    <div style={{ marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-                        <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 650 }}>
-                            Processing:
-                            <span style={{ color: "var(--text-primary)", fontWeight: 700, marginLeft: 6 }}>
-                                {model.currentProcessing ? `${model.currentProcessing.label} (${model.currentProcessing.id})` : "—"}
-                            </span>
-                        </div>
-                        <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
-                            Total: <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>{job.total}</span>
-                        </div>
-                    </div>
-
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10, marginTop: 12 }}>
-                        <MiniStat label="Queue" value={model.queuedCount} icon={<ClipboardList size={14} />} />
-                        <MiniStat label="Processing" value={model.processingCount} icon={<Cpu size={14} />} />
-                        <MiniStat label="Done" value={model.doneCount} icon={<ListChecks size={14} />} />
-                        <MiniStat label="Failed" value={model.failedCount} icon={<XCircle size={14} />} />
-                        <MiniStat label="Errors" value={model.errorCount} icon={<AlertTriangle size={14} />} />
-                    </div>
-                </div>
-
-                {/* Logs card (theme-aware, scrollable) */}
-                <div style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: 16, overflow: "hidden" }}>
-                    <div
-                        style={{
-                            padding: "10px 12px",
-                            background: "var(--bg-secondary)",
-                            borderBottom: "1px solid var(--border-subtle)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            gap: 12,
-                        }}
-                    >
-                        <div style={{ fontSize: 12, color: "var(--text-secondary)", fontWeight: 750 }}>Logs</div>
-                        <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{model.logs.length} entries</div>
-                    </div>
-
-                    <div
-                        style={{
-                            padding: 12,
-                            background: "var(--terminal-bg)",
-                            color: "var(--terminal-fg)",
-                            fontFamily:
-                                "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-                            fontSize: 12,
-                            lineHeight: 1.5,
-                            maxHeight: 240,
-                            overflowY: "auto", // scrollbar for logs
-                        }}
-                    >
-                        {model.logs.length === 0 ? (
-                            <div style={{ color: "var(--terminal-muted)" }}>No logs.</div>
-                        ) : (
-                            model.logs.slice(0, 400).map((l) => (
-                                <div key={l.id} style={{ display: "flex", gap: 10 }}>
-                                    <span style={{ color: "var(--terminal-muted)" }}>{fmtTs(l.ts)}</span>
-                                    <span
-                                        style={{
-                                            color:
-                                                l.level === "error" ? "var(--terminal-error)" : l.level === "warn" ? "var(--terminal-warn)" : "var(--terminal-info)",
-                                        }}
-                                    >
-                                        {l.level.toUpperCase()}
-                                    </span>
-                                    <span>{l.message}</span>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </div>
-
-                {/* Queue card (tabs inside; no "Queue Items" label; list scrolls) */}
-                <div style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: 16, overflow: "hidden" }}>
-                    <div
-                        style={{
-                            padding: "10px 12px",
-                            borderBottom: "1px solid var(--border-subtle)",
-                            background: "var(--bg-primary)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-end",
-                            gap: 8,
-                            flexWrap: "wrap",
-                        }}
-                    >
-                        <TabButton active={tab === "queue"} onClick={() => setTab("queue")}>Queue</TabButton>
-                        <TabButton active={tab === "processing"} onClick={() => setTab("processing")}>Processing</TabButton>
-                        <TabButton active={tab === "done"} onClick={() => setTab("done")}>Done</TabButton>
-                        <TabButton active={tab === "failed"} onClick={() => setTab("failed")}>Failed</TabButton>
-                        <TabButton active={tab === "errors"} onClick={() => setTab("errors")}>Errors</TabButton>
-                    </div>
-
-                    {/* Entire card body scrolls (independent scrollbar for queue/lists) */}
-                    <div style={{ padding: 12, maxHeight: 460, overflowY: "auto" }}>
-                        {tab === "queue" ? <ItemTable items={model.queued} /> : null}
-                        {tab === "processing" ? <ItemTable items={model.processing} /> : null}
-                        {tab === "done" ? <ItemTable items={model.done} /> : null}
-                        {tab === "failed" ? <ItemTable items={model.failed} /> : null}
-                        {tab === "errors" ? <ItemTable items={model.errors} /> : null}
-                    </div>
-                </div>
-
-                <style>{`
-          @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-          .animate-spin { animation: spin 1.4s linear infinite; }
-          @keyframes progressShimmer { 0% { transform: translateX(-70%); } 100% { transform: translateX(170%); } }
-
-          /* Theme-aware terminal palette (works in light/dark via your vars) */
-          :root {
-            --terminal-bg: var(--bg-primary);
-            --terminal-fg: var(--text-primary);
-            --terminal-muted: var(--text-muted);
-            --terminal-info: var(--status-success);
-            --terminal-warn: var(--status-warning);
-            --terminal-error: var(--status-error);
-          }
-        `}</style>
-            </div>
-        </div>
-    );
-}
-
-function IconActionButton({
-    onClick,
-    title,
-    icon,
-    accent,
-}: {
-    onClick: () => void;
-    title: string;
-    icon: React.ReactNode;
-    accent: boolean;
-}) {
-    return (
-        <button
-            onClick={onClick}
-            title={title}
-            style={{
-                background: "transparent",
-                border: "none",
-                borderRadius: "8px",
-                padding: "6px",
+            {/* Header Section */}
+            <div style={{
+                padding: "20px 24px",
+                borderBottom: "1px solid var(--border-subtle)",
+                backgroundColor: "var(--bg-surface)",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                color: accent ? "var(--accent-primary)" : "var(--text-secondary)",
-                transition: "all 0.2s",
-                outline: "none",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-secondary)")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-        >
-            {icon}
-        </button>
-    );
-}
+                justifyContent: "space-between",
+                gap: 20
+            }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                    <button
+                        onClick={onBack}
+                        style={{
+                            width: 36, height: 36,
+                            borderRadius: 18,
+                            border: "none",
+                            background: "transparent",
+                            color: "var(--text-secondary)",
+                            cursor: "pointer",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            transition: "background 0.2s"
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = "var(--bg-secondary)"}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
+                    >
+                        <ArrowLeft size={20} />
+                    </button>
 
-function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-    return (
-        <button
-            type="button"
-            onClick={onClick}
-            style={{
-                height: 30,
-                padding: "0 10px",
-                borderRadius: 999,
-                border: "1px solid var(--border-subtle)",
-                background: active ? "var(--bg-surface)" : "transparent",
-                color: active ? "var(--text-primary)" : "var(--text-secondary)",
-                cursor: "pointer",
-                fontSize: 12,
-                fontWeight: 700,
-            }}
-            onMouseEnter={(e) => {
-                if (!active) e.currentTarget.style.backgroundColor = "var(--bg-surface)";
-            }}
-            onMouseLeave={(e) => {
-                if (!active) e.currentTarget.style.backgroundColor = "transparent";
-            }}
-        >
-            {children}
-        </button>
-    );
-}
+                    <div style={{
+                        width: 48, height: 48,
+                        borderRadius: 12,
+                        backgroundColor: "var(--bg-secondary)",
+                        color: "var(--accent-primary)",
+                        display: "flex", alignItems: "center", justifyContent: "center"
+                    }}>
+                        <Icon size={24} />
+                    </div>
 
-function MiniStat({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) {
-    return (
-        <div style={{ border: "1px solid var(--border-subtle)", borderRadius: 14, padding: "10px 10px", background: "var(--bg-primary)" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-                <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 750 }}>{label}</div>
-                <div style={{ color: "var(--text-muted)" }}>{icon}</div>
+                    <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <h1 style={{ fontSize: 20, fontWeight: 600, color: "var(--text-primary)", margin: 0 }}>
+                                {job.title}
+                            </h1>
+                            <StatusBadge status={job.status} />
+                        </div>
+                        <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>
+                            {job.description}
+                        </div>
+                    </div>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    {job.status !== "completed" && (
+                        <ActionButton
+                            onClick={onPauseResume}
+                            icon={job.status === "running" ? <Pause size={18} /> : <Play size={18} />}
+                            label={job.status === "running" ? "Pause" : "Resume"}
+                        />
+                    )}
+                    <ActionButton
+                        onClick={onRestart}
+                        icon={<RotateCcw size={18} />}
+                        label="Restart"
+                    />
+                </div>
             </div>
-            <div style={{ marginTop: 6, fontSize: 16, fontWeight: 780, color: "var(--text-primary)" }}>{value}</div>
+
+            {/* Scrollable Content */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
+                <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
+
+                    {/* Stats Overview */}
+                    <div style={{
+                        display: "grid",
+                        gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 1fr",
+                        gap: 16
+                    }}>
+                        {/* Progress Card */}
+                        <div style={{
+                            gridColumn: "span 1",
+                            background: "var(--bg-surface)",
+                            padding: 20,
+                            borderRadius: 16,
+                            border: "1px solid var(--border-subtle)",
+                            display: "flex", flexDirection: "column", justifyContent: "center"
+                        }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+                                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)" }}>Total Progress</span>
+                                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>{Math.round(progress)}%</span>
+                            </div>
+                            <div style={{ height: 8, background: "var(--bg-secondary)", borderRadius: 4, overflow: "hidden" }}>
+                                <div style={{
+                                    width: `${progress}%`,
+                                    height: "100%",
+                                    background: job.status === "completed" ? "var(--status-success)" : "var(--accent-primary)",
+                                    transition: "width 0.5s ease"
+                                }} />
+                            </div>
+                        </div>
+
+                        {/* Mini Stats */}
+                        <StatCard label="Queue" value={model.queuedCount} icon={<ClipboardList size={16} />} color="var(--text-secondary)" />
+                        <StatCard label="Processing" value={model.processingCount} icon={<Cpu size={16} />} color="var(--accent-primary)" />
+                        <StatCard label="Done" value={model.doneCount} icon={<CheckCircle2 size={16} />} color="var(--status-success)" />
+                        <StatCard label="Failed" value={model.failedCount} icon={<XCircle size={16} />} color="var(--status-error)" />
+                        <StatCard label="Errors" value={model.errorCount} icon={<AlertTriangle size={16} />} color="var(--status-warning)" />
+                    </div>
+
+                    {/* Integrated Tabs Section */}
+                    <div style={{
+                        background: "var(--bg-surface)",
+                        border: "1px solid var(--border-subtle)",
+                        borderRadius: 16,
+                        overflow: "hidden",
+                        display: "flex", flexDirection: "column",
+                        minHeight: 500
+                    }}>
+                        <div style={{
+                            padding: "6px 8px",
+                            borderBottom: "1px solid var(--border-subtle)",
+                            display: "flex", gap: 4,
+                            background: "var(--bg-surface)"
+                        }}>
+                            <TabTrigger active={tab === "queue"} onClick={() => setTab("queue")} icon={<ClipboardList size={14} />} label="Queue" count={model.queuedCount} />
+                            <TabTrigger active={tab === "processing"} onClick={() => setTab("processing")} icon={<Cpu size={14} />} label="Processing" count={model.processingCount} />
+                            <TabTrigger active={tab === "done"} onClick={() => setTab("done")} icon={<CheckCircle2 size={14} />} label="Done" count={model.doneCount} />
+                            <TabTrigger active={tab === "failed"} onClick={() => setTab("failed")} icon={<XCircle size={14} />} label="Failed" count={model.failedCount} />
+                            <TabTrigger active={tab === "errors"} onClick={() => setTab("errors")} icon={<AlertTriangle size={14} />} label="Errors" count={model.errorCount} />
+                            <div style={{ width: 1, background: "var(--border-subtle)", margin: "4px 8px" }} />
+                            <TabTrigger active={tab === "logs"} onClick={() => setTab("logs")} icon={<TerminalSquare size={14} />} label="Logs" count={model.logs.length} />
+                        </div>
+
+                        <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                            {tab === "logs" ? (
+                                <LogsView logs={model.logs} />
+                            ) : (
+                                <ItemsView items={
+                                    tab === "queue" ? model.queued :
+                                        tab === "processing" ? model.processing :
+                                            tab === "done" ? model.done :
+                                                tab === "failed" ? model.failed :
+                                                    model.errors
+                                } />
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
 
-function ItemTable({ items }: { items: JobItem[] }) {
-    return (
-        <div style={{ border: "1px solid var(--border-subtle)", borderRadius: 14, overflow: "hidden" }}>
-            <div
-                style={{
-                    display: "grid",
-                    gridTemplateColumns: "160px 1fr 190px",
-                    padding: "10px 12px",
-                    background: "var(--bg-surface)",
-                    borderBottom: "1px solid var(--border-subtle)",
-                }}
-            >
-                <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 750 }}>ID</div>
-                <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 750 }}>Item</div>
-                <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 750 }}>Updated</div>
-            </div>
+// --- Subcomponents ---
 
-            {items.length === 0 ? (
-                <div style={{ padding: 14, fontSize: 12, color: "var(--text-muted)" }}>No items.</div>
-            ) : (
-                items.map((it) => (
-                    <div
-                        key={it.id}
-                        style={{
-                            display: "grid",
-                            gridTemplateColumns: "160px 1fr 190px",
-                            padding: "10px 12px",
-                            borderBottom: "1px solid var(--border-subtle)",
-                        }}
-                    >
-                        <div style={{ fontSize: 12, color: "var(--text-primary)", fontWeight: 700 }}>{it.id}</div>
-                        <div style={{ fontSize: 12, color: "var(--text-primary)" }}>
-                            <div style={{ fontWeight: 700 }}>{it.label}</div>
-                            <div style={{ color: "var(--text-muted)", marginTop: 2 }}>{it.ref}</div>
-                        </div>
-                        <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{fmtTs(it.updatedAt)}</div>
-                    </div>
-                ))
+function StatusBadge({ status }: { status: Job["status"] }) {
+    const color =
+        status === "completed" ? "var(--status-success)" :
+            "var(--accent-primary)";
+
+    return (
+        <div style={{
+            padding: "4px 10px",
+            borderRadius: 99,
+            backgroundColor: `color-mix(in srgb, ${color} 10%, transparent)`,
+            color: color,
+            fontSize: 12,
+            fontWeight: 600,
+            display: "flex", alignItems: "center", gap: 6,
+            border: `1px solid color-mix(in srgb, ${color} 20%, transparent)`
+        }}>
+            {status === "running" && <Loader2 size={10} className="animate-spin" />}
+            {status.toUpperCase()}
+        </div>
+    );
+}
+
+function StatCard({ label, value, icon, color }: { label: string; value: number; icon: React.ReactNode; color: string }) {
+    return (
+        <div style={{
+            background: "var(--bg-surface)",
+            padding: "16px",
+            borderRadius: 16,
+            border: "1px solid var(--border-subtle)",
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8
+        }}>
+            <div style={{ color: color, fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
+                {icon}
+                {label}
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: "var(--text-primary)" }}>{value}</div>
+        </div>
+    );
+}
+
+function ActionButton({ onClick, icon, label }: { onClick: () => void; icon: React.ReactNode; label: string }) {
+    return (
+        <button
+            onClick={onClick}
+            style={{
+                height: 36,
+                padding: "0 16px",
+                borderRadius: 10,
+                border: "1px solid var(--border-subtle)",
+                background: "var(--bg-surface)",
+                color: "var(--text-primary)",
+                fontSize: 13, fontWeight: 500,
+                display: "flex", alignItems: "center", gap: 8,
+                cursor: "pointer",
+                transition: "all 0.2s"
+            }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = "var(--bg-secondary)"}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = "var(--bg-surface)"}
+        >
+            {icon}
+            {label}
+        </button>
+    );
+}
+
+function TabTrigger({ active, onClick, icon, label, count }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string; count?: number }) {
+    return (
+        <button
+            onClick={onClick}
+            style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "8px 16px",
+                borderRadius: 8,
+                border: "none",
+                background: active ? "var(--bg-secondary)" : "transparent",
+                color: active ? "var(--text-primary)" : "var(--text-secondary)",
+                fontSize: 13,
+                fontWeight: active ? 600 : 500,
+                cursor: "pointer",
+                transition: "all 0.2s"
+            }}
+            onMouseEnter={e => !active && (e.currentTarget.style.backgroundColor = "var(--bg-secondary)")}
+            onMouseLeave={e => !active && (e.currentTarget.style.backgroundColor = "transparent")}
+        >
+            {icon}
+            {label}
+            {count !== undefined && (
+                <span style={{
+                    fontSize: 11,
+                    padding: "2px 6px",
+                    borderRadius: 99,
+                    background: active ? "var(--bg-surface)" : "var(--bg-secondary)",
+                    color: "var(--text-muted)"
+                }}>
+                    {count}
+                </span>
             )}
+        </button>
+    );
+}
+
+function ItemsView({ items }: { items: JobItem[] }) {
+    if (items.length === 0) {
+        return (
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)", flexDirection: "column", gap: 12 }}>
+                <ClipboardList size={40} strokeWidth={1} style={{ opacity: 0.5 }} />
+                <span>No items in this list</span>
+            </div>
+        );
+    }
+    return (
+        <div style={{ overflowY: "auto", flex: 1 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead style={{ position: "sticky", top: 0, background: "var(--bg-surface)", fontSize: 12, color: "var(--text-muted)", textAlign: "left" }}>
+                    <tr>
+                        <th style={{ padding: "12px 20px", fontWeight: 600 }}>ID</th>
+                        <th style={{ padding: "12px 20px", fontWeight: 600 }}>Filename</th>
+                        <th style={{ padding: "12px 20px", fontWeight: 600 }}>Path</th>
+                        <th style={{ padding: "12px 20px", fontWeight: 600 }}>Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {items.map(item => (
+                        <tr key={item.id} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+                            <td style={{ padding: "12px 20px", color: "var(--text-secondary)", fontFamily: "monospace" }}>{item.id}</td>
+                            <td style={{ padding: "12px 20px", color: "var(--text-primary)", fontWeight: 500 }}>{item.label}</td>
+                            <td style={{ padding: "12px 20px", color: "var(--text-muted)" }}>{item.ref}</td>
+                            <td style={{ padding: "12px 20px", color: "var(--text-muted)", fontFamily: "monospace" }}>{item.updatedAt.slice(11, 19)}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
+function LogsView({ logs }: { logs: JobLog[] }) {
+    if (logs.length === 0) {
+        return (
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)" }}>
+                No activity logs
+            </div>
+        );
+    }
+    return (
+        <div style={{
+            flex: 1,
+            overflowY: "auto",
+            background: "var(--terminal-bg)",
+            color: "var(--terminal-fg)",
+            fontFamily: "monospace",
+            fontSize: 12,
+            padding: 20
+        }}>
+            {logs.map(log => (
+                <div key={log.id} style={{ display: "flex", gap: 12, marginBottom: 8, lineHeight: 1.5 }}>
+                    <span style={{ color: "var(--terminal-muted)", minWidth: 140 }}>{log.ts.replace("T", " ").slice(0, 23)}</span>
+                    <span style={{
+                        fontWeight: 700,
+                        width: 60,
+                        color: log.level === "error" ? "var(--terminal-error)" :
+                            log.level === "warn" ? "var(--terminal-warn)" :
+                                "var(--terminal-info)"
+                    }}>
+                        {log.level.toUpperCase()}
+                    </span>
+                    <span style={{ color: "var(--terminal-fg)" }}>{log.message}</span>
+                </div>
+            ))}
         </div>
     );
 }

@@ -25,6 +25,9 @@ export const PhotoSchema = z.object({
     timestamp: z.date(),
     location: LocationSchema.nullable(),
     metadata: PhotoMetadataSchema,
+    // Hoisted for easier layout calculations
+    width: z.number(),
+    height: z.number(),
 });
 
 export type Location = z.infer<typeof LocationSchema>;

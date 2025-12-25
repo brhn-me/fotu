@@ -30,11 +30,19 @@ export const generateDummyPhotos = (): Photo[] => {
     // Helper to generate a photo object
     const createPhoto = (date: Date, index: number): Photo => {
         const id = uuidv4();
-        const width = getRandomInt(800, 1600);
-        const height = getRandomInt(600, 1200);
-        const hasLocation = Math.random() > 0.2;
+        // Generate distinct aspect ratios: Landscape (4:3, 16:9), Portrait (3:4, 9:16)
+        const isLandscape = Math.random() > 0.4;
+        const aspectRatio = isLandscape
+            ? (Math.random() > 0.5 ? 4 / 3 : 16 / 9)
+            : (Math.random() > 0.5 ? 3 / 4 : 9 / 16);
 
+        const baseSize = 800;
+        const width = Math.round(isLandscape ? baseSize * aspectRatio : baseSize);
+        const height = Math.round(isLandscape ? baseSize : baseSize / aspectRatio);
+
+        const hasLocation = Math.random() > 0.2;
         let location: Location | null = null;
+
         if (hasLocation) {
             const city = getRandomArrayElement(CITIES);
             location = {
@@ -46,12 +54,15 @@ export const generateDummyPhotos = (): Photo[] => {
 
         return {
             id,
-            url: `https://picsum.photos/seed/${id}/1920/1080`,
-            thumbnailUrl: `https://picsum.photos/seed/${id}/400/400`,
+            // Use 'seed' instead of 'id' because random integer IDs (1-500) might have gaps/404s
+            url: `https://picsum.photos/seed/${id}/${width}/${height}`,
+            thumbnailUrl: `https://picsum.photos/seed/${id}/400/${Math.round(400 / aspectRatio)}`,
             title: `Photo ${index}`,
             description: Math.random() > 0.5 ? `A beautiful shot from my travels.` : null,
             timestamp: date,
             location,
+            width,     // Hoisted
+            height,    // Hoisted
             metadata: {
                 width,
                 height,

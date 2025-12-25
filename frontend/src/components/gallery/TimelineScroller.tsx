@@ -155,129 +155,131 @@ export function TimelineScroller({ photos, gridContainerId = 'photo-grid' }: Tim
                     transition: 'width 0.2s ease',
                 }}
             >
-                {/* Expanded year/month panel */}
-                {showExpandedPanel && (
-                    <div
-                        className="timeline-panel"
-                        style={{
-                            position: 'absolute',
-                            right: 0,
-                            top: 0,
-                            bottom: 0,
-                            width: '200px',
-                            background: 'linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.8) 100%)',
-                            overflowY: 'auto',
-                            overflowX: 'hidden',
-                            padding: '16px 20px 16px 40px',
-                            animation: 'fadeIn 0.2s ease-out',
-                            borderRight: '3px solid var(--text-muted)',
-                        }}>
-                        {yearMonthGroups.map((yearGroup) => (
-                            <div key={yearGroup.year} style={{ marginBottom: '12px', textAlign: 'right' }}>
-                                {/* Year header with horizontal line beside it */}
-                                <div
-                                    onClick={() => {
-                                        if (yearGroup.months.length > 0) {
-                                            scrollToSection(yearGroup.months[0].sectionId);
-                                        }
-                                    }}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'flex-end',
-                                        gap: '8px',
-                                        fontSize: '15px',
-                                        fontWeight: 400,
-                                        color: 'var(--text-primary)',
-                                        padding: '6px 0',
-                                        cursor: 'pointer',
-                                        transition: 'color 0.15s ease',
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.color = 'hsl(220, 90%, 56%)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.color = 'var(--text-primary)';
-                                    }}
-                                >
-                                    {/* Horizontal line */}
-                                    <div style={{
-                                        width: '24px',
-                                        height: '1px',
-                                        backgroundColor: 'var(--text-muted)',
-                                    }} />
-                                    {/* Year text */}
-                                    <span>{yearGroup.year}</span>
-                                </div>
-
-                                {/* Month list */}
-                                <div style={{
+                {/* Expanded year/month panel - always rendered for transition */}
+                <div
+                    className="timeline-panel"
+                    style={{
+                        position: 'absolute',
+                        right: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: '200px',
+                        background: 'linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.95) 60%)',
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        padding: '16px 20px 16px 40px',
+                        borderRight: '3px solid var(--text-muted)',
+                        scrollbarWidth: 'none', // Firefox
+                        msOverflowStyle: 'none', // IE/Edge
+                        opacity: showExpandedPanel ? 1 : 0,
+                        pointerEvents: showExpandedPanel ? 'auto' : 'none',
+                        transition: 'opacity 0.2s ease-in-out',
+                    }}>
+                    {yearMonthGroups.map((yearGroup) => (
+                        <div key={yearGroup.year} style={{ marginBottom: '12px', textAlign: 'right' }}>
+                            {/* Year header with horizontal line beside it */}
+                            <div
+                                onClick={() => {
+                                    if (yearGroup.months.length > 0) {
+                                        scrollToSection(yearGroup.months[0].sectionId);
+                                    }
+                                }}
+                                style={{
                                     display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'flex-end',
-                                    gap: '4px',
-                                    marginTop: '6px',
-                                    marginBottom: '6px'
-                                }}>
-                                    {yearGroup.months.map((monthGroup) => (
+                                    alignItems: 'center',
+                                    justifyContent: 'flex-end',
+                                    gap: '8px',
+                                    fontSize: '15px',
+                                    fontWeight: 400,
+                                    color: 'var(--text-primary)',
+                                    padding: '6px 0',
+                                    cursor: 'pointer',
+                                    transition: 'color 0.15s ease',
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.color = 'hsl(220, 90%, 56%)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.color = 'var(--text-primary)';
+                                }}
+                            >
+                                {/* Horizontal line */}
+                                <div style={{
+                                    width: '24px',
+                                    height: '1px',
+                                    backgroundColor: 'var(--text-muted)',
+                                }} />
+                                {/* Year text */}
+                                <span>{yearGroup.year}</span>
+                            </div>
+
+                            {/* Month list */}
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'flex-end',
+                                gap: '4px',
+                                marginTop: '6px',
+                                marginBottom: '6px'
+                            }}>
+                                {yearGroup.months.map((monthGroup) => (
+                                    <div
+                                        key={`${monthGroup.year}-${monthGroup.monthNumber}`}
+                                        onClick={() => scrollToSection(monthGroup.sectionId)}
+                                        style={{
+                                            position: 'relative',
+                                            cursor: 'pointer',
+                                            padding: '2px',
+                                        }}
+                                    >
+                                        {/* Dot */}
                                         <div
-                                            key={`${monthGroup.year}-${monthGroup.monthNumber}`}
-                                            onClick={() => scrollToSection(monthGroup.sectionId)}
                                             style={{
-                                                position: 'relative',
-                                                cursor: 'pointer',
-                                                padding: '2px',
+                                                width: '4px',
+                                                height: '4px',
+                                                borderRadius: '50%',
+                                                backgroundColor: 'var(--text-muted)',
+                                                transition: 'all 0.15s ease',
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.backgroundColor = 'hsl(220, 90%, 56%)';
+                                                e.currentTarget.style.transform = 'scale(1.5)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.backgroundColor = 'var(--text-muted)';
+                                                e.currentTarget.style.transform = 'scale(1)';
+                                            }}
+                                        />
+
+                                        {/* Tooltip on hover */}
+                                        <div
+                                            className="month-tooltip"
+                                            style={{
+                                                position: 'absolute',
+                                                right: '14px',
+                                                top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                padding: '4px 10px',
+                                                backgroundColor: 'var(--bg-surface)',
+                                                color: 'var(--text-primary)',
+                                                fontSize: '12px',
+                                                fontWeight: 500,
+                                                borderRadius: '4px',
+                                                whiteSpace: 'nowrap',
+                                                opacity: 0,
+                                                pointerEvents: 'none',
+                                                transition: 'opacity 0.15s ease',
+                                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                                             }}
                                         >
-                                            {/* Dot */}
-                                            <div
-                                                style={{
-                                                    width: '4px',
-                                                    height: '4px',
-                                                    borderRadius: '50%',
-                                                    backgroundColor: 'var(--text-muted)',
-                                                    transition: 'all 0.15s ease',
-                                                }}
-                                                onMouseEnter={(e) => {
-                                                    e.currentTarget.style.backgroundColor = 'hsl(220, 90%, 56%)';
-                                                    e.currentTarget.style.transform = 'scale(1.5)';
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    e.currentTarget.style.backgroundColor = 'var(--text-muted)';
-                                                    e.currentTarget.style.transform = 'scale(1)';
-                                                }}
-                                            />
-
-                                            {/* Tooltip on hover */}
-                                            <div
-                                                className="month-tooltip"
-                                                style={{
-                                                    position: 'absolute',
-                                                    right: '14px',
-                                                    top: '50%',
-                                                    transform: 'translateY(-50%)',
-                                                    padding: '4px 10px',
-                                                    backgroundColor: 'var(--bg-surface)',
-                                                    color: 'var(--text-primary)',
-                                                    fontSize: '12px',
-                                                    fontWeight: 500,
-                                                    borderRadius: '4px',
-                                                    whiteSpace: 'nowrap',
-                                                    opacity: 0,
-                                                    pointerEvents: 'none',
-                                                    transition: 'opacity 0.15s ease',
-                                                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                                                }}
-                                            >
-                                                {monthGroup.date.toLocaleString('default', { month: 'long' })}
-                                            </div>
+                                            {monthGroup.date.toLocaleString('default', { month: 'long' })}
                                         </div>
-                                    ))}
-                                </div>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                )}
+                        </div>
+                    ))}
+                </div>
 
                 {/* Custom scrollbar thumb */}
                 <div
@@ -349,12 +351,17 @@ export function TimelineScroller({ photos, gridContainerId = 'photo-grid' }: Tim
                 
                 /* Dark mode gradient support */
                 [data-theme='dark'] .timeline-panel {
-                    background: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.8) 100%) !important;
+                    background: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.95) 60%) !important;
                 }
                 
                 /* Show tooltip on hover */
                 div:hover > .month-tooltip {
                     opacity: 1 !important;
+                }
+
+                /* Hide scrollbar */
+                .timeline-panel::-webkit-scrollbar {
+                    display: none;
                 }
             `}</style>
         </>

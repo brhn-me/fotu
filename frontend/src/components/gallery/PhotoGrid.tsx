@@ -1,21 +1,18 @@
-
-// src/components/gallery/PhotoGrid.tsx
-
+import { useMemo, useEffect, useRef } from 'react';
 import type { Photo } from '../../types';
 import { groupPhotosByDate } from '../../utils/photoUtils';
-import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { useSelection } from '../../context/SelectionContext';
 import { usePhotos } from '../../context/PhotoContext';
 import { Check } from 'lucide-react';
 import { GroupedVirtuoso, type GroupedVirtuosoHandle } from 'react-virtuoso';
 import { useResizeObserver } from '../../utils/useResizeObserver';
+import { computeJustifiedLayout } from '../../utils/justifiedLayout';
 
 interface PhotoGridProps {
     photos: Photo[];
     onPhotoClick: (photo: Photo) => void;
 }
 
-const MIN_COLUMN_WIDTH = 200;
 const GAP = 2;
 
 export function PhotoGrid({ photos, onPhotoClick }: PhotoGridProps) {
@@ -25,22 +22,26 @@ export function PhotoGrid({ photos, onPhotoClick }: PhotoGridProps) {
 
     // Resize Observer for dynamic columns
     const { ref: containerRef, width: containerWidth } = useResizeObserver<HTMLDivElement>();
-    const [numColumns, setNumColumns] = useState(3);
     const virtuosoRef = useRef<GroupedVirtuosoHandle>(null);
 
-    useEffect(() => {
-        if (containerWidth > 0) {
-            const cols = Math.floor(containerWidth / MIN_COLUMN_WIDTH);
-            setNumColumns(Math.max(1, cols));
-        }
-    }, [containerWidth]);
+    // Justified Layout Calculation
+    // We compute the rows for each group
+    const groupRows = useMemo(() => {
+        return groups.map(group => {
+            return computeJustifiedLayout(
+                group.photos,
+                containerWidth - 48, // Subtract padding (24px left + 24px right)
+                220 // Target row height
+            );
+        });
+    }, [groups, containerWidth]);
 
-    // Calculate group counts (rows per group)
+    // Calculate group counts (number of rows per group)
     const groupCounts = useMemo(() => {
-        return groups.map(group => Math.ceil(group.photos.length / numColumns));
-    }, [groups, numColumns]);
+        return groupRows.map(rows => rows.length);
+    }, [groupRows]);
 
-    // Pre-calculate starting global item index for each group
+    // Pre-calculate starting global item index for each group (needed for scrolling)
     const groupStartIndices = useMemo(() => {
         const indices: number[] = [0];
         let current = 0;
@@ -51,34 +52,18 @@ export function PhotoGrid({ photos, onPhotoClick }: PhotoGridProps) {
         return indices;
     }, [groupCounts]);
 
-    const getRowPhotos = useCallback((groupIndex: number, globalRowIndex: number) => {
-        const group = groups[groupIndex];
-        const groupStartRow = groupStartIndices[groupIndex];
-        const relativeRowIndex = globalRowIndex - groupStartRow;
-
-        const startIndex = relativeRowIndex * numColumns;
-        const endIndex = startIndex + numColumns;
-        return group.photos.slice(startIndex, endIndex);
-    }, [groups, groupStartIndices, numColumns]);
-
     // Handle Scroll Command
     useEffect(() => {
         if (scrollToGroupId && virtuosoRef.current) {
             const groupIndex = groups.findIndex(g => g.id === scrollToGroupId);
             if (groupIndex !== -1) {
-                // Determine the global item index of the first row of this group.
-                // GroupedVirtuoso expects 'index' to be the ITEM index.
                 const itemIndex = groupStartIndices[groupIndex];
-
                 virtuosoRef.current.scrollToIndex({
                     index: itemIndex,
                     align: 'start',
-                    offset: 0, // Optional offset
+                    offset: 0,
                     behavior: 'smooth'
                 });
-
-                // Reset the command so it can be triggered again later
-                // Timeout ensures we don't conflict with render cycle if context updates are immediate
                 setTimeout(() => setScrollToGroupId(null), 100);
             }
         }
@@ -103,20 +88,13 @@ export function PhotoGrid({ photos, onPhotoClick }: PhotoGridProps) {
                     style={{ height: '100%', width: '100%' }}
                     groupCounts={groupCounts}
                     scrollerRef={(ref) => {
-                        if (ref) {
-                            // Assign the ID expected by TimelineScroller
-                            (ref as HTMLElement).id = 'photo-grid';
-                        }
+                        if (ref) (ref as HTMLElement).id = 'photo-grid';
                     }}
-
-                    // Header (Group) content
                     groupContent={(index) => {
                         const group = groups[index];
                         const photoIds = group.photos.map(p => p.id);
                         const selectionStatus = getGroupStatus(photoIds);
-                        const isAllSelected = selectionStatus === 'all';
-                        const isPartial = selectionStatus === 'partial';
-
+                        // ... header rendering remains largely same but updated for context ...
                         return (
                             <div
                                 className="date-header"
@@ -141,8 +119,8 @@ export function PhotoGrid({ photos, onPhotoClick }: PhotoGridProps) {
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         transition: 'background-color 0.2s, opacity 0.2s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                                        opacity: isAllSelected || isPartial ? 1 : 0,
-                                        backgroundColor: (isAllSelected || isPartial) ? '#34A853' : 'rgba(0, 0, 0, 0.1)',
+                                        opacity: selectionStatus !== 'none' ? 1 : 0,
+                                        backgroundColor: selectionStatus !== 'none' ? '#34A853' : 'rgba(0, 0, 0, 0.1)',
                                         color: 'white',
                                         transform: 'translateX(-50%)',
                                     }}
@@ -157,7 +135,7 @@ export function PhotoGrid({ photos, onPhotoClick }: PhotoGridProps) {
                                     color: 'var(--text-primary)',
                                     margin: 0,
                                     transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    transform: (isAllSelected || isPartial) ? 'translateX(26px)' : 'translateX(0)',
+                                    transform: selectionStatus !== 'none' ? 'translateX(26px)' : 'translateX(0)',
                                 }}
                                     className="date-label"
                                 >
@@ -166,27 +144,38 @@ export function PhotoGrid({ photos, onPhotoClick }: PhotoGridProps) {
                             </div>
                         );
                     }}
+                    itemContent={(rowIndex, groupIndex) => {
+                        let row = groupRows[groupIndex]?.[rowIndex];
 
-                    // Row (Item) content
-                    itemContent={(index, groupIndex) => {
-                        const rowPhotos = getRowPhotos(groupIndex, index);
+                        // Fallback: If row is undefined, it might be that indexes are global (though they shouldn't be in v4).
+                        // Or we messed up something else. But handling global index is safe if it exceeds length.
+                        if (!row) {
+                            const offset = groupStartIndices[groupIndex];
+                            if (rowIndex >= offset) {
+                                row = groupRows[groupIndex]?.[rowIndex - offset];
+                            }
+                        }
+
+                        if (!row) return null;
 
                         return (
                             <div style={{
-                                display: 'grid',
-                                gridTemplateColumns: `repeat(${numColumns}, 1fr)`,
+                                display: 'flex',
                                 gap: `${GAP}px`,
                                 padding: `0 24px ${GAP}px 24px`,
-                                boxSizing: 'border-box'
+                                height: row.height, // Explicit height
+                                boxSizing: 'content-box' // Important for padding
                             }}>
-                                {rowPhotos.map((photo) => {
+                                {row.photos.map((item) => {
+                                    const photo = item.photo;
                                     const selected = isSelected(photo.id);
                                     return (
                                         <div
                                             key={photo.id}
                                             onClick={() => onPhotoClick(photo)}
                                             style={{
-                                                aspectRatio: '1',
+                                                width: item.scaledWidth,
+                                                height: '100%',
                                                 backgroundColor: selected ? 'var(--bg-selection)' : 'var(--bg-surface)',
                                                 position: 'relative',
                                                 cursor: 'pointer',
@@ -194,7 +183,6 @@ export function PhotoGrid({ photos, onPhotoClick }: PhotoGridProps) {
                                             }}
                                             className="photo-item"
                                         >
-                                            {/* Scaling Container */}
                                             <div style={{
                                                 width: '100%',
                                                 height: '100%',
@@ -216,8 +204,6 @@ export function PhotoGrid({ photos, onPhotoClick }: PhotoGridProps) {
                                                     transition: 'opacity 0.2s',
                                                 }} />
                                             </div>
-
-                                            {/* Checkbox */}
                                             <div
                                                 onClick={(e) => {
                                                     e.stopPropagation();
@@ -240,10 +226,6 @@ export function PhotoGrid({ photos, onPhotoClick }: PhotoGridProps) {
                                         </div>
                                     );
                                 })}
-                                {/* Fill empty columns if last row */}
-                                {rowPhotos.length < numColumns && Array.from({ length: numColumns - rowPhotos.length }).map((_, i) => (
-                                    <div key={`empty-${i}`} />
-                                ))}
                             </div>
                         );
                     }}
@@ -251,21 +233,20 @@ export function PhotoGrid({ photos, onPhotoClick }: PhotoGridProps) {
             )}
 
             <style>{`
-                .date-header:hover .date-label {
-                    transform: translateX(26px) !important;
-                }
-                .date-header:hover .header-checkbox {
-                    opacity: 1 !important;
-                }
-                .photo-item:hover .selection-checkbox {
-                    opacity: 1 !important;
-                }
-                /* Hide scrollbar for standard virtualization container if needed */
-                div[data-viewport-type="element"]::-webkit-scrollbar {
-                    display: none;
-                }
-            `}</style>
+                    .date-header:hover .date-label {
+                        transform: translateX(26px) !important;
+                    }
+                    .date-header:hover .header-checkbox {
+                        opacity: 1 !important;
+                    }
+                    .photo-item:hover .selection-checkbox {
+                        opacity: 1 !important;
+                    }
+                    /* Hide scrollbar for standard virtualization container if needed */
+                    div[data-viewport-type="element"]::-webkit-scrollbar {
+                        display: none;
+                    }
+                `}</style>
         </div>
     );
 }
-
