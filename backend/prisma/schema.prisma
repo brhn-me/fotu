@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Settings {
+  id             String   @id @default(uuid())
+  key            String   @unique
+  value          String
+  updatedAt      DateTime @updatedAt
+}
+
+model Source {
+  id        String   @id @default(uuid())
+  path      String   @unique
+  scannedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model File {
+  id        String   @id @default(uuid())
+  path      String   @unique
+  size      BigInt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  media     Media?
+}
+
+model Media {
+  id          String   @id @default(uuid())
+  fileId      String   @unique
+  file        File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  type        String   // image, video
+  mimeType    String
+  hash        String?  @unique
+  
+  metadata    Metadata?
+  thumbnails  Thumbnail[]
+  
+  createdAt   DateTime @default(now())
+}
+
+model Metadata {
+  id          String   @id @default(uuid())
+  mediaId     String   @unique
+  media       Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  
+  dateTaken   DateTime?
+  width       Int?
+  height      Int?
+  duration    Float?   // for videos
+  
+  // Locations (simplified)
+  latitude    Float?
+  longitude   Float?
+  
+  raw         Json?    // Full EXIF/ffprobe dump
+}
+
+model Thumbnail {
+  id        String   @id @default(uuid())
+  mediaId   String
+  media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  
+  size      String   // small, medium, large
+  path      String   // relative path to thumbs dir
+  width     Int
+  height    Int
+
+  @@unique([mediaId, size])
+}
+
+model JobRun {
+  id          String   @id @default(uuid())
+  name        String   // e.g. "Scan Sources"
+  type        String   // scan, metadata, thumbnails
+  status      String   // queued, running, completed, failed, paused
+  progress    Int      @default(0)
+  data        Json?    // Job arguments
+  result      Json?    // Result data or error
+  
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

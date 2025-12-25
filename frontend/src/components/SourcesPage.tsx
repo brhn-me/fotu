@@ -285,7 +285,7 @@ function ModePill({
     );
 }
 
-function StatusBadge({ status, message }: { status: Source["status"]; message?: string }): React.ReactElement {
+function StatusBadge({ status, message }: { status: Source["status"]; message?: string | undefined }): React.ReactElement {
     const { icon, text } = (() => {
         if (status === "scanning") return { icon: <RefreshCw size={14} className="spin" />, text: message ?? "Scanning…" };
         if (status === "ok") return { icon: <CheckCircle2 size={14} />, text: message ?? "Up to date" };

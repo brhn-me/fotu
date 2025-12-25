@@ -29,7 +29,7 @@ function MapControls({
 }: {
     hasLocation: boolean;
     onAddAtCenter: () => void;
-    onClear?: () => void;
+    onClear?: (() => void) | undefined;
 }) {
     return (
         <div
