@@ -1,5 +1,5 @@
 // src/components/MetadataPanel.tsx
-import type { Photo } from "../types";
+import type { Photo } from "../../types";
 import { MapWidget } from "./MapWidget";
 import { InlineEditable } from "./InlineEditable";
 import { InlineEditableDateTime } from "./InlineEditableDateTime";

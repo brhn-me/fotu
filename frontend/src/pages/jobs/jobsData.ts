@@ -11,7 +11,7 @@ import {
     FolderTree,
 } from "lucide-react";
 import type React from "react";
-import type { Job } from "../components/JobsPage";
+import type { Job } from "./JobsPage";
 
 export const JOBS_DATA: Job[] = [
     { id: "1", title: "Scan", icon: Search as React.ElementType, total: 1000, completed: 850, failed: 5, errors: 2, status: "running", description: "Scans sources and syncs changes into the database." },

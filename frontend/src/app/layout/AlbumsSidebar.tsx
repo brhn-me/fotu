@@ -1,9 +1,9 @@
 // src/components/AlbumsSidebar.tsx
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Photo } from "../types";
+import type { Photo } from "../../types";
 import { ChevronDown } from "lucide-react";
-import { groupPhotosByDate } from "../utils/photoUtils";
+import { groupPhotosByDate } from "../../utils/photoUtils";
 
 type DateKey = string; // "YYYY-MM-DD"
 

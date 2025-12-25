@@ -1,9 +1,9 @@
 // src/components/PhotoGrid.tsx
 
-import type { Photo } from '../types';
-import { groupPhotosByDate } from '../utils/photoUtils';
+import type { Photo } from '../../types';
+import { groupPhotosByDate } from '../../utils/photoUtils';
 import { useMemo } from 'react';
-import { useSelection } from '../context/SelectionContext';
+import { useSelection } from '../../context/SelectionContext';
 import { Check } from 'lucide-react';
 
 interface PhotoGridProps {

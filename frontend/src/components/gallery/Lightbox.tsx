@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react';
 import { X } from 'lucide-react';
-import type { Photo } from '../types';
-import { MetadataPanel } from './MetadataPanel';
+import type { Photo } from '../../types';
+import { MetadataPanel } from '../metadata/MetadataPanel';
 
 interface LightboxProps {
     photo: Photo;

@@ -1,9 +1,10 @@
 // src/components/MetadataPage.tsx
 
 import React, { useEffect, useMemo, useState } from "react";
-import type { Photo } from "../types";
-import { PhotoGrid } from "./PhotoGrid";
+import type { Photo } from "../../types";
+import { PhotoGrid } from "../../components/gallery/PhotoGrid";
 import { Save, RotateCcw, Image as ImageIcon, MapPin, CalendarClock, Info } from "lucide-react";
+import { usePhotos } from "../../context/PhotoContext";
 
 type Draft = {
     title: string;
@@ -64,17 +65,9 @@ function deepEqualDraft(a: Draft, b: Draft): boolean {
     return JSON.stringify(a) === JSON.stringify(b);
 }
 
-export function MetadataPage({
-    photos,
-    selectedPhotoId,
-    onSelectPhoto,
-    onUpdatePhoto,
-}: {
-    photos: Photo[];
-    selectedPhotoId: string | null;
-    onSelectPhoto: (photoId: string | null) => void;
-    onUpdatePhoto: (photo: Photo) => void;
-}): React.ReactElement {
+export function MetadataPage(): React.ReactElement {
+    const { photos, selectedPhotoId, setSelectedPhotoId, updatePhoto } = usePhotos();
+
     const selectedPhoto = useMemo(
         () => photos.find((p) => p.id === selectedPhotoId) ?? null,
         [photos, selectedPhotoId]
@@ -135,7 +128,7 @@ export function MetadataPage({
             },
         };
 
-        onUpdatePhoto(next);
+        updatePhoto(next);
         const newBaseline = buildDraft(next);
         setBaseline(newBaseline);
         setDraft(newBaseline);
@@ -250,7 +243,7 @@ export function MetadataPage({
                                 </div>
 
                                 <button
-                                    onClick={() => onSelectPhoto(null)}
+                                    onClick={() => setSelectedPhotoId(null)}
                                     style={{
                                         marginTop: 10,
                                         height: 36,
@@ -450,7 +443,7 @@ export function MetadataPage({
                     <PhotoGrid
                         photos={photos}
                         onPhotoClick={(photo) => {
-                            onSelectPhoto(photo.id);
+                            setSelectedPhotoId(photo.id);
                             // Ensure the editor side shows the newly selected photo immediately.
                             // No scrolling required here.
                         }}

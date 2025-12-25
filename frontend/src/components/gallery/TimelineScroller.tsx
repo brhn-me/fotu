@@ -1,5 +1,5 @@
-import type { Photo } from '../types';
-import { groupPhotosByDate, groupPhotosByYearMonth } from '../utils/photoUtils';
+import type { Photo } from '../../types';
+import { groupPhotosByDate, groupPhotosByYearMonth } from '../../utils/photoUtils';
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 
 interface TimelineScrollerProps {
