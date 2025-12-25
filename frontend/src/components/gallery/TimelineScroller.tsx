@@ -1,6 +1,7 @@
 import type { Photo } from '../../types';
 import { groupPhotosByDate, groupPhotosByYearMonth } from '../../utils/photoUtils';
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
+import { usePhotos } from '../../context/PhotoContext';
 
 interface TimelineScrollerProps {
     photos: Photo[];
@@ -10,6 +11,7 @@ interface TimelineScrollerProps {
 export function TimelineScroller({ photos, gridContainerId = 'photo-grid' }: TimelineScrollerProps) {
     const groups = useMemo(() => groupPhotosByDate(photos), [photos]);
     const yearMonthGroups = useMemo(() => groupPhotosByYearMonth(photos), [photos]);
+    const { setScrollToGroupId } = usePhotos();
     const [isDragging, setIsDragging] = useState(false);
     const [showLabel, setShowLabel] = useState(false);
     const [showExpandedPanel, setShowExpandedPanel] = useState(false);
@@ -103,11 +105,8 @@ export function TimelineScroller({ photos, gridContainerId = 'photo-grid' }: Tim
     }, []);
 
     const scrollToSection = useCallback((sectionId: string) => {
-        const element = document.getElementById(sectionId);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    }, []);
+        setScrollToGroupId(sectionId);
+    }, [setScrollToGroupId]);
 
     // Set up scroll listener on the grid element
     useEffect(() => {

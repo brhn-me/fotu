@@ -21,7 +21,7 @@ export function MainLayout() {
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
     const [selectedAlbumSectionId, setSelectedAlbumSectionId] = useState<string | null>(null);
 
-    const { photos, selectedPhotoId, setSelectedPhotoId, updatePhoto } = usePhotos();
+    const { photos, selectedPhotoId, setSelectedPhotoId, updatePhoto, setScrollToGroupId } = usePhotos();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -47,8 +47,7 @@ export function MainLayout() {
                         selectedSectionId={selectedAlbumSectionId}
                         onSelectSection={(sectionId) => {
                             setSelectedAlbumSectionId(sectionId);
-                            const el = document.getElementById(sectionId);
-                            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                            setScrollToGroupId(sectionId);
                         }}
                     />
                 )}
