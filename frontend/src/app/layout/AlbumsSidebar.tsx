@@ -5,6 +5,7 @@ import type { Photo } from "../../types";
 import { ChevronDown } from "lucide-react";
 import { groupPhotosByDate } from "../../utils/photoUtils";
 import { Virtuoso } from "react-virtuoso";
+import styles from "./AlbumsSidebar.module.css";
 
 type DateKey = string; // "YYYY-MM-DD"
 
@@ -151,59 +152,32 @@ export function AlbumsSidebar({
         return items;
     }, [tree, openYears, openMonths]);
 
-    const width = isMainSidebarOpen ? 320 : 280;
-
     return (
-        <aside
-            style={{
-                width,
-                height: "100%",
-                borderRight: "1px solid var(--border-subtle)",
-                backgroundColor: "var(--bg-primary)",
-                flexShrink: 0,
-                display: "flex",
-                flexDirection: "column",
-            }}
-        >
-            <div style={{ padding: "16px 16px 8px 16px" }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>Albums</div>
+        <aside className={`${styles.sidebar} ${isMainSidebarOpen ? styles.sidebarExpanded : styles.sidebarCollapsed}`}>
+            <div className={styles.header}>
+                <div className={styles.title}>Albums</div>
             </div>
 
-            <div style={{ flex: 1 }}>
+            <div className={styles.content}>
                 {flatItems.length === 0 ? (
-                    <div style={{ padding: 16, color: "var(--text-secondary)", fontSize: 13 }}>No data yet.</div>
+                    <div className={styles.emptyState}>No data yet.</div>
                 ) : (
                     <Virtuoso
-                        style={{ height: '100%' }}
+                        className={styles.virtuoso}
                         data={flatItems}
                         itemContent={(_, item) => {
                             if (item.type === 'year') {
                                 const isOpen = openYears[item.year] ?? false;
                                 return (
-                                    <div style={{ padding: "8px 8px 4px 8px" }}>
+                                    <div className={styles.yearContainer}>
                                         <button
                                             onClick={() => setOpenYears(prev => ({ ...prev, [item.year]: !isOpen }))}
-                                            style={{
-                                                width: "100%",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "space-between",
-                                                padding: "10px 12px",
-                                                borderRadius: 12,
-                                                border: "1px solid var(--border-subtle)",
-                                                background: "var(--bg-secondary)",
-                                                cursor: "pointer",
-                                                color: "var(--text-primary)",
-                                            }}
+                                            className={styles.yearButton}
                                         >
-                                            <span style={{ fontSize: 13, fontWeight: 600 }}>{item.year}</span>
+                                            <span className={styles.yearText}>{item.year}</span>
                                             <ChevronDown
                                                 size={16}
-                                                style={{
-                                                    color: "var(--text-secondary)",
-                                                    transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                                                    transition: "transform 0.15s ease",
-                                                }}
+                                                className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}
                                             />
                                         </button>
                                     </div>
@@ -212,32 +186,15 @@ export function AlbumsSidebar({
                                 const key = `${item.year}-${item.month}`;
                                 const isOpen = openMonths[key] ?? false;
                                 return (
-                                    <div style={{ padding: "0 8px" }}>
+                                    <div className={styles.monthContainer}>
                                         <button
                                             onClick={() => setOpenMonths(prev => ({ ...prev, [key]: !isOpen }))}
-                                            style={{
-                                                width: "100%",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "space-between",
-                                                padding: "8px 12px",
-                                                borderRadius: 12,
-                                                border: "1px solid transparent",
-                                                background: "transparent",
-                                                cursor: "pointer",
-                                                color: "var(--text-primary)",
-                                            }}
-                                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-surface)")}
-                                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                                            className={styles.monthButton}
                                         >
-                                            <span style={{ fontSize: 13, fontWeight: 500 }}>{item.label}</span>
+                                            <span className={styles.monthText}>{item.label}</span>
                                             <ChevronDown
                                                 size={16}
-                                                style={{
-                                                    color: "var(--text-secondary)",
-                                                    transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                                                    transition: "transform 0.15s ease",
-                                                }}
+                                                className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}
                                             />
                                         </button>
                                     </div>
@@ -246,50 +203,24 @@ export function AlbumsSidebar({
                                 // Date Item
                                 const selected = selectedSectionId === item.sectionId;
                                 return (
-                                    <div style={{ padding: "0 8px 4px 16px" }}>
+                                    <div className={styles.dateContainer}>
                                         <button
                                             onClick={() => onSelectSection(item.sectionId, item.dateKey)}
-                                            style={{
-                                                width: "100%",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                gap: 10,
-                                                padding: "6px 10px",
-                                                borderRadius: 12,
-                                                border: selected ? "1px solid var(--accent-primary)" : "1px solid transparent",
-                                                background: selected ? "rgba(52, 168, 83, 0.12)" : "transparent",
-                                                cursor: "pointer",
-                                                textAlign: "left",
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                if (!selected) e.currentTarget.style.backgroundColor = "var(--bg-surface)";
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                if (!selected) e.currentTarget.style.backgroundColor = "transparent";
-                                            }}
+                                            className={`${styles.dateButton} ${selected ? styles.selected : ''}`}
                                         >
-                                            <div
-                                                style={{
-                                                    width: 32,
-                                                    height: 32,
-                                                    borderRadius: 8,
-                                                    backgroundColor: "var(--bg-placeholder)",
-                                                    overflow: "hidden",
-                                                    flexShrink: 0,
-                                                }}
-                                            >
+                                            <div className={styles.thumbnailContainer}>
                                                 <img
                                                     src={item.thumbnailUrl}
                                                     alt={item.dateKey}
-                                                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                                    className={styles.thumbnail}
                                                     loading="lazy"
                                                 />
                                             </div>
-                                            <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-                                                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>
+                                            <div className={styles.dateInfo}>
+                                                <div className={styles.dateText}>
                                                     {item.dateKey}
                                                 </div>
-                                                <div style={{ fontSize: 11, color: "var(--text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                                <div className={styles.countText}>
                                                     {item.label}
                                                 </div>
                                             </div>

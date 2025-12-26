@@ -1,0 +1,158 @@
+/* PhotoGrid.module.css */
+
+.gridOuter {
+    height: 100%;
+    width: 100%;
+    background-color: var(--bg-primary);
+    position: relative;
+    z-index: 0;
+}
+
+.virtuoso {
+    height: 100%;
+    width: 100%;
+}
+
+/* Date Header */
+.dateHeader {
+    padding: 12px 24px 4px 24px;
+    background-color: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    height: 44px;
+    position: relative;
+}
+
+.headerCheckbox {
+    position: absolute;
+    left: 32px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, opacity 0.2s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(-50%);
+    color: white;
+}
+
+.headerCheckboxVisible {
+    opacity: 1;
+    background-color: #34A853;
+}
+
+.headerCheckboxHidden {
+    opacity: 0;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.dateLabel {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text-primary);
+    margin: 0;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dateLabelActive {
+    transform: translateX(26px);
+}
+
+.dateLabelInactive {
+    transform: translateX(0);
+}
+
+.dateHeader:hover .dateLabel {
+    transform: translateX(26px);
+}
+
+.dateHeader:hover .headerCheckbox {
+    opacity: 1;
+}
+
+/* Photo Row */
+.photoRow {
+    display: flex;
+    padding-left: 24px;
+    padding-right: 24px;
+    box-sizing: content-box;
+}
+
+/* Photo Item */
+.photoItemWrapper {
+    height: 100%;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    transition: background-color 0.2s;
+}
+
+.photoItemSelected {
+    background-color: var(--bg-selection);
+}
+
+.photoItemUnselected {
+    background-color: var(--bg-surface);
+}
+
+.photoItemInner {
+    width: 100%;
+    height: 100%;
+    transition: transform 0.2s;
+    background-color: var(--bg-placeholder);
+    position: relative;
+}
+
+.photoItemInnerSelected {
+    transform: scale(0.85);
+}
+
+.photoItemInnerUnselected {
+    transform: scale(1);
+}
+
+.photoImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.selectionOverlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), transparent);
+    transition: opacity 0.2s;
+}
+
+.selectionCheckbox {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    z-index: 10;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: opacity 0.2s, background-color 0.2s, transform 0.2s;
+}
+
+.selectionCheckboxSelected {
+    background-color: #34A853;
+    opacity: 1;
+    transform: scale(1.18);
+}
+
+.selectionCheckboxUnselected {
+    background-color: rgba(255, 255, 255, 0.4);
+    opacity: 0;
+    transform: scale(1);
+}
+
+.photoItemWrapper:hover .selectionCheckbox {
+    opacity: 1;
+}

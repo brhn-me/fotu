@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet';
 import { usePhotos } from '../../context/PhotoContext';
+import styles from './MapPage.module.css';
 
 export function MapPage() {
     const { photos, setSelectedPhotoId } = usePhotos();
@@ -20,11 +21,11 @@ export function MapPage() {
     }, [locatedPhotos]);
 
     return (
-        <div style={{ height: '100%', width: '100%', position: 'relative' }}>
+        <div className={styles.container}>
             <MapContainer
                 center={center}
                 zoom={3}
-                style={{ height: '100%', width: '100%' }}
+                className={styles.mapContainer}
                 zoomControl={true}
             >
                 <TileLayer
@@ -37,9 +38,7 @@ export function MapPage() {
                         key={photo.id}
                         center={[photo.location!.latitude, photo.location!.longitude]}
                         pathOptions={{
-                            fillColor: '#FF4500',
-                            fillOpacity: 0.6,
-                            color: 'transparent'
+                            className: styles.heatmapMarker
                         }}
                         radius={8}
                         eventHandlers={{
@@ -47,15 +46,15 @@ export function MapPage() {
                         }}
                     >
                         <Tooltip direction="top" offset={[0, -10]} opacity={1}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div className={styles.tooltipContent}>
                                 <img
                                     src={photo.thumbnailUrl}
                                     alt=""
-                                    style={{ width: 40, height: 40, objectFit: "cover", borderRadius: 4 }}
+                                    className={styles.tooltipImage}
                                 />
-                                <div>
-                                    <div style={{ fontWeight: 600, fontSize: 12 }}>{photo.location?.name || "Unknown Location"}</div>
-                                    <div style={{ fontSize: 11, color: "#666" }}>{new Date(photo.timestamp).toLocaleDateString()}</div>
+                                <div className={styles.tooltipInfo}>
+                                    <div className={styles.locationName}>{photo.location?.name || "Unknown Location"}</div>
+                                    <div className={styles.dateText}>{new Date(photo.timestamp).toLocaleDateString()}</div>
                                 </div>
                             </div>
                         </Tooltip>

@@ -1,0 +1,59 @@
+/* MapPage.module.css */
+
+.container {
+    height: 100%;
+    width: 100%;
+    position: relative;
+}
+
+.mapContainer {
+    height: 100%;
+    width: 100%;
+    z-index: 0;
+    /* Align with sidebar */
+}
+
+/* Marker Styling - targeted via className in pathOptions */
+.heatmapMarker {
+    fill: #FF4500;
+    fill-opacity: 0.6;
+    stroke: none;
+    transition: fill-opacity 0.2s ease;
+}
+
+.heatmapMarker:hover {
+    fill-opacity: 0.8;
+}
+
+/* Tooltip Styling */
+.tooltipContent {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+}
+
+.tooltipImage {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+    background-color: var(--bg-placeholder);
+}
+
+.tooltipInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.locationName {
+    font-weight: 600;
+    font-size: 12px;
+    color: #333;
+    /* Leaflet tooltips are usually light theme by default */
+}
+
+.dateText {
+    font-size: 11px;
+    color: #666;
+}

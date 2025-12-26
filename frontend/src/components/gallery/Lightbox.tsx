@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { X, ChevronLeft, ChevronRight, Trash2, Info, ZoomIn, ZoomOut, Download } from 'lucide-react';
 import { usePhotos } from '../../context/PhotoContext';
 import { MetadataPanel } from '../metadata/MetadataPanel';
+import styles from './Lightbox.module.css';
 
 interface LightboxProps {
     onClose: () => void;
@@ -151,26 +152,10 @@ export function Lightbox({ onClose }: LightboxProps) {
     if (!photo) return null;
 
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'var(--bg-primary)',
-            zIndex: 2000,
-            display: 'flex',
-            flexDirection: 'row',
-            animation: 'fadeIn 0.2s ease-out'
-        }}>
+        <div className={styles.overlay}>
             {/* Main Image Area */}
-            <div style={{
-                flex: 1,
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: '#000',
-                overflow: 'hidden',
-                cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default'
-            }}
+            <div
+                className={`${styles.mainArea} ${zoom > 1 ? (isDragging ? styles.dragging : styles.draggable) : ''}`}
                 onClick={(e) => {
                     // Close only if clicking the background (container), not the image
                     if (e.target === e.currentTarget) onClose();
@@ -181,42 +166,34 @@ export function Lightbox({ onClose }: LightboxProps) {
                 onMouseLeave={handleMouseUp}
             >
                 {/* Header Controls */}
-                <div style={{
-                    position: 'absolute',
-                    top: '20px',
-                    right: '20px',
-                    display: 'flex',
-                    gap: '12px',
-                    zIndex: 20
-                }}>
+                <div className={styles.headerControls}>
                     {canZoom && (
-                        <button onClick={toggleZoom} className="lightbox-btn" title={zoom > 1 ? "Zoom Out" : "Zoom In"}>
+                        <button onClick={toggleZoom} className={styles.lightboxBtn} title={zoom > 1 ? "Zoom Out" : "Zoom In"}>
                             {zoom > 1 ? <ZoomOut size={20} /> : <ZoomIn size={20} />}
                         </button>
                     )}
-                    <button onClick={handleDownload} className="lightbox-btn" title="Download (Shift+D)">
+                    <button onClick={handleDownload} className={styles.lightboxBtn} title="Download (Shift+D)">
                         <Download size={20} />
                     </button>
-                    {/* Removed Separator */}
-                    <button onClick={() => setIsInfoOpen(!isInfoOpen)} className="lightbox-btn" title="Info">
+                    <button onClick={() => setIsInfoOpen(!isInfoOpen)} className={styles.lightboxBtn} title="Info">
                         <Info size={20} />
                     </button>
-                    <button onClick={handleDelete} className="lightbox-btn" title="Delete">
+                    <button onClick={handleDelete} className={styles.lightboxBtn} title="Delete">
                         <Trash2 size={20} />
                     </button>
-                    <button onClick={onClose} className="lightbox-btn" title="Close">
+                    <button onClick={onClose} className={styles.lightboxBtn} title="Close">
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* Navigation Buttons */}
                 {currentPhotoIndex > 0 && !isDragging && (
-                    <button onClick={(e) => { e.stopPropagation(); handlePrev(); }} className="nav-btn prev">
+                    <button onClick={(e) => { e.stopPropagation(); handlePrev(); }} className={`${styles.navBtn} ${styles.prevBtn}`}>
                         <ChevronLeft size={32} />
                     </button>
                 )}
                 {currentPhotoIndex < photos.length - 1 && !isDragging && (
-                    <button onClick={(e) => { e.stopPropagation(); handleNext(); }} className="nav-btn next">
+                    <button onClick={(e) => { e.stopPropagation(); handleNext(); }} className={`${styles.navBtn} ${styles.nextBtn}`}>
                         <ChevronRight size={32} />
                     </button>
                 )}
@@ -227,64 +204,20 @@ export function Lightbox({ onClose }: LightboxProps) {
                     alt={photo.title}
                     onLoad={handleImageLoad}
                     draggable={false}
+                    className={styles.image}
                     style={{
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                        objectFit: 'contain',
                         transition: isDragging ? 'none' : 'transform 0.2s',
                         transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
-                        // Removed pointerEvents: 'none' to allow drag on image
-                        userSelect: 'none'
                     }}
                 />
             </div>
 
             {/* Slide-out Sidebar */}
-            <div style={{
-                width: isInfoOpen ? '360px' : '0px',
-                overflow: 'hidden',
-                transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                borderLeft: isInfoOpen ? '1px solid var(--border-subtle)' : 'none',
-                backgroundColor: 'var(--bg-surface)'
-            }}>
-                <div style={{ width: '360px', height: '100%' }}>
+            <div className={`${styles.sidebar} ${isInfoOpen ? styles.sidebarOpen : styles.sidebarClosed}`}>
+                <div className={styles.sidebarContent}>
                     <MetadataPanel photo={photo} onChange={updatePhoto} />
                 </div>
             </div>
-
-            <style>{`
-                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-                .lightbox-btn {
-                    background: rgba(0,0,0,0.5);
-                    border: none;
-                    color: white;
-                    border-radius: 50%;
-                    width: 40px;
-                    height: 40px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    cursor: pointer;
-                    transition: background 0.2s;
-                }
-                .lightbox-btn:hover { background: rgba(0,0,0,0.7); }
-                
-                .nav-btn {
-                    position: absolute;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    background: transparent;
-                    border: none;
-                    color: rgba(255,255,255,0.7);
-                    cursor: pointer;
-                    padding: 20px;
-                    transition: color 0.2s, transform 0.2s;
-                    z-index: 10;
-                }
-                .nav-btn:hover { color: white; transform: translateY(-50%) scale(1.1); }
-                .nav-btn.prev { left: 10px; }
-                .nav-btn.next { right: 10px; }
-            `}</style>
         </div>
     );
 }

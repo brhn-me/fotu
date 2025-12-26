@@ -1,4 +1,3 @@
-// src/components/JobDetailsPage.tsx
 import type React from "react";
 import { useMemo, useState } from "react";
 import {
@@ -13,9 +12,14 @@ import {
     RotateCcw,
     Loader2,
     TerminalSquare,
+    Square,
+    ChevronRight,
 } from "lucide-react";
 import { Virtuoso, TableVirtuoso } from "react-virtuoso";
+import { useJobs } from "../../context/JobContext";
+import { useParams, Link } from "react-router-dom";
 import type { Job } from "./JobsPage";
+import styles from "./Jobs.module.css";
 
 type TabKey = "queue" | "processing" | "done" | "failed" | "errors" | "logs";
 
@@ -29,7 +33,7 @@ type JobItem = {
     updatedAt: string;
 };
 
-// ... utility functions (clamp, makeItems, makeLogs, fmtTs) remain the same ...
+// ... utility functions
 function clamp(n: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, n));
 }
@@ -62,22 +66,20 @@ function makeLogs(jobTitle: string): JobLog[] {
     return logs.sort((a, b) => (a.ts < b.ts ? 1 : -1));
 }
 
+export function JobDetailsPage() {
+    const { id } = useParams<{ id: string }>();
+    const { jobs, toggleJobStatus, restartJob } = useJobs();
 
-
-export function JobDetailsPage({
-    job,
-    onBack,
-    onPauseResume,
-    onRestart,
-}: {
-    job: Job;
-    onBack: () => void;
-    onPauseResume: () => void;
-    onRestart: () => void;
-}) {
+    const job = jobs.find(j => j.id === id);
     const [tab, setTab] = useState<TabKey>("queue");
 
+    if (!job) {
+        return <div className="p-8 text-center text-gray-500">Job not found</div>;
+    }
+
     const progress = job.total > 0 ? (job.completed / job.total) * 100 : 0;
+    // Mock concurrency
+    const concurrency = (job as any).concurrency || 2;
 
     const model = useMemo(() => {
         const doneCount = clamp(job.completed, 0, job.total);
@@ -88,6 +90,8 @@ export function JobDetailsPage({
         const processingCount = job.status === "running" ? clamp(Math.min(5, remaining), 0, 5) : 0;
         const queuedCount = clamp(remaining - processingCount, 0, job.total);
 
+        // In a real app, these items/logs would come from an API based on `job.id`
+        // Here we mock them using helper functions for demonstration
         const processing = makeItems("Processing", Math.min(60, processingCount));
         const queued = makeItems("Queue", Math.min(120, queuedCount));
         const done = makeItems("Done", Math.min(120, doneCount));
@@ -112,166 +116,148 @@ export function JobDetailsPage({
 
     const Icon = job.icon;
 
+    const getStatusColor = (status: Job['status']) => {
+        switch (status) {
+            case 'completed': return 'bg-green-100 text-green-800';
+            case 'failed': return 'bg-red-100 text-red-800';
+            case 'paused': return 'bg-yellow-100 text-yellow-800';
+            case 'running': return 'bg-blue-100 text-blue-800';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    };
+
     return (
-        <div
-            style={{
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                backgroundColor: "var(--bg-primary)",
-            }}
-        >
-            {/* Header Section */}
-            <div style={{
-                borderBottom: "1px solid var(--border-subtle)",
-                backgroundColor: "var(--bg-surface)",
-            }}>
-                <div style={{
-                    maxWidth: 1000,
-                    margin: "0 auto",
-                    padding: "20px 24px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 20
-                }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                        <button
-                            onClick={onBack}
-                            style={{
-                                width: 36, height: 36,
-                                borderRadius: 18,
-                                border: "none",
-                                background: "transparent",
-                                color: "var(--text-secondary)",
-                                cursor: "pointer",
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                transition: "background 0.2s"
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.backgroundColor = "var(--bg-secondary)"}
-                            onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
-                        >
-                            <ArrowLeft size={20} />
-                        </button>
-
-                        <div style={{
-                            width: 48, height: 48,
-                            borderRadius: 12,
-                            backgroundColor: "var(--bg-secondary)",
-                            color: "var(--accent-primary)",
-                            display: "flex", alignItems: "center", justifyContent: "center"
-                        }}>
-                            <Icon size={24} />
-                        </div>
-
-                        <div>
-                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                <h1 style={{ fontSize: 20, fontWeight: 600, color: "var(--text-primary)", margin: 0 }}>
+        <div className={styles.container}>
+            <div className={styles.centered} style={{ maxWidth: 1000 }}>
+                {/* Header */}
+                <div className={styles.detailsHeader}>
+                    <div style={{ flex: 1 }}>
+                        {/* Breadcrumb Row */}
+                        <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
+                            <div className={styles.breadcrumb}>
+                                <Link to="/jobs" className={styles.breadcrumbLink}>Jobs</Link>
+                                <ChevronRight size={16} className={styles.breadcrumbSeparator} />
+                                <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                     {job.title}
-                                </h1>
-                                <StatusBadge status={job.status} />
+                                    {job.status === "running" && (
+                                        <Loader2 size={16} className={styles.animateSpin} style={{ color: "var(--accent-primary)" }} />
+                                    )}
+                                </span>
                             </div>
-                            <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>
-                                {job.description}
+                            <div style={{ flex: 1 }} />
+                            {/* Action Buttons: Moved to top right */}
+                            <div className={styles.detailsActions}>
+                                {job.status === 'running' ? (
+                                    <button
+                                        onClick={() => toggleJobStatus(job.id)}
+                                        className={`${styles.actionButton} ${styles.dangerButton}`}
+                                    >
+                                        <Square size={16} fill="currentColor" /> Pause
+                                    </button>
+                                ) : job.status === 'paused' ? (
+                                    <button
+                                        onClick={() => toggleJobStatus(job.id)}
+                                        className={`${styles.actionButton} ${styles.primaryButton}`}
+                                    >
+                                        <Play size={16} fill="currentColor" /> Resume
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => restartJob(job.id)}
+                                        className={`${styles.actionButton} ${styles.primaryButton}`}
+                                    >
+                                        <RotateCcw size={16} /> Restart
+                                    </button>
+                                )}
                             </div>
                         </div>
-                    </div>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        {job.status !== "completed" && (
-                            <ActionButton
-                                onClick={onPauseResume}
-                                icon={job.status === "running" ? <Pause size={18} /> : <Play size={18} />}
-                                label={job.status === "running" ? "Pause" : "Resume"}
-                            />
-                        )}
-                        <ActionButton
-                            onClick={onRestart}
-                            icon={<RotateCcw size={18} />}
-                            label="Restart"
-                        />
+                        {/* Info Row: Icon, Description, Concurrency */}
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 20 }}>
+                            <div style={{
+                                width: 48, height: 48, borderRadius: 12,
+                                backgroundColor: "var(--bg-secondary)",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                color: "var(--accent-primary)", flexShrink: 0
+                            }}>
+                                <Icon size={24} />
+                            </div>
+                            <div style={{ paddingTop: 2 }}>
+                                <p style={{ margin: "0 0 8px 0", color: "var(--text-secondary)", fontSize: 14 }}>{job.description}</p>
+                                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                                    <div title="Concurrency workers" style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "var(--text-secondary)", backgroundColor: "var(--bg-secondary)", padding: "2px 8px", borderRadius: 6 }}>
+                                        <Cpu size={14} />
+                                        <span style={{ fontWeight: 600 }}>{concurrency}x</span> workers
+                                    </div>
+                                    <div style={{ width: 1, height: 16, backgroundColor: "var(--border-subtle)" }} />
+                                    <span style={{ fontSize: 12, color: "var(--text-muted)" }}>ID: <span style={{ fontFamily: "monospace" }}>{job.id}</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Progress Bar: Bottom of header */}
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            <div className={styles.progressContainer} style={{ flex: 1, marginBottom: 0, height: 8 }}>
+                                <div className={styles.progressBarTrack}>
+                                    <div
+                                        className={styles.progressBarFill}
+                                        style={{
+                                            width: `${progress}%`,
+                                            backgroundColor: job.status === "completed" ? "var(--status-success)" : "var(--accent-primary)",
+                                        }}
+                                    />
+                                    {job.status === "running" && progress > 0 && progress < 100 ? (
+                                        <div className={styles.progressShimmer} />
+                                    ) : null}
+                                </div>
+                            </div>
+                            <span className={styles.progressText} style={{ marginLeft: 0, minWidth: 40, textAlign: "right" }}>
+                                {Math.round(progress)}%
+                            </span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Scrollable Content */}
-            <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
-                <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
+                {/* Stats Overview */}
+                <div className={styles.statsGrid}>
+                    <StatCard label="Queue" value={model.queuedCount} icon={<ClipboardList size={20} />} color="var(--text-secondary)" />
+                    <StatCard label="Processing" value={model.processingCount} icon={<Cpu size={20} />} color="var(--accent-primary)" />
+                    <StatCard label="Done" value={model.doneCount} icon={<CheckCircle2 size={20} />} color="var(--status-success)" />
+                    <StatCard label="Failed" value={model.failedCount} icon={<XCircle size={20} />} color="var(--status-error)" />
+                    <StatCard label="Errors" value={model.errorCount} icon={<AlertTriangle size={20} />} color="var(--status-warning)" />
+                </div>
 
-                    {/* Stats Overview */}
-                    <div style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-                        gap: 16
-                    }}>
-                        {/* Progress Card */}
-                        <div style={{
-                            gridColumn: "span 1",
-                            background: "var(--bg-surface)",
-                            padding: 20,
-                            borderRadius: 16,
-                            border: "1px solid var(--border-subtle)",
-                            display: "flex", flexDirection: "column", justifyContent: "center"
-                        }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
-                                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)" }}>Total Progress</span>
-                                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>{Math.round(progress)}%</span>
-                            </div>
-                            <div style={{ height: 8, background: "var(--bg-secondary)", borderRadius: 4, overflow: "hidden" }}>
-                                <div style={{
-                                    width: `${progress}%`,
-                                    height: "100%",
-                                    background: job.status === "completed" ? "var(--status-success)" : "var(--accent-primary)",
-                                    transition: "width 0.5s ease"
-                                }} />
-                            </div>
-                        </div>
-
-                        {/* Mini Stats */}
-                        <StatCard label="Queue" value={model.queuedCount} icon={<ClipboardList size={16} />} color="var(--text-secondary)" />
-                        <StatCard label="Processing" value={model.processingCount} icon={<Cpu size={16} />} color="var(--accent-primary)" />
-                        <StatCard label="Done" value={model.doneCount} icon={<CheckCircle2 size={16} />} color="var(--status-success)" />
-                        <StatCard label="Failed" value={model.failedCount} icon={<XCircle size={16} />} color="var(--status-error)" />
-                        <StatCard label="Errors" value={model.errorCount} icon={<AlertTriangle size={16} />} color="var(--status-warning)" />
+                {/* Integrated Tabs Section */}
+                <div style={{
+                    background: "var(--bg-surface)",
+                    border: "1px solid var(--border-subtle)",
+                    borderRadius: 16,
+                    overflow: "hidden",
+                    display: "flex", flexDirection: "column",
+                    height: 600
+                }}>
+                    <div className={styles.tabsContainer} style={{ padding: "0 16px", margin: 0, justifyContent: "flex-start", gap: 8, background: "var(--bg-surface)", borderBottom: "1px solid var(--border-subtle)" }}>
+                        <TabTrigger active={tab === "queue"} onClick={() => setTab("queue")} icon={<ClipboardList size={14} />} label="Queue" count={model.queuedCount} />
+                        <TabTrigger active={tab === "processing"} onClick={() => setTab("processing")} icon={<Cpu size={14} />} label="Processing" count={model.processingCount} />
+                        <TabTrigger active={tab === "done"} onClick={() => setTab("done")} icon={<CheckCircle2 size={14} />} label="Done" count={model.doneCount} />
+                        <TabTrigger active={tab === "failed"} onClick={() => setTab("failed")} icon={<XCircle size={14} />} label="Failed" count={model.failedCount} />
+                        <TabTrigger active={tab === "errors"} onClick={() => setTab("errors")} icon={<AlertTriangle size={14} />} label="Errors" count={model.errorCount} />
+                        <div style={{ flex: 1 }} />
+                        <TabTrigger active={tab === "logs"} onClick={() => setTab("logs")} icon={<TerminalSquare size={14} />} label="Logs" count={model.logs.length} />
                     </div>
 
-                    {/* Integrated Tabs Section */}
-                    <div style={{
-                        background: "var(--bg-surface)",
-                        border: "1px solid var(--border-subtle)",
-                        borderRadius: 16,
-                        overflow: "hidden",
-                        display: "flex", flexDirection: "column",
-                        height: 500 // Fixed height for virtualization to work
-                    }}>
-                        <div style={{
-                            padding: "6px 8px",
-                            borderBottom: "1px solid var(--border-subtle)",
-                            display: "flex", gap: 4,
-                            background: "var(--bg-surface)"
-                        }}>
-                            <TabTrigger active={tab === "queue"} onClick={() => setTab("queue")} icon={<ClipboardList size={14} />} label="Queue" count={model.queuedCount} />
-                            <TabTrigger active={tab === "processing"} onClick={() => setTab("processing")} icon={<Cpu size={14} />} label="Processing" count={model.processingCount} />
-                            <TabTrigger active={tab === "done"} onClick={() => setTab("done")} icon={<CheckCircle2 size={14} />} label="Done" count={model.doneCount} />
-                            <TabTrigger active={tab === "failed"} onClick={() => setTab("failed")} icon={<XCircle size={14} />} label="Failed" count={model.failedCount} />
-                            <TabTrigger active={tab === "errors"} onClick={() => setTab("errors")} icon={<AlertTriangle size={14} />} label="Errors" count={model.errorCount} />
-                            <div style={{ flex: 1 }} />
-                            <TabTrigger active={tab === "logs"} onClick={() => setTab("logs")} icon={<TerminalSquare size={14} />} label="Logs" count={model.logs.length} />
-                        </div>
-
-                        <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-                            {tab === "logs" ? (
-                                <LogsView logs={model.logs} />
-                            ) : (
-                                <ItemsView items={
-                                    tab === "queue" ? model.queued :
-                                        tab === "processing" ? model.processing :
-                                            tab === "done" ? model.done :
-                                                tab === "failed" ? model.failed :
-                                                    model.errors
-                                } />
-                            )}
-                        </div>
+                    <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column", position: "relative" }}>
+                        {tab === "logs" ? (
+                            <LogsView logs={model.logs} />
+                        ) : (
+                            <ItemsView items={
+                                tab === "queue" ? model.queued :
+                                    tab === "processing" ? model.processing :
+                                        tab === "done" ? model.done :
+                                            tab === "failed" ? model.failed :
+                                                model.errors
+                            } />
+                        )}
                     </div>
                 </div>
             </div>
@@ -281,68 +267,21 @@ export function JobDetailsPage({
 
 // --- Subcomponents ---
 
-function StatusBadge({ status }: { status: Job["status"] }) {
-    const color =
-        status === "completed" ? "var(--status-success)" :
-            "var(--accent-primary)";
-
-    return (
-        <div style={{
-            padding: "4px 10px",
-            borderRadius: 99,
-            backgroundColor: `color-mix(in srgb, ${color} 10%, transparent)`,
-            color: color,
-            fontSize: 12,
-            fontWeight: 600,
-            display: "flex", alignItems: "center", gap: 6,
-            border: `1px solid color-mix(in srgb, ${color} 20%, transparent)`
-        }}>
-            {status === "running" && <Loader2 size={10} className="animate-spin" />}
-            {status.toUpperCase()}
-        </div>
-    );
-}
-
 function StatCard({ label, value, icon, color }: { label: string; value: number; icon: React.ReactNode; color: string }) {
     return (
-        <div style={{
-            background: "var(--bg-surface)",
-            padding: "16px",
-            borderRadius: 16,
-            border: "1px solid var(--border-subtle)",
-            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8
-        }}>
-            <div style={{ color: color, fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
-                {icon}
-                {label}
+        <div className={styles.statCard} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ color: color, display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{
+                    width: 36, height: 36, borderRadius: 10,
+                    backgroundColor: `color-mix(in srgb, ${color} 10%, transparent)`,
+                    display: "flex", alignItems: "center", justifyContent: "center"
+                }}>
+                    {icon}
+                </div>
+                <div className={styles.statLabel}>{label}</div>
             </div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: "var(--text-primary)" }}>{value}</div>
+            <div className={styles.statValue} style={{ marginLeft: 4 }}>{value}</div>
         </div>
-    );
-}
-
-function ActionButton({ onClick, icon, label }: { onClick: () => void; icon: React.ReactNode; label: string }) {
-    return (
-        <button
-            onClick={onClick}
-            style={{
-                height: 36,
-                padding: "0 16px",
-                borderRadius: 10,
-                border: "1px solid var(--border-subtle)",
-                background: "var(--bg-surface)",
-                color: "var(--text-primary)",
-                fontSize: 13, fontWeight: 500,
-                display: "flex", alignItems: "center", gap: 8,
-                cursor: "pointer",
-                transition: "all 0.2s"
-            }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = "var(--bg-secondary)"}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = "var(--bg-surface)"}
-        >
-            {icon}
-            {label}
-        </button>
     );
 }
 
@@ -352,28 +291,26 @@ function TabTrigger({ active, onClick, icon, label, count }: { active: boolean; 
             onClick={onClick}
             style={{
                 display: "flex", alignItems: "center", gap: 8,
-                padding: "8px 16px",
-                borderRadius: 8,
+                padding: "16px 12px",
+                background: "transparent",
                 border: "none",
-                background: active ? "var(--bg-secondary)" : "transparent",
+                borderBottom: `2px solid ${active ? "var(--primary)" : "transparent"}`,
                 color: active ? "var(--text-primary)" : "var(--text-secondary)",
                 fontSize: 13,
                 fontWeight: active ? 600 : 500,
                 cursor: "pointer",
                 transition: "all 0.2s"
             }}
-            onMouseEnter={e => !active && (e.currentTarget.style.backgroundColor = "var(--bg-secondary)")}
-            onMouseLeave={e => !active && (e.currentTarget.style.backgroundColor = "transparent")}
         >
             {icon}
             {label}
             {count !== undefined && (
                 <span style={{
-                    fontSize: 11,
+                    fontSize: 10,
                     padding: "2px 6px",
                     borderRadius: 99,
-                    background: active ? "var(--bg-surface)" : "var(--bg-secondary)",
-                    color: "var(--text-muted)"
+                    background: active ? "var(--bg-secondary)" : "var(--bg-secondary)",
+                    color: "var(--text-secondary)"
                 }}>
                     {count}
                 </span>
@@ -398,18 +335,18 @@ function ItemsView({ items }: { items: JobItem[] }) {
                 data={items}
                 fixedHeaderContent={() => (
                     <tr style={{ background: "var(--bg-surface)", fontSize: 12, color: "var(--text-muted)", textAlign: "left" }}>
-                        <th style={{ padding: "12px 20px", fontWeight: 600, borderBottom: "1px solid var(--border-subtle)" }}>ID</th>
-                        <th style={{ padding: "12px 20px", fontWeight: 600, borderBottom: "1px solid var(--border-subtle)" }}>Filename</th>
-                        <th style={{ padding: "12px 20px", fontWeight: 600, borderBottom: "1px solid var(--border-subtle)" }}>Path</th>
-                        <th style={{ padding: "12px 20px", fontWeight: 600, borderBottom: "1px solid var(--border-subtle)" }}>Updated</th>
+                        <th style={{ padding: "12px 24px", fontWeight: 600, borderBottom: "1px solid var(--border-subtle)" }}>ID</th>
+                        <th style={{ padding: "12px 24px", fontWeight: 600, borderBottom: "1px solid var(--border-subtle)" }}>Filename</th>
+                        <th style={{ padding: "12px 24px", fontWeight: 600, borderBottom: "1px solid var(--border-subtle)" }}>Path</th>
+                        <th style={{ padding: "12px 24px", fontWeight: 600, borderBottom: "1px solid var(--border-subtle)" }}>Updated</th>
                     </tr>
                 )}
                 itemContent={(_index, item) => (
                     <>
-                        <td style={{ padding: "12px 20px", color: "var(--text-secondary)", fontFamily: "monospace", borderBottom: "1px solid var(--border-subtle)" }}>{item.id}</td>
-                        <td style={{ padding: "12px 20px", color: "var(--text-primary)", fontWeight: 500, borderBottom: "1px solid var(--border-subtle)" }}>{item.label}</td>
-                        <td style={{ padding: "12px 20px", color: "var(--text-muted)", borderBottom: "1px solid var(--border-subtle)" }}>{item.ref}</td>
-                        <td style={{ padding: "12px 20px", color: "var(--text-muted)", fontFamily: "monospace", borderBottom: "1px solid var(--border-subtle)" }}>{item.updatedAt.slice(11, 19)}</td>
+                        <td style={{ padding: "12px 24px", color: "var(--text-secondary)", fontFamily: "monospace", borderBottom: "1px solid var(--border-subtle)" }}>{item.id}</td>
+                        <td style={{ padding: "12px 24px", color: "var(--text-primary)", fontWeight: 500, borderBottom: "1px solid var(--border-subtle)" }}>{item.label}</td>
+                        <td style={{ padding: "12px 24px", color: "var(--text-muted)", borderBottom: "1px solid var(--border-subtle)" }}>{item.ref}</td>
+                        <td style={{ padding: "12px 24px", color: "var(--text-muted)", fontFamily: "monospace", borderBottom: "1px solid var(--border-subtle)" }}>{item.updatedAt.slice(11, 19)}</td>
                     </>
                 )}
                 components={{
@@ -429,34 +366,28 @@ function LogsView({ logs }: { logs: JobLog[] }) {
         );
     }
     return (
-        <div style={{
-            flex: 1,
-            background: "var(--terminal-bg, #000)",
-            color: "var(--terminal-fg, #fff)",
-            fontFamily: "monospace",
-            fontSize: 12,
-        }}>
-            <Virtuoso
-                style={{ height: "100%", width: "100%" }}
-                data={logs}
-                initialTopMostItemIndex={logs.length - 1}
-                followOutput="auto"
-                itemContent={(_index, log) => (
-                    <div key={log.id} style={{ display: "flex", gap: 12, padding: "4px 20px", lineHeight: 1.5 }}>
-                        <span style={{ color: "var(--terminal-muted, #888)", minWidth: 140 }}>{log.ts.replace("T", " ").slice(0, 23)}</span>
-                        <span style={{
-                            fontWeight: 700,
-                            width: 60,
-                            color: log.level === "error" ? "var(--terminal-error, #ff4d4d)" :
-                                log.level === "warn" ? "var(--terminal-warn, #ffcc00)" :
-                                    "var(--terminal-info, #4d94ff)"
-                        }}>
-                            {log.level.toUpperCase()}
-                        </span>
-                        <span style={{ color: "var(--terminal-fg, #fff)" }}>{log.message}</span>
-                    </div>
-                )}
-            />
+        <div className={styles.logsContainer}>
+            {/* Removed Logs Header per user request */}
+            <div className={styles.logsContent}>
+                <Virtuoso
+                    style={{ height: "100%", width: "100%" }}
+                    data={logs}
+                    initialTopMostItemIndex={logs.length - 1}
+                    followOutput="auto"
+                    itemContent={(_index, log) => (
+                        <div key={log.id} className={styles.logRow}>
+                            <span className={styles.logTimestamp}>{log.ts.replace("T", " ").slice(0, 23)}</span>
+                            <span className={`${styles.logLevel} ${log.level === "error" ? styles.levelError :
+                                    log.level === "warn" ? styles.levelWarn :
+                                        styles.levelInfo
+                                }`}>
+                                {log.level.toUpperCase()}
+                            </span>
+                            <span className={styles.logMessage}>{log.message}</span>
+                        </div>
+                    )}
+                />
+            </div>
         </div>
     );
 }

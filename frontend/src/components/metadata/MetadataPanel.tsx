@@ -9,6 +9,8 @@ interface MetadataPanelProps {
     onChange: (updatedPhoto: Photo) => void;
 }
 
+import styles from './MetadataPanel.module.css';
+
 export function MetadataPanel({ photo, onChange }: MetadataPanelProps) {
     const handleChange = <K extends keyof Photo>(field: K, value: Photo[K]) => {
         onChange({ ...photo, [field]: value });
@@ -25,24 +27,12 @@ export function MetadataPanel({ photo, onChange }: MetadataPanelProps) {
         });
     };
 
-
-
     return (
-        <div
-            style={{
-                width: "360px",
-                background: "var(--bg-surface)",
-                borderLeft: "1px solid var(--border-subtle)",
-                display: "flex",
-                flexDirection: "column",
-                height: "100%",
-                overflowY: "auto",
-            }}
-        >
-            <div style={{ padding: "24px" }}>
-                <h2 style={{ fontSize: "18px", marginBottom: "24px" }}>Info</h2>
+        <div className={styles.panel}>
+            <div className={styles.content}>
+                <h2 className={styles.header}>Info</h2>
 
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
+                <div className={styles.section}>
                     <InlineEditable
                         label="Title"
                         value={photo.title}
@@ -59,16 +49,16 @@ export function MetadataPanel({ photo, onChange }: MetadataPanelProps) {
                         placeholder="Add a description"
                         onSave={(next) => handleChange("description", next.length ? next : null)}
                         renderViewValue={(v) =>
-                            v?.length ? v : <span style={{ color: "var(--text-muted)" }}>No description</span>
+                            v?.length ? v : <span className={styles.noDescription}>No description</span>
                         }
                     />
                 </div>
 
                 {/* Editable Date */}
-                <div style={{ marginBottom: "24px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <div style={{ fontSize: 20 }}>📅</div>
-                        <div style={{ flex: 1 }}>
+                <div className={styles.sectionRow}>
+                    <div className={styles.iconRow}>
+                        <div className={styles.icon}>📅</div>
+                        <div className={styles.flex1}>
                             <InlineEditableDateTime
                                 label="Date"
                                 value={new Date(photo.timestamp)}
@@ -79,39 +69,29 @@ export function MetadataPanel({ photo, onChange }: MetadataPanelProps) {
                 </div>
 
                 {/* Camera (still view-only for now) */}
-                <div style={{ marginBottom: "32px", display: "flex", alignItems: "center", gap: "12px" }}>
-                    <div style={{ fontSize: "20px" }}>📷</div>
+                <div className={styles.cameraInfo}>
+                    <div className={styles.icon}>📷</div>
                     <div>
-                        <div style={{ fontSize: "14px" }}>{photo.metadata.cameraModel || "Unknown Camera"}</div>
-                        <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                        <div className={styles.cameraModel}>{photo.metadata.cameraModel || "Unknown Camera"}</div>
+                        <div className={styles.cameraSettings}>
                             {photo.metadata.focalLength} • {photo.metadata.aperture} • {photo.metadata.iso}ISO
                         </div>
                     </div>
                 </div>
 
                 {/* Map */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <label style={{ fontSize: "12px", color: "var(--text-muted)" }}>Location</label>
-                        <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+                <div className={styles.mapSection}>
+                    <div className={styles.locationHeader}>
+                        <label className={styles.locationLabel}>Location</label>
+                        <span className={styles.locationCoordinates}>
                             {photo.location ? (
                                 `${photo.location.latitude.toFixed(4)}, ${photo.location.longitude.toFixed(4)}`
                             ) : (
                                 <button
                                     onClick={() => handleLocationChange(51.505, -0.09)} // Default to London or map center if possible
-                                    style={{
-                                        background: "none",
-                                        border: "none",
-                                        padding: 0,
-                                        color: "var(--primary)",
-                                        fontSize: "12px",
-                                        cursor: "pointer",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: "4px"
-                                    }}
+                                    className={styles.addLocationBtn}
                                 >
-                                    <span style={{ fontSize: "14px" }}>📍</span> Add location
+                                    <span className={styles.addLocationIcon}>📍</span> Add location
                                 </button>
                             )}
                         </span>

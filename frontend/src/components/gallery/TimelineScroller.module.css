@@ -1,0 +1,196 @@
+/* TimelineScroller.module.css */
+
+/* Global keyframes for animations */
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateX(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.hoverZone {
+    position: fixed;
+    right: 0;
+    top: 64px;
+    bottom: 0;
+    pointer-events: auto;
+    z-index: 999;
+    transition: width 0.2s ease;
+}
+
+.hoverZoneExpanded {
+    width: 200px;
+}
+
+.hoverZone collapsed {
+    width: 50px;
+}
+
+.timelinePanel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 200px;
+    background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.95) 60%);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 16px 20px 16px 40px;
+    border-right: 3px solid var(--text-muted);
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Hide scrollbar for Chrome/Safari */
+.timelinePanel::-webkit-scrollbar {
+    display: none;
+}
+
+/* Dark mode gradient support */
+:global([data-theme='dark']) .timelinePanel {
+    background: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.95) 60%);
+}
+
+.timelinePanelVisible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.yearGroup {
+    margin-bottom: 12px;
+    text-align: right;
+}
+
+.yearHeader {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text-primary);
+    padding: 6px 0;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.yearHeader:hover {
+    color: hsl(220, 90%, 56%);
+}
+
+.yearLine {
+    width: 24px;
+    height: 1px;
+    background-color: var(--text-muted);
+}
+
+.monthList {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
+.monthItem {
+    position: relative;
+    cursor: pointer;
+    padding: 2px;
+}
+
+.monthDot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: var(--text-muted);
+    transition: all 0.15s ease;
+}
+
+.monthItem:hover .monthDot {
+    background-color: hsl(220, 90%, 56%);
+    transform: scale(1.5);
+}
+
+.monthTooltip {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 4px 10px;
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.monthItem:hover .monthTooltip {
+    opacity: 1;
+}
+
+/* Scroll Thumb */
+.scrollThumb {
+    position: absolute;
+    right: 6px;
+    width: 6px;
+    height: 60px;
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+    z-index: 1002;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.scrollThumbDragging {
+    background-color: var(--text-secondary);
+    cursor: grabbing;
+    transition: none;
+}
+
+.scrollThumbIdle {
+    background-color: var(--text-muted);
+    cursor: grab;
+}
+
+.scrollThumbActive {
+    opacity: 0.8;
+}
+
+.scrollThumbInactive {
+    opacity: 0.4;
+}
+
+/* Floating Label */
+.floatingLabel {
+    position: fixed;
+    right: 24px;
+    padding: 8px 14px;
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-primary);
+    pointer-events: none;
+    z-index: 1001;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+    animation: fadeInSlide 0.2s ease-out;
+}

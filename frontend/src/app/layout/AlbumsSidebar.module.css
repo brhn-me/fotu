@@ -1,0 +1,167 @@
+/* AlbumsSidebar.module.css */
+
+.sidebar {
+    height: 100%;
+    border-right: 1px solid var(--border-subtle);
+    background-color: var(--bg-primary);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease;
+}
+
+.sidebarExpanded {
+    width: 320px;
+}
+
+.sidebarCollapsed {
+    width: 280px;
+}
+
+.header {
+    padding: 16px 16px 8px 16px;
+}
+
+.title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.content {
+    flex: 1;
+}
+
+.emptyState {
+    padding: 16px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.virtuoso {
+    height: 100%;
+}
+
+/* Item Containers */
+.yearContainer {
+    padding: 8px 8px 4px 8px;
+}
+
+.monthContainer {
+    padding: 0 8px;
+}
+
+.dateContainer {
+    padding: 0 8px 4px 16px;
+}
+
+/* Buttons */
+.yearButton {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-secondary);
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+.monthButton {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: background-color 0.2s;
+}
+
+.monthButton:hover {
+    background-color: var(--bg-surface);
+}
+
+.dateButton {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.2s;
+}
+
+.dateButton:hover {
+    background-color: var(--bg-surface);
+}
+
+.dateButton.selected {
+    border-color: var(--accent-primary);
+    background-color: rgba(52, 168, 83, 0.12);
+    /* Consider using variable for alpha */
+}
+
+/* Text & Icons */
+.yearText {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.monthText {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.chevron {
+    color: var(--text-secondary);
+    transition: transform 0.15s ease;
+}
+
+.chevronOpen {
+    transform: rotate(180deg);
+}
+
+.thumbnailContainer {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background-color: var(--bg-placeholder);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.dateInfo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.dateText {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.countText {
+    font-size: 11px;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
