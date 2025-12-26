@@ -11,6 +11,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import styles from "./Jobs.module.css";
 import shared from "../../styles/shared.module.css";
+import { Button } from "../../components/ui/Button";
+import { Card, CardHeader, CardBody } from "../../components/ui/Card";
 
 export interface Job {
     id: string;
@@ -23,7 +25,7 @@ export interface Job {
     completed: number;
     failed: number;
     errors: number;
-    concurrency?: number; // Added concurrency
+    concurrency?: number;
 }
 
 export function JobsPage() {
@@ -40,19 +42,18 @@ export function JobsPage() {
                     </div>
 
                     <div className={shared.pageHeaderActions}>
-                        <button
+                        <Button
                             onClick={() => navigate("/jobs/concurrency")}
-                            className={shared.btn}
                             style={{
                                 backgroundColor: "var(--bg-surface)",
                                 border: "1px solid var(--border-subtle)",
                                 color: "var(--text-secondary)",
                                 height: "fit-content"
                             }}
+                            icon={<Settings size={16} style={{ marginRight: 8 }} />}
                         >
-                            <Settings size={16} />
                             Concurrency
-                        </button>
+                        </Button>
                     </div>
                 </header>
 
@@ -85,12 +86,11 @@ function JobCard({
 }) {
     const progress = job.total > 0 ? (job.completed / job.total) * 100 : 0;
     const Icon = job.icon;
-    const concurrency = job.concurrency || 2; // Default mock concurrency
+    const concurrency = job.concurrency || 2;
 
     return (
-        <div className={shared.card}>
-            {/* Header */}
-            <div className={shared.cardHeader}>
+        <Card>
+            <CardHeader>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: "16px", flex: 1 }}>
                     <div
                         style={{
@@ -132,35 +132,32 @@ function JobCard({
 
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     {job.status !== "completed" && (
-                        <button
+                        <Button
                             onClick={onToggle}
                             title={job.status === "running" ? "Pause" : "Resume"}
-                            className={shared.btn}
                             style={{ padding: 6, color: "var(--text-secondary)" }}
                             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-secondary)")}
                             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                         >
                             {job.status === "running" ? <Pause size={18} /> : <Play size={18} fill="currentColor" />}
-                        </button>
+                        </Button>
                     )}
 
                     {job.status === "completed" && (
-                        <button
+                        <Button
                             onClick={onRestart}
                             title="Restart"
-                            className={shared.btn}
                             style={{ padding: 6, color: "var(--accent-primary)" }}
                             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-secondary)")}
                             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                         >
                             <RotateCcw size={18} />
-                        </button>
+                        </Button>
                     )}
                 </div>
-            </div>
+            </CardHeader>
 
-            {/* Body */}
-            <div className={shared.cardBody}>
+            <CardBody>
                 <div className={styles.progressContainer}>
                     <div className={styles.progressBarTrack}>
                         <div
@@ -191,8 +188,8 @@ function JobCard({
                         {Math.round(progress)}%
                     </span>
                 </div>
-            </div>
-        </div>
+            </CardBody>
+        </Card>
     );
 }
 

@@ -1,5 +1,5 @@
 import type React from "react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
     ClipboardList,
     AlertTriangle,
@@ -18,51 +18,11 @@ import { useJobs } from "../../context/JobContext";
 import { useParams, Link } from "react-router-dom";
 import styles from "./Jobs.module.css";
 import shared from "../../styles/shared.module.css";
+import { Button } from "../../components/ui/Button";
+import { Card, CardHeader } from "../../components/ui/Card";
+import { useJobDetails, JobLog, JobItem } from "../../hooks/useJobDetails";
 
 type TabKey = "queue" | "processing" | "done" | "failed" | "errors" | "logs";
-
-type LogLevel = "info" | "warn" | "error";
-type JobLog = { id: string; ts: string; level: LogLevel; message: string };
-
-type JobItem = {
-    id: string;
-    label: string;
-    ref?: string;
-    updatedAt: string;
-};
-
-// ... utility functions
-function clamp(n: number, min: number, max: number): number {
-    return Math.max(min, Math.min(max, n));
-}
-
-function makeItems(prefix: string, count: number): JobItem[] {
-    const items: JobItem[] = [];
-    const base = Date.now();
-    for (let i = 0; i < count; i++) {
-        const t = new Date(base - i * 45_000).toISOString();
-        items.push({
-            id: `${prefix}-${i + 1}`,
-            label: `${prefix.toLowerCase()}_${i + 1}.jpg`,
-            ref: `file://${prefix.toLowerCase()}/${i + 1}`,
-            updatedAt: t,
-        });
-    }
-    return items;
-}
-
-function makeLogs(jobTitle: string): JobLog[] {
-    const ts = (minsAgo: number) => new Date(Date.now() - minsAgo * 60_000).toISOString();
-    const logs: JobLog[] = [
-        { id: "l1", ts: ts(38), level: "info", message: `${jobTitle}: worker started.` },
-        { id: "l2", ts: ts(31), level: "info", message: `${jobTitle}: claimed 50 items from queue.` },
-        { id: "l3", ts: ts(24), level: "warn", message: `${jobTitle}: slow item detected; retry scheduled.` },
-        { id: "l4", ts: ts(14), level: "info", message: `${jobTitle}: processing item queue_12.jpg.` },
-        { id: "l5", ts: ts(7), level: "error", message: `${jobTitle}: failed queue_7.jpg after max retries.` },
-        { id: "l6", ts: ts(2), level: "info", message: `${jobTitle}: progress updated.` },
-    ];
-    return logs.sort((a, b) => (a.ts < b.ts ? 1 : -1));
-}
 
 export function JobDetailsPage() {
     const { id } = useParams<{ id: string }>();
@@ -71,7 +31,10 @@ export function JobDetailsPage() {
     const job = jobs.find(j => j.id === id);
     const [tab, setTab] = useState<TabKey>("queue");
 
-    if (!job) {
+    // Use custom hook for logic
+    const model = useJobDetails(job);
+
+    if (!job || !model) {
         return <div className="p-8 text-center text-gray-500">Job not found</div>;
     }
 
@@ -79,46 +42,13 @@ export function JobDetailsPage() {
     // Mock concurrency
     const concurrency = (job as any).concurrency || 2;
 
-    const model = useMemo(() => {
-        const doneCount = clamp(job.completed, 0, job.total);
-        const failedCount = clamp(job.failed, 0, job.total);
-        const errorCount = clamp(job.errors, 0, job.total);
-
-        const remaining = clamp(job.total - doneCount - failedCount, 0, job.total);
-        const processingCount = job.status === "running" ? clamp(Math.min(5, remaining), 0, 5) : 0;
-        const queuedCount = clamp(remaining - processingCount, 0, job.total);
-
-        // In a real app, these items/logs would come from an API based on `job.id`
-        // Here we mock them using helper functions for demonstration
-        const processing = makeItems("Processing", Math.min(60, processingCount));
-        const queued = makeItems("Queue", Math.min(120, queuedCount));
-        const done = makeItems("Done", Math.min(120, doneCount));
-        const failed = makeItems("Failed", Math.min(120, failedCount));
-        const errors = makeItems("Error", Math.min(120, errorCount));
-        const logs = makeLogs(job.title);
-
-        return {
-            queuedCount,
-            processingCount,
-            doneCount,
-            failedCount,
-            errorCount,
-            queued,
-            processing,
-            done,
-            failed,
-            errors,
-            logs,
-        };
-    }, [job]);
-
     const Icon = job.icon;
 
     return (
         <div className={shared.pageContainer}>
             <div className={shared.pageCentered} style={{ maxWidth: 1000 }}>
                 {/* Header */}
-                <div className={styles.detailsHeader}>
+                <Card className={styles.detailsHeader}>
                     <div style={{ flex: 1 }}>
                         {/* Breadcrumb Row */}
                         <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
@@ -133,34 +63,37 @@ export function JobDetailsPage() {
                                 </span>
                             </div>
                             <div style={{ flex: 1 }} />
-                            {/* Action Buttons: Moved to top right */}
+                            {/* Action Buttons */}
                             <div className={styles.detailsActions}>
                                 {job.status === 'running' ? (
-                                    <button
+                                    <Button
                                         onClick={() => toggleJobStatus(job.id)}
-                                        className={`${shared.btn} ${shared.btnDanger}`}
+                                        variant="danger"
+                                        icon={<Square size={16} fill="currentColor" />}
                                     >
-                                        <Square size={16} fill="currentColor" /> Pause
-                                    </button>
+                                        Pause
+                                    </Button>
                                 ) : job.status === 'paused' ? (
-                                    <button
+                                    <Button
                                         onClick={() => toggleJobStatus(job.id)}
-                                        className={`${shared.btn} ${shared.btnPrimary}`}
+                                        variant="primary"
+                                        icon={<Play size={16} fill="currentColor" />}
                                     >
-                                        <Play size={16} fill="currentColor" /> Resume
-                                    </button>
+                                        Resume
+                                    </Button>
                                 ) : (
-                                    <button
+                                    <Button
                                         onClick={() => restartJob(job.id)}
-                                        className={`${shared.btn} ${shared.btnPrimary}`}
+                                        variant="primary"
+                                        icon={<RotateCcw size={16} />}
                                     >
-                                        <RotateCcw size={16} /> Restart
-                                    </button>
+                                        Restart
+                                    </Button>
                                 )}
                             </div>
                         </div>
 
-                        {/* Info Row: Icon, Description, Concurrency */}
+                        {/* Info Row */}
                         <div style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 20 }}>
                             <div style={{
                                 width: 48, height: 48, borderRadius: 12,
@@ -183,7 +116,7 @@ export function JobDetailsPage() {
                             </div>
                         </div>
 
-                        {/* Progress Bar: Bottom of header */}
+                        {/* Progress Bar */}
                         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                             <div className={styles.progressContainer} style={{ flex: 1, marginBottom: 0, height: 8 }}>
                                 <div className={styles.progressBarTrack}>
@@ -204,7 +137,7 @@ export function JobDetailsPage() {
                             </span>
                         </div>
                     </div>
-                </div>
+                </Card>
 
                 {/* Stats Overview */}
                 <div className={styles.statsGrid}>
@@ -257,7 +190,7 @@ export function JobDetailsPage() {
 
 function StatCard({ label, value, icon, color }: { label: string; value: number; icon: React.ReactNode; color: string }) {
     return (
-        <div className={styles.statCard} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <Card className={styles.statCard} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div style={{ color: color, display: "flex", alignItems: "center", gap: 8 }}>
                 <div style={{
                     width: 36, height: 36, borderRadius: 10,
@@ -269,7 +202,7 @@ function StatCard({ label, value, icon, color }: { label: string; value: number;
                 <div className={styles.statLabel}>{label}</div>
             </div>
             <div className={styles.statValue} style={{ marginLeft: 4 }}>{value}</div>
-        </div>
+        </Card>
     );
 }
 

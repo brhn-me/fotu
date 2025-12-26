@@ -1,38 +1,42 @@
-import { Routes, Route, Navigate, useParams, useNavigate } from "react-router-dom";
+import React, { Suspense } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { MainLayout } from "../layout/MainLayout";
-import { GalleryPage } from "../../pages/gallery/GalleryPage";
-import { SourcesPage } from "../../pages/sources/SourcesPage";
-import { MetadataPage } from "../../pages/metadata/MetadataPage";
-import { JobsPage } from "../../pages/jobs/JobsPage";
-import { JobDetailsPage } from "../../pages/jobs/JobDetailsPage";
-import { JobConcurrencyPage } from "../../pages/jobs/JobConcurrencyPage";
-import { SettingsPage } from "../../pages/settings/SettingsPage";
-import { ProfilePage } from "../../pages/profile/ProfilePage";
-import { AccountsPage } from "../../pages/accounts/AccountsPage";
-import { MapPage } from "../../pages/map/MapPage";
-import { useJobs } from "../../context/JobContext";
+
+// Lazy load pages
+const GalleryPage = React.lazy(() => import("../../pages/gallery/GalleryPage").then(module => ({ default: module.GalleryPage })));
+const SourcesPage = React.lazy(() => import("../../pages/sources/SourcesPage").then(module => ({ default: module.SourcesPage })));
+const MetadataPage = React.lazy(() => import("../../pages/metadata/MetadataPage").then(module => ({ default: module.MetadataPage })));
+const JobsPage = React.lazy(() => import("../../pages/jobs/JobsPage").then(module => ({ default: module.JobsPage })));
+const JobDetailsPage = React.lazy(() => import("../../pages/jobs/JobDetailsPage").then(module => ({ default: module.JobDetailsPage })));
+const JobConcurrencyPage = React.lazy(() => import("../../pages/jobs/JobConcurrencyPage").then(module => ({ default: module.JobConcurrencyPage })));
+const SettingsPage = React.lazy(() => import("../../pages/settings/SettingsPage").then(module => ({ default: module.SettingsPage })));
+const ProfilePage = React.lazy(() => import("../../pages/profile/ProfilePage").then(module => ({ default: module.ProfilePage })));
+const AccountsPage = React.lazy(() => import("../../pages/accounts/AccountsPage").then(module => ({ default: module.AccountsPage })));
+const MapPage = React.lazy(() => import("../../pages/map/MapPage").then(module => ({ default: module.MapPage })));
 
 export function AppRoutes() {
     return (
-        <Routes>
-            <Route element={<MainLayout />}>
-                <Route path="/" element={<GalleryPage />} />
-                <Route path="/albums" element={<GalleryPage />} />
-                <Route path="/sources" element={<SourcesPage />} />
-                <Route path="/metadata" element={<MetadataPage />} />
+        <Suspense fallback={<div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}>
+            <Routes>
+                <Route element={<MainLayout />}>
+                    <Route path="/" element={<GalleryPage />} />
+                    <Route path="/albums" element={<GalleryPage />} />
+                    <Route path="/sources" element={<SourcesPage />} />
+                    <Route path="/metadata" element={<MetadataPage />} />
 
-                {/* Jobs Routes */}
-                <Route path="/jobs" element={<JobsPage />} />
-                <Route path="/jobs/concurrency" element={<JobConcurrencyPage />} />
-                <Route path="/jobs/:id" element={<JobDetailsPage />} />
+                    {/* Jobs Routes */}
+                    <Route path="/jobs" element={<JobsPage />} />
+                    <Route path="/jobs/concurrency" element={<JobConcurrencyPage />} />
+                    <Route path="/jobs/:id" element={<JobDetailsPage />} />
 
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/accounts" element={<AccountsPage />} />
-                <Route path="/map" element={<MapPage />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-            </Route>
-        </Routes>
+                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/accounts" element={<AccountsPage />} />
+                    <Route path="/map" element={<MapPage />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Route>
+            </Routes>
+        </Suspense>
     );
 }
 
