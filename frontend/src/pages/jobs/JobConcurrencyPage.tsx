@@ -1,8 +1,7 @@
-import type React from "react";
 import { useState } from "react";
-import { ChevronRight, Settings, Sliders, Cpu, Save } from "lucide-react";
+import { ChevronRight, Settings, Cpu, Save } from "lucide-react";
 import { Link } from "react-router-dom";
-import styles from "./Jobs.module.css";
+import shared from "../../styles/shared.module.css";
 
 // Interface for Job Configuration
 interface JobConfig {
@@ -36,21 +35,21 @@ export function JobConcurrencyPage() {
     };
 
     return (
-        <div className={styles.container}>
-            <div className={styles.centered} style={{ maxWidth: 800 }}>
+        <div className={shared.pageContainer}>
+            <div className={shared.pageCentered} style={{ maxWidth: 800 }}>
                 {/* Header */}
-                <header className={styles.header} style={{ marginBottom: 32 }}>
-                    <div className={styles.headerContent} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <div className={styles.breadcrumb}>
-                            <Link to="/jobs" className={styles.breadcrumbLink}>Jobs</Link>
-                            <ChevronRight size={16} className={styles.breadcrumbSeparator} />
+                <header className={shared.pageHeader} style={{ marginBottom: 32 }}>
+                    <div className={shared.pageHeaderContent} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <div className={shared.breadcrumb}>
+                            <Link to="/jobs" className={shared.breadcrumbLink}>Jobs</Link>
+                            <ChevronRight size={16} className={shared.breadcrumbSeparator} />
                             <span>Concurrency</span>
                         </div>
                     </div>
                 </header>
 
-                <div className={styles.card}>
-                    <div className={styles.cardHeader}>
+                <div className={shared.card}>
+                    <div className={shared.cardHeader}>
                         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                             <div style={{
                                 width: 40, height: 40, borderRadius: 10,
@@ -67,13 +66,13 @@ export function JobConcurrencyPage() {
                         </div>
                         <button
                             onClick={handleSave}
-                            className={`${styles.actionButton} ${styles.primaryButton}`}
+                            className={`${shared.btn} ${shared.btnPrimary}`}
                         >
                             <Save size={16} /> Save Changes
                         </button>
                     </div>
 
-                    <div className={styles.cardBody}>
+                    <div className={shared.cardBody}>
                         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
                             {configs.map(config => (
                                 <div key={config.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid var(--border-subtle)" }}>

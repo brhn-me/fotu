@@ -1,0 +1,228 @@
+/* Shared Layout & UI Components */
+
+/* Page Layout */
+.pageContainer {
+    padding: 24px;
+    height: 100%;
+    overflow-y: auto;
+    background-color: var(--bg-primary);
+    scrollbar-width: thin;
+}
+
+.pageCentered {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.pageHeader {
+    margin-bottom: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.pageHeaderContent {
+    flex: 1;
+}
+
+.pageHeaderActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Typography */
+.pageTitle {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+    letter-spacing: -0.5px;
+}
+
+.pageSubtitle {
+    color: var(--text-secondary);
+    font-size: 15px;
+    margin: 0;
+}
+
+/* Cards */
+.card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.cardHeader {
+    padding: 22px 24px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-surface);
+}
+
+.cardBody {
+    padding: 24px;
+    flex: 1;
+}
+
+/* Buttons */
+.btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-primary);
+}
+
+.btnPrimary {
+    background-color: var(--bg-surface);
+    color: var(--accent-primary);
+    border: 1px solid var(--border-subtle);
+}
+
+.btnPrimary:hover {
+    background-color: var(--bg-secondary);
+}
+
+.btnDanger {
+    background-color: var(--bg-surface);
+    color: var(--status-error);
+    border: 1px solid var(--border-subtle);
+}
+
+.btnDanger:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.btnGhost {
+    background-color: transparent;
+    color: var(--text-secondary);
+}
+
+.btnGhost:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.btnIcon {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+/* Breadcrumbs */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.breadcrumbLink {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.breadcrumbLink:hover {
+    color: var(--text-primary);
+}
+
+.breadcrumbSeparator {
+    color: var(--text-muted);
+}
+
+/* Badge / Tags */
+.badge {
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badgeBlue {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+/* Console / Logs */
+.console {
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.consoleContent {
+    flex: 1;
+    padding: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text-primary);
+    overflow-y: auto;
+}
+
+/* Utilities */
+.flexCol {
+    display: flex;
+    flex-direction: column;
+}
+
+.gap2 {
+    gap: 8px;
+}
+
+.gap4 {
+    gap: 16px;
+}
+
+.itemsCenter {
+    align-items: center;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animateSpin {
+    animation: spin 1.4s linear infinite;
+}

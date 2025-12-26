@@ -1,26 +1,28 @@
 import type React from "react";
+import { useJobs } from "../../context/JobContext";
 import {
     Play,
     Pause,
-    Loader2,
     RotateCcw,
     Settings,
+    Loader2,
     Cpu,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useJobs } from "../../context/JobContext";
 import styles from "./Jobs.module.css";
+import shared from "../../styles/shared.module.css";
 
 export interface Job {
     id: string;
     title: string;
     description: string;
+    status: "running" | "paused" | "completed";
+    progress: number;
     icon: React.ElementType;
     total: number;
     completed: number;
     failed: number;
     errors: number;
-    status: "running" | "paused" | "completed";
     concurrency?: number; // Added concurrency
 }
 
@@ -29,18 +31,18 @@ export function JobsPage() {
     const navigate = useNavigate();
 
     return (
-        <div className={styles.container}>
-            <div className={styles.centered}>
-                <header className={styles.header}>
-                    <div className={styles.headerContent}>
-                        <h1 className={styles.title}>Jobs</h1>
-                        <p className={styles.subtitle}>Monitor and manage indexing and processing tasks.</p>
+        <div className={shared.pageContainer}>
+            <div className={shared.pageCentered}>
+                <header className={shared.pageHeader}>
+                    <div className={shared.pageHeaderContent}>
+                        <h1 className={shared.pageTitle}>Jobs</h1>
+                        <p className={shared.pageSubtitle}>Monitor and manage indexing and processing tasks.</p>
                     </div>
 
-                    <div className={styles.headerActions}>
+                    <div className={shared.pageHeaderActions}>
                         <button
                             onClick={() => navigate("/jobs/concurrency")}
-                            className={styles.actionButton}
+                            className={shared.btn}
                             style={{
                                 backgroundColor: "var(--bg-surface)",
                                 border: "1px solid var(--border-subtle)",
@@ -86,9 +88,9 @@ function JobCard({
     const concurrency = job.concurrency || 2; // Default mock concurrency
 
     return (
-        <div className={styles.card}>
+        <div className={shared.card}>
             {/* Header */}
-            <div className={styles.cardHeader}>
+            <div className={shared.cardHeader}>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: "16px", flex: 1 }}>
                     <div
                         style={{
@@ -118,7 +120,7 @@ function JobCard({
                             </button>
 
                             {job.status === "running" ? (
-                                <Loader2 size={14} className={styles.animateSpin} style={{ color: "var(--accent-primary)" }} />
+                                <Loader2 size={14} className={shared.animateSpin} style={{ color: "var(--accent-primary)" }} />
                             ) : null}
                         </div>
 
@@ -133,7 +135,7 @@ function JobCard({
                         <button
                             onClick={onToggle}
                             title={job.status === "running" ? "Pause" : "Resume"}
-                            className={styles.actionButton}
+                            className={shared.btn}
                             style={{ padding: 6, color: "var(--text-secondary)" }}
                             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-secondary)")}
                             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
@@ -146,7 +148,7 @@ function JobCard({
                         <button
                             onClick={onRestart}
                             title="Restart"
-                            className={styles.actionButton}
+                            className={shared.btn}
                             style={{ padding: 6, color: "var(--accent-primary)" }}
                             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-secondary)")}
                             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
@@ -158,7 +160,7 @@ function JobCard({
             </div>
 
             {/* Body */}
-            <div className={styles.cardBody}>
+            <div className={shared.cardBody}>
                 <div className={styles.progressContainer}>
                     <div className={styles.progressBarTrack}>
                         <div

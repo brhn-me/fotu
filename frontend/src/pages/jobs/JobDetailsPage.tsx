@@ -1,25 +1,23 @@
 import type React from "react";
 import { useMemo, useState } from "react";
 import {
-    ArrowLeft,
     ClipboardList,
     AlertTriangle,
     XCircle,
     Cpu,
     CheckCircle2,
-    Pause,
     Play,
-    RotateCcw,
     Loader2,
     TerminalSquare,
     Square,
     ChevronRight,
+    RotateCcw,
 } from "lucide-react";
 import { Virtuoso, TableVirtuoso } from "react-virtuoso";
 import { useJobs } from "../../context/JobContext";
 import { useParams, Link } from "react-router-dom";
-import type { Job } from "./JobsPage";
 import styles from "./Jobs.module.css";
+import shared from "../../styles/shared.module.css";
 
 type TabKey = "queue" | "processing" | "done" | "failed" | "errors" | "logs";
 
@@ -116,31 +114,21 @@ export function JobDetailsPage() {
 
     const Icon = job.icon;
 
-    const getStatusColor = (status: Job['status']) => {
-        switch (status) {
-            case 'completed': return 'bg-green-100 text-green-800';
-            case 'failed': return 'bg-red-100 text-red-800';
-            case 'paused': return 'bg-yellow-100 text-yellow-800';
-            case 'running': return 'bg-blue-100 text-blue-800';
-            default: return 'bg-gray-100 text-gray-800';
-        }
-    };
-
     return (
-        <div className={styles.container}>
-            <div className={styles.centered} style={{ maxWidth: 1000 }}>
+        <div className={shared.pageContainer}>
+            <div className={shared.pageCentered} style={{ maxWidth: 1000 }}>
                 {/* Header */}
                 <div className={styles.detailsHeader}>
                     <div style={{ flex: 1 }}>
                         {/* Breadcrumb Row */}
                         <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
-                            <div className={styles.breadcrumb}>
-                                <Link to="/jobs" className={styles.breadcrumbLink}>Jobs</Link>
-                                <ChevronRight size={16} className={styles.breadcrumbSeparator} />
+                            <div className={shared.breadcrumb}>
+                                <Link to="/jobs" className={shared.breadcrumbLink}>Jobs</Link>
+                                <ChevronRight size={16} className={shared.breadcrumbSeparator} />
                                 <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                     {job.title}
                                     {job.status === "running" && (
-                                        <Loader2 size={16} className={styles.animateSpin} style={{ color: "var(--accent-primary)" }} />
+                                        <Loader2 size={16} className={shared.animateSpin} style={{ color: "var(--accent-primary)" }} />
                                     )}
                                 </span>
                             </div>
@@ -150,21 +138,21 @@ export function JobDetailsPage() {
                                 {job.status === 'running' ? (
                                     <button
                                         onClick={() => toggleJobStatus(job.id)}
-                                        className={`${styles.actionButton} ${styles.dangerButton}`}
+                                        className={`${shared.btn} ${shared.btnDanger}`}
                                     >
                                         <Square size={16} fill="currentColor" /> Pause
                                     </button>
                                 ) : job.status === 'paused' ? (
                                     <button
                                         onClick={() => toggleJobStatus(job.id)}
-                                        className={`${styles.actionButton} ${styles.primaryButton}`}
+                                        className={`${shared.btn} ${shared.btnPrimary}`}
                                     >
                                         <Play size={16} fill="currentColor" /> Resume
                                     </button>
                                 ) : (
                                     <button
                                         onClick={() => restartJob(job.id)}
-                                        className={`${styles.actionButton} ${styles.primaryButton}`}
+                                        className={`${shared.btn} ${shared.btnPrimary}`}
                                     >
                                         <RotateCcw size={16} /> Restart
                                     </button>
@@ -378,8 +366,8 @@ function LogsView({ logs }: { logs: JobLog[] }) {
                         <div key={log.id} className={styles.logRow}>
                             <span className={styles.logTimestamp}>{log.ts.replace("T", " ").slice(0, 23)}</span>
                             <span className={`${styles.logLevel} ${log.level === "error" ? styles.levelError :
-                                    log.level === "warn" ? styles.levelWarn :
-                                        styles.levelInfo
+                                log.level === "warn" ? styles.levelWarn :
+                                    styles.levelInfo
                                 }`}>
                                 {log.level.toUpperCase()}
                             </span>
