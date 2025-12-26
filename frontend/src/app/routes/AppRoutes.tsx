@@ -8,6 +8,7 @@ import { JobDetailsPage } from "../../pages/jobs/JobDetailsPage";
 import { SettingsPage } from "../../pages/settings/SettingsPage";
 import { ProfilePage } from "../../pages/profile/ProfilePage";
 import { AccountsPage } from "../../pages/accounts/AccountsPage";
+import { MapPage } from "../../pages/map/MapPage";
 import { useJobs } from "../../context/JobContext";
 
 function JobDetailsWrapper() {
@@ -40,6 +41,7 @@ export function AppRoutes() {
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/accounts" element={<AccountsPage />} />
+                <Route path="/map" element={<MapPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
         </Routes>

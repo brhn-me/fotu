@@ -13,6 +13,7 @@ const getSidebarView = (path: string) => {
     if (path.startsWith("/sources")) return "sources";
     if (path.startsWith("/metadata")) return "metadata";
     if (path.startsWith("/jobs")) return "jobs";
+    if (path.startsWith("/map")) return "map";
     return "photos";
 };
 
@@ -21,7 +22,7 @@ export function MainLayout() {
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
     const [selectedAlbumSectionId, setSelectedAlbumSectionId] = useState<string | null>(null);
 
-    const { photos, selectedPhotoId, setSelectedPhotoId, updatePhoto, setScrollToGroupId } = usePhotos();
+    const { photos, selectedPhotoId, setSelectedPhotoId, setScrollToGroupId } = usePhotos();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -63,9 +64,7 @@ export function MainLayout() {
 
             {selectedPhotoId && !location.pathname.startsWith("/metadata") && photos.length > 0 && (
                 <Lightbox
-                    photo={photos.find((p) => p.id === selectedPhotoId)!}
                     onClose={() => setSelectedPhotoId(null)}
-                    onUpdatePhoto={updatePhoto}
                 />
             )}
         </div>

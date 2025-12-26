@@ -3,7 +3,7 @@
 import React from "react";
 import { Image, Library, Map, MapPin, Info, Trash2, Cloud, BarChart3, Clock, HardDrive } from "lucide-react";
 
-type AppView = "photos" | "albums" | "sources" | "metadata" | "jobs" | "jobDetails";
+type AppView = "photos" | "albums" | "sources" | "metadata" | "jobs" | "jobDetails" | "map";
 
 interface SidebarProps {
     isOpen: boolean;
@@ -219,10 +219,8 @@ export function Sidebar({ isOpen, view, onNavigate }: SidebarProps) {
                 icon={<Map size={20} />}
                 label="Map"
                 isOpen={isOpen}
-                active={false}
-                onClick={() => {
-                    // placeholder
-                }}
+                active={view === "map"}
+                onClick={() => onNavigate("map")}
             />
 
             <SectionHeader label="Manage" isOpen={isOpen} />
