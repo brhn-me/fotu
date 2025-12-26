@@ -14,6 +14,7 @@ import {
     Loader2,
     TerminalSquare,
 } from "lucide-react";
+import { Virtuoso, TableVirtuoso } from "react-virtuoso";
 import type { Job } from "./JobsPage";
 
 type TabKey = "queue" | "processing" | "done" | "failed" | "errors" | "logs";
@@ -122,69 +123,74 @@ export function JobDetailsPage({
         >
             {/* Header Section */}
             <div style={{
-                padding: "20px 24px",
                 borderBottom: "1px solid var(--border-subtle)",
                 backgroundColor: "var(--bg-surface)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 20
             }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                    <button
-                        onClick={onBack}
-                        style={{
-                            width: 36, height: 36,
-                            borderRadius: 18,
-                            border: "none",
-                            background: "transparent",
-                            color: "var(--text-secondary)",
-                            cursor: "pointer",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            transition: "background 0.2s"
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.backgroundColor = "var(--bg-secondary)"}
-                        onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
-                    >
-                        <ArrowLeft size={20} />
-                    </button>
+                <div style={{
+                    maxWidth: 1000,
+                    margin: "0 auto",
+                    padding: "20px 24px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 20
+                }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                        <button
+                            onClick={onBack}
+                            style={{
+                                width: 36, height: 36,
+                                borderRadius: 18,
+                                border: "none",
+                                background: "transparent",
+                                color: "var(--text-secondary)",
+                                cursor: "pointer",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                transition: "background 0.2s"
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.backgroundColor = "var(--bg-secondary)"}
+                            onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
+                        >
+                            <ArrowLeft size={20} />
+                        </button>
 
-                    <div style={{
-                        width: 48, height: 48,
-                        borderRadius: 12,
-                        backgroundColor: "var(--bg-secondary)",
-                        color: "var(--accent-primary)",
-                        display: "flex", alignItems: "center", justifyContent: "center"
-                    }}>
-                        <Icon size={24} />
+                        <div style={{
+                            width: 48, height: 48,
+                            borderRadius: 12,
+                            backgroundColor: "var(--bg-secondary)",
+                            color: "var(--accent-primary)",
+                            display: "flex", alignItems: "center", justifyContent: "center"
+                        }}>
+                            <Icon size={24} />
+                        </div>
+
+                        <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                <h1 style={{ fontSize: 20, fontWeight: 600, color: "var(--text-primary)", margin: 0 }}>
+                                    {job.title}
+                                </h1>
+                                <StatusBadge status={job.status} />
+                            </div>
+                            <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>
+                                {job.description}
+                            </div>
+                        </div>
                     </div>
 
-                    <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <h1 style={{ fontSize: 20, fontWeight: 600, color: "var(--text-primary)", margin: 0 }}>
-                                {job.title}
-                            </h1>
-                            <StatusBadge status={job.status} />
-                        </div>
-                        <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>
-                            {job.description}
-                        </div>
-                    </div>
-                </div>
-
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    {job.status !== "completed" && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        {job.status !== "completed" && (
+                            <ActionButton
+                                onClick={onPauseResume}
+                                icon={job.status === "running" ? <Pause size={18} /> : <Play size={18} />}
+                                label={job.status === "running" ? "Pause" : "Resume"}
+                            />
+                        )}
                         <ActionButton
-                            onClick={onPauseResume}
-                            icon={job.status === "running" ? <Pause size={18} /> : <Play size={18} />}
-                            label={job.status === "running" ? "Pause" : "Resume"}
+                            onClick={onRestart}
+                            icon={<RotateCcw size={18} />}
+                            label="Restart"
                         />
-                    )}
-                    <ActionButton
-                        onClick={onRestart}
-                        icon={<RotateCcw size={18} />}
-                        label="Restart"
-                    />
+                    </div>
                 </div>
             </div>
 
@@ -195,7 +201,7 @@ export function JobDetailsPage({
                     {/* Stats Overview */}
                     <div style={{
                         display: "grid",
-                        gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 1fr",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
                         gap: 16
                     }}>
                         {/* Progress Card */}
@@ -236,7 +242,7 @@ export function JobDetailsPage({
                         borderRadius: 16,
                         overflow: "hidden",
                         display: "flex", flexDirection: "column",
-                        minHeight: 500
+                        height: 500 // Fixed height for virtualization to work
                     }}>
                         <div style={{
                             padding: "6px 8px",
@@ -249,7 +255,7 @@ export function JobDetailsPage({
                             <TabTrigger active={tab === "done"} onClick={() => setTab("done")} icon={<CheckCircle2 size={14} />} label="Done" count={model.doneCount} />
                             <TabTrigger active={tab === "failed"} onClick={() => setTab("failed")} icon={<XCircle size={14} />} label="Failed" count={model.failedCount} />
                             <TabTrigger active={tab === "errors"} onClick={() => setTab("errors")} icon={<AlertTriangle size={14} />} label="Errors" count={model.errorCount} />
-                            <div style={{ width: 1, background: "var(--border-subtle)", margin: "4px 8px" }} />
+                            <div style={{ flex: 1 }} />
                             <TabTrigger active={tab === "logs"} onClick={() => setTab("logs")} icon={<TerminalSquare size={14} />} label="Logs" count={model.logs.length} />
                         </div>
 
@@ -386,27 +392,30 @@ function ItemsView({ items }: { items: JobItem[] }) {
         );
     }
     return (
-        <div style={{ overflowY: "auto", flex: 1 }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-                <thead style={{ position: "sticky", top: 0, background: "var(--bg-surface)", fontSize: 12, color: "var(--text-muted)", textAlign: "left" }}>
-                    <tr>
-                        <th style={{ padding: "12px 20px", fontWeight: 600 }}>ID</th>
-                        <th style={{ padding: "12px 20px", fontWeight: 600 }}>Filename</th>
-                        <th style={{ padding: "12px 20px", fontWeight: 600 }}>Path</th>
-                        <th style={{ padding: "12px 20px", fontWeight: 600 }}>Updated</th>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+            <TableVirtuoso
+                style={{ height: "100%", width: "100%" }}
+                data={items}
+                fixedHeaderContent={() => (
+                    <tr style={{ background: "var(--bg-surface)", fontSize: 12, color: "var(--text-muted)", textAlign: "left" }}>
+                        <th style={{ padding: "12px 20px", fontWeight: 600, borderBottom: "1px solid var(--border-subtle)" }}>ID</th>
+                        <th style={{ padding: "12px 20px", fontWeight: 600, borderBottom: "1px solid var(--border-subtle)" }}>Filename</th>
+                        <th style={{ padding: "12px 20px", fontWeight: 600, borderBottom: "1px solid var(--border-subtle)" }}>Path</th>
+                        <th style={{ padding: "12px 20px", fontWeight: 600, borderBottom: "1px solid var(--border-subtle)" }}>Updated</th>
                     </tr>
-                </thead>
-                <tbody>
-                    {items.map(item => (
-                        <tr key={item.id} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-                            <td style={{ padding: "12px 20px", color: "var(--text-secondary)", fontFamily: "monospace" }}>{item.id}</td>
-                            <td style={{ padding: "12px 20px", color: "var(--text-primary)", fontWeight: 500 }}>{item.label}</td>
-                            <td style={{ padding: "12px 20px", color: "var(--text-muted)" }}>{item.ref}</td>
-                            <td style={{ padding: "12px 20px", color: "var(--text-muted)", fontFamily: "monospace" }}>{item.updatedAt.slice(11, 19)}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                )}
+                itemContent={(_index, item) => (
+                    <>
+                        <td style={{ padding: "12px 20px", color: "var(--text-secondary)", fontFamily: "monospace", borderBottom: "1px solid var(--border-subtle)" }}>{item.id}</td>
+                        <td style={{ padding: "12px 20px", color: "var(--text-primary)", fontWeight: 500, borderBottom: "1px solid var(--border-subtle)" }}>{item.label}</td>
+                        <td style={{ padding: "12px 20px", color: "var(--text-muted)", borderBottom: "1px solid var(--border-subtle)" }}>{item.ref}</td>
+                        <td style={{ padding: "12px 20px", color: "var(--text-muted)", fontFamily: "monospace", borderBottom: "1px solid var(--border-subtle)" }}>{item.updatedAt.slice(11, 19)}</td>
+                    </>
+                )}
+                components={{
+                    Table: (props) => <table {...props} style={{ ...props.style, width: "100%", borderCollapse: "collapse", fontSize: 13 }} />,
+                }}
+            />
         </div>
     );
 }
@@ -422,28 +431,32 @@ function LogsView({ logs }: { logs: JobLog[] }) {
     return (
         <div style={{
             flex: 1,
-            overflowY: "auto",
-            background: "var(--terminal-bg)",
-            color: "var(--terminal-fg)",
+            background: "var(--terminal-bg, #000)",
+            color: "var(--terminal-fg, #fff)",
             fontFamily: "monospace",
             fontSize: 12,
-            padding: 20
         }}>
-            {logs.map(log => (
-                <div key={log.id} style={{ display: "flex", gap: 12, marginBottom: 8, lineHeight: 1.5 }}>
-                    <span style={{ color: "var(--terminal-muted)", minWidth: 140 }}>{log.ts.replace("T", " ").slice(0, 23)}</span>
-                    <span style={{
-                        fontWeight: 700,
-                        width: 60,
-                        color: log.level === "error" ? "var(--terminal-error)" :
-                            log.level === "warn" ? "var(--terminal-warn)" :
-                                "var(--terminal-info)"
-                    }}>
-                        {log.level.toUpperCase()}
-                    </span>
-                    <span style={{ color: "var(--terminal-fg)" }}>{log.message}</span>
-                </div>
-            ))}
+            <Virtuoso
+                style={{ height: "100%", width: "100%" }}
+                data={logs}
+                initialTopMostItemIndex={logs.length - 1}
+                followOutput="auto"
+                itemContent={(_index, log) => (
+                    <div key={log.id} style={{ display: "flex", gap: 12, padding: "4px 20px", lineHeight: 1.5 }}>
+                        <span style={{ color: "var(--terminal-muted, #888)", minWidth: 140 }}>{log.ts.replace("T", " ").slice(0, 23)}</span>
+                        <span style={{
+                            fontWeight: 700,
+                            width: 60,
+                            color: log.level === "error" ? "var(--terminal-error, #ff4d4d)" :
+                                log.level === "warn" ? "var(--terminal-warn, #ffcc00)" :
+                                    "var(--terminal-info, #4d94ff)"
+                        }}>
+                            {log.level.toUpperCase()}
+                        </span>
+                        <span style={{ color: "var(--terminal-fg, #fff)" }}>{log.message}</span>
+                    </div>
+                )}
+            />
         </div>
     );
 }

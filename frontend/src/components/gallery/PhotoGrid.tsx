@@ -203,25 +203,26 @@ export function PhotoGrid({ photos, onPhotoClick }: PhotoGridProps) {
                                                     opacity: selected ? 1 : 0,
                                                     transition: 'opacity 0.2s',
                                                 }} />
-                                            </div>
-                                            <div
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    toggleSelection(photo.id);
-                                                }}
-                                                style={{
-                                                    position: 'absolute',
-                                                    top: '8px', left: '8px', zIndex: 5,
-                                                    width: '24px', height: '24px', borderRadius: '50%',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    backgroundColor: selected ? '#34A853' : 'rgba(255, 255, 255, 0.3)',
-                                                    color: 'white',
-                                                    opacity: selected ? 1 : 0,
-                                                    transition: 'opacity 0.2s, background-color 0.2s'
-                                                }}
-                                                className="selection-checkbox"
-                                            >
-                                                <Check size={16} strokeWidth={selected ? 4 : 3} />
+                                                <div
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        toggleSelection(photo.id);
+                                                    }}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: '6px', left: '6px', zIndex: 10,
+                                                        width: '18px', height: '18px', borderRadius: '50%',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        backgroundColor: selected ? '#34A853' : 'rgba(255, 255, 255, 0.4)',
+                                                        color: 'white',
+                                                        opacity: selected ? 1 : 0,
+                                                        transition: 'opacity 0.2s, background-color 0.2s, transform 0.2s',
+                                                        transform: selected ? 'scale(1.18)' : 'scale(1)'
+                                                    }}
+                                                    className="selection-checkbox"
+                                                >
+                                                    <Check size={12} strokeWidth={4} />
+                                                </div>
                                             </div>
                                         </div>
                                     );

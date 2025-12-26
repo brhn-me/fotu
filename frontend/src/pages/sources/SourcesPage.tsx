@@ -13,6 +13,8 @@ export type Source = {
     statusMessage?: string;
 };
 
+// ... utility functions remain default ...
+
 function now(): Date {
     return new Date();
 }
@@ -72,18 +74,6 @@ export function SourcesPage(): React.ReactElement {
         );
     };
 
-    const setSourceMode = (id: string, nextMode: SourceMode): void => {
-        setSources((prev) =>
-            prev.map((s) => {
-                if (s.id !== id) return s;
-                return {
-                    ...s,
-                    mode: nextMode,
-                    enabled: nextMode === "watch" ? true : false,
-                };
-            })
-        );
-    };
 
     // UI-only simulated scan (replace with real backend call later)
     const rescan = async (id: string): Promise<void> => {
@@ -109,80 +99,80 @@ export function SourcesPage(): React.ReactElement {
             style={{
                 height: "100%",
                 overflow: "auto",
-                padding: "24px",
+                padding: "40px 24px",
                 scrollbarWidth: "none",
+                backgroundColor: "var(--bg-primary)"
             }}
         >
-            <div style={{ maxWidth: 980, margin: "0 auto" }}>
+            <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", flexDirection: "column", gap: 32 }}>
                 {/* Page header */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                        <div style={{ fontSize: 22, fontWeight: 600, color: "var(--text-primary)" }}>Sources</div>
-                        <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>
-                            Add folders to scan for photos and videos. You can also watch folders for changes.
-                        </div>
-                    </div>
-                </div>
+                <header>
+                    <h1 style={{ fontSize: "28px", fontWeight: 500, color: "var(--text-primary)", marginBottom: "8px" }}>Sources</h1>
+                    <p style={{ color: "var(--text-secondary)", fontSize: "15px" }}>Add folders to scan for photos and videos. You can also watch folders for changes.</p>
+                </header>
 
                 {/* Add source card */}
                 <div
                     style={{
-                        marginTop: 18,
-                        borderRadius: 20,
-                        backgroundColor: "var(--bg-secondary)",
+                        borderRadius: "16px",
+                        backgroundColor: "var(--bg-surface)",
                         border: "1px solid var(--border-subtle)",
-                        padding: 16,
-                        boxShadow: "var(--shadow-sm)",
+                        padding: "24px",
+                        boxShadow: "0 4px 15px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04)",
                     }}
                 >
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
                         <div
                             style={{
-                                width: 36,
-                                height: 36,
+                                width: 40,
+                                height: 40,
                                 borderRadius: 12,
-                                backgroundColor: "var(--bg-primary)",
-                                border: "1px solid var(--border-subtle)",
+                                backgroundColor: "var(--bg-secondary)",
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                color: "var(--text-secondary)",
+                                color: "var(--accent-primary)",
                             }}
                         >
-                            <HardDrive size={18} />
+                            <FolderPlus size={20} />
                         </div>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>Add a folder</div>
+                        <div style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>Add New Source</div>
                     </div>
 
                     <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-                        <input
-                            value={path}
-                            onChange={(e) => setPath(e.target.value)}
-                            placeholder="e.g. /Users/burhan/Pictures or D:\Photos"
-                            style={{
-                                flex: "1 1 420px",
-                                minWidth: 280,
-                                height: 44,
-                                padding: "0 14px",
-                                borderRadius: 14,
-                                border: "1px solid var(--border-subtle)",
-                                backgroundColor: "var(--bg-primary)",
-                                color: "var(--text-primary)",
-                                outline: "none",
-                                fontSize: 14,
-                            }}
-                        />
+                        <div style={{ flex: 1, minWidth: 280, position: "relative" }}>
+                            <input
+                                value={path}
+                                onChange={(e) => setPath(e.target.value)}
+                                placeholder="e.g. /Users/burhan/Pictures"
+                                style={{
+                                    width: "100%",
+                                    height: 48,
+                                    padding: "0 16px",
+                                    borderRadius: 12,
+                                    border: "1px solid var(--border-subtle)",
+                                    backgroundColor: "var(--bg-primary)",
+                                    color: "var(--text-primary)",
+                                    outline: "none",
+                                    fontSize: 15,
+                                    transition: "border-color 0.2s",
+                                }}
+                                onFocus={(e) => e.target.style.borderColor = "var(--accent-primary)"}
+                                onBlur={(e) => e.target.style.borderColor = "var(--border-subtle)"}
+                            />
+                        </div>
 
-                        {/* Mode pills */}
+                        {/* Mode styling update */}
                         <div
                             style={{
                                 display: "flex",
                                 alignItems: "center",
-                                gap: 8,
-                                padding: 6,
-                                borderRadius: 999,
+                                gap: 4,
+                                padding: 4,
+                                borderRadius: 12,
                                 backgroundColor: "var(--bg-primary)",
                                 border: "1px solid var(--border-subtle)",
+                                height: 48
                             }}
                         >
                             <ModePill
@@ -201,38 +191,41 @@ export function SourcesPage(): React.ReactElement {
                             onClick={addSource}
                             disabled={!canAdd}
                             style={{
-                                height: 44,
-                                padding: "0 16px",
-                                borderRadius: 14,
+                                height: 48,
+                                padding: "0 24px",
+                                borderRadius: 12,
                                 border: "none",
-                                backgroundColor: canAdd ? "var(--accent-primary)" : "var(--border-subtle)",
-                                color: "white",
+                                backgroundColor: canAdd ? "var(--accent-primary)" : "var(--bg-secondary)",
+                                color: canAdd ? "white" : "var(--text-muted)",
                                 cursor: canAdd ? "pointer" : "not-allowed",
                                 display: "flex",
                                 alignItems: "center",
-                                gap: 10,
+                                gap: 8,
                                 fontWeight: 600,
-                                fontSize: 14,
+                                fontSize: 15,
+                                transition: "all 0.2s"
                             }}
                         >
                             <FolderPlus size={18} />
-                            Add
+                            Add Folder
                         </button>
                     </div>
 
                     {!isLikelyPath(path) && path.trim().length > 0 && (
-                        <div style={{ marginTop: 10, fontSize: 12, color: "var(--text-secondary)" }}>
-                            Tip: Use an absolute folder path (Linux/macOS: <code>/…</code> or <code>~/…</code>, Windows: <code>C:\…</code>).
+                        <div style={{ marginTop: 12, fontSize: 13, color: "var(--status-warning)", display: "flex", alignItems: "center", gap: 6 }}>
+                            <AlertTriangle size={14} />
+                            <span>Please enter a valid absolute path</span>
                         </div>
                     )}
                 </div>
 
                 {/* Sources list */}
-                <div style={{ marginTop: 16 }}>
+                <div>
+                    <h2 style={{ fontSize: 20, fontWeight: 600, color: "var(--text-primary)", marginBottom: 16 }}>Configured Sources</h2>
                     {sources.length === 0 ? (
                         <EmptyState />
                     ) : (
-                        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
                             {sources.map((s) => (
                                 <SourceRow
                                     key={s.id}
@@ -240,7 +233,6 @@ export function SourcesPage(): React.ReactElement {
                                     onRescan={() => void rescan(s.id)}
                                     onRemove={() => removeSource(s.id)}
                                     onToggleWatch={() => toggleWatchEnabled(s.id)}
-                                    onChangeMode={(m) => setSourceMode(s.id, m)}
                                 />
                             ))}
                         </div>
@@ -269,15 +261,17 @@ function ModePill({
         <button
             onClick={onClick}
             style={{
-                height: 30,
-                padding: "0 12px",
-                borderRadius: 999,
-                border: active ? "1px solid var(--accent-primary)" : "1px solid transparent",
-                backgroundColor: active ? "rgba(52, 168, 83, 0.12)" : "transparent",
+                height: 40,
+                padding: "0 16px",
+                borderRadius: 8,
+                border: "none",
+                backgroundColor: active ? "var(--bg-surface)" : "transparent",
                 color: active ? "var(--text-primary)" : "var(--text-secondary)",
                 cursor: "pointer",
-                fontSize: 13,
-                fontWeight: 600,
+                fontSize: 14,
+                fontWeight: active ? 600 : 500,
+                boxShadow: active ? "0 1px 2px rgba(0,0,0,0.1)" : "none",
+                transition: "all 0.2s"
             }}
         >
             {label}
@@ -298,12 +292,11 @@ function StatusBadge({ status, message }: { status: Source["status"]; message?: 
             style={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 8,
-                padding: "6px 10px",
-                borderRadius: 999,
-                backgroundColor: "var(--bg-secondary)",
-                border: "1px solid var(--border-subtle)",
-                color: "var(--text-secondary)",
+                gap: 6,
+                padding: "4px 10px",
+                borderRadius: 6,
+                backgroundColor: status === "ok" ? "rgba(16, 185, 129, 0.1)" : "var(--bg-secondary)",
+                color: status === "ok" ? "var(--status-success)" : "var(--text-secondary)",
                 fontSize: 12,
                 fontWeight: 600,
             }}
@@ -323,53 +316,51 @@ function SourceRow({
     onRescan,
     onRemove,
     onToggleWatch,
-    onChangeMode,
 }: {
     source: Source;
     onRescan: () => void;
     onRemove: () => void;
     onToggleWatch: () => void;
-    onChangeMode: (m: SourceMode) => void;
 }): React.ReactElement {
     const isWatch = source.mode === "watch";
 
     return (
         <div
             style={{
-                borderRadius: 18,
-                backgroundColor: "var(--bg-primary)",
+                borderRadius: 16,
+                backgroundColor: "var(--bg-surface)",
                 border: "1px solid var(--border-subtle)",
-                padding: 14,
+                padding: 24,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                gap: 14,
+                gap: 20,
+                boxShadow: "0 4px 15px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04)",
             }}
         >
             {/* Left: path + meta */}
-            <div style={{ display: "flex", gap: 12, alignItems: "flex-start", minWidth: 0 }}>
+            <div style={{ display: "flex", gap: 16, alignItems: "flex-start", minWidth: 0 }}>
                 <div
                     style={{
-                        width: 38,
-                        height: 38,
-                        borderRadius: 14,
+                        width: 48,
+                        height: 48,
+                        borderRadius: 12,
                         backgroundColor: "var(--bg-secondary)",
-                        border: "1px solid var(--border-subtle)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        color: "var(--text-secondary)",
+                        color: "var(--accent-primary)",
                         flexShrink: 0,
                     }}
                 >
-                    <HardDrive size={18} />
+                    <HardDrive size={24} />
                 </div>
 
                 <div style={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 6 }}>
                     <div
                         style={{
-                            fontSize: 14,
-                            fontWeight: 700,
+                            fontSize: 16,
+                            fontWeight: 600,
                             color: "var(--text-primary)",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -380,103 +371,68 @@ function SourceRow({
                         {source.path}
                     </div>
 
-                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+                    <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
                         <StatusBadge status={source.status} message={source.statusMessage} />
 
-                        <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
-                            {source.lastScanAt ? `Last scan: ${formatDateTime(source.lastScanAt)}` : "Not scanned yet"}
+                        <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
+                            {source.lastScanAt ? `Scanned ${formatDateTime(source.lastScanAt)}` : "Not scanned yet"}
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Right: controls */}
-            <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-                {/* Mode pills (per-source) */}
-                <div
-                    style={{
-                        display: "flex",
-                        gap: 6,
-                        padding: 6,
-                        borderRadius: 999,
-                        backgroundColor: "var(--bg-secondary)",
-                        border: "1px solid var(--border-subtle)",
-                    }}
-                >
-                    <ModePill label="Watch" active={source.mode === "watch"} onClick={() => onChangeMode("watch")} />
-                    <ModePill label="Scan once" active={source.mode === "scanOnce"} onClick={() => onChangeMode("scanOnce")} />
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+
+                {/* Actions */}
+                <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                        onClick={onToggleWatch}
+                        disabled={!isWatch}
+                        title={isWatch ? (source.enabled ? "Disable watch" : "Enable watch") : "Watch is only available in Watch mode"}
+                        style={{
+                            width: 36, height: 36, borderRadius: 8,
+                            border: "none", background: isWatch && source.enabled ? "var(--bg-secondary)" : "transparent",
+                            color: isWatch && source.enabled ? "var(--accent-primary)" : "var(--text-muted)",
+                            cursor: isWatch ? "pointer" : "not-allowed",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                        }}
+                    >
+                        {source.enabled ? <Eye size={18} /> : <EyeOff size={18} />}
+                    </button>
+
+                    <button
+                        onClick={onRescan}
+                        title="Rescan"
+                        style={{
+                            width: 36, height: 36, borderRadius: 8,
+                            border: "none", background: "transparent",
+                            color: "var(--text-primary)",
+                            cursor: "pointer",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = "var(--bg-secondary)"}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
+                    >
+                        <RefreshCw size={18} />
+                    </button>
+
+                    <button
+                        onClick={onRemove}
+                        title="Remove"
+                        style={{
+                            width: 36, height: 36, borderRadius: 8,
+                            border: "none", background: "transparent",
+                            color: "var(--status-error)",
+                            cursor: "pointer",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = "rgba(239, 68, 68, 0.1)"}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
+                    >
+                        <Trash2 size={18} />
+                    </button>
                 </div>
-
-                {/* Watch enable/disable */}
-                <button
-                    onClick={onToggleWatch}
-                    disabled={!isWatch}
-                    title={isWatch ? (source.enabled ? "Disable watch" : "Enable watch") : "Watch is only available in Watch mode"}
-                    style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 14,
-                        border: "1px solid var(--border-subtle)",
-                        backgroundColor: isWatch ? "var(--bg-secondary)" : "transparent",
-                        color: isWatch ? "var(--text-secondary)" : "var(--border-subtle)",
-                        cursor: isWatch ? "pointer" : "not-allowed",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                    }}
-                    onMouseEnter={(e) => {
-                        if (isWatch) e.currentTarget.style.backgroundColor = "var(--bg-surface)";
-                    }}
-                    onMouseLeave={(e) => {
-                        if (isWatch) e.currentTarget.style.backgroundColor = "var(--bg-secondary)";
-                    }}
-                >
-                    {source.enabled ? <Eye size={18} /> : <EyeOff size={18} />}
-                </button>
-
-                {/* Rescan */}
-                <button
-                    onClick={onRescan}
-                    title="Rescan for changes"
-                    style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 14,
-                        border: "1px solid var(--border-subtle)",
-                        backgroundColor: "var(--bg-secondary)",
-                        color: "var(--text-secondary)",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-surface)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-secondary)")}
-                >
-                    <RefreshCw size={18} />
-                </button>
-
-                {/* Remove */}
-                <button
-                    onClick={onRemove}
-                    title="Remove source"
-                    style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 14,
-                        border: "1px solid var(--border-subtle)",
-                        backgroundColor: "transparent",
-                        color: "var(--text-secondary)",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-surface)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-                >
-                    <Trash2 size={18} />
-                </button>
             </div>
         </div>
     );
@@ -486,35 +442,37 @@ function EmptyState(): React.ReactElement {
     return (
         <div
             style={{
-                marginTop: 14,
-                borderRadius: 20,
-                border: "1px dashed var(--border-subtle)",
-                backgroundColor: "var(--bg-primary)",
-                padding: 22,
-                color: "var(--text-secondary)",
+                borderRadius: 16,
+                border: "2px dashed var(--border-subtle)",
+                backgroundColor: "transparent",
+                padding: 40,
+                color: "var(--text-muted)",
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
-                gap: 14,
+                gap: 16,
+                textAlign: "center"
             }}
         >
             <div
                 style={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: 16,
+                    width: 56,
+                    height: 56,
+                    borderRadius: 20,
                     backgroundColor: "var(--bg-secondary)",
-                    border: "1px solid var(--border-subtle)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    color: "var(--text-secondary)",
+                    marginBottom: 8
                 }}
             >
-                <FolderPlus size={20} />
+                <FolderPlus size={24} />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>No sources yet</div>
-                <div style={{ fontSize: 13 }}>
-                    Add a folder above to scan once or watch for changes.
+            <div>
+                <div style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)", marginBottom: 4 }}>No sources configured</div>
+                <div style={{ fontSize: 14, maxWidth: 300, margin: "0 auto", lineHeight: 1.5 }}>
+                    Add a folder above to start scanning your photo library.
                 </div>
             </div>
         </div>

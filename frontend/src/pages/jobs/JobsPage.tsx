@@ -4,18 +4,10 @@ import {
     Play,
     Pause,
     Loader2,
-    Search,
-    Fingerprint,
-    Scissors,
-    FileText,
-    Monitor,
-    Zap,
-    Video,
-    RefreshCw,
-    FolderTree,
     RotateCcw,
 } from "lucide-react";
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useJobs } from "../../context/JobContext";
 
 export interface Job {
     id: string;
@@ -29,54 +21,30 @@ export interface Job {
     status: "running" | "paused" | "completed";
 }
 
-const INITIAL_JOBS: Job[] = [
-    { id: "1", title: "Scan", icon: Search, total: 1000, completed: 850, failed: 5, errors: 2, status: "running", description: "Scans sources and syncs changes into the database." },
-    { id: "2", title: "Hashing", icon: Fingerprint, total: 1000, completed: 420, failed: 0, errors: 0, status: "running", description: "Computes hashes for dedupe, move detection, and integrity checks." },
-    { id: "3", title: "Thumbnail Generation", icon: Scissors, total: 1000, completed: 150, failed: 12, errors: 4, status: "running", description: "Generates cached thumbnails for fast gallery browsing." },
-    { id: "4", title: "Meta Data Extraction", icon: FileText, total: 1000, completed: 0, failed: 0, errors: 0, status: "paused", description: "Extracts EXIF/IPTC/XMP (date, camera, GPS) for indexing." },
-    { id: "5", title: "Preview Generation", icon: Monitor, total: 1000, completed: 0, failed: 0, errors: 0, status: "paused", description: "Builds web previews for high-quality viewing without originals." },
-    { id: "6", title: "Raw Conversion", icon: Zap, total: 50, completed: 0, failed: 0, errors: 0, status: "paused", description: "Converts RAW to viewable previews using standard profiles." },
-    { id: "7", title: "Video Encoding", icon: Video, total: 20, completed: 5, failed: 1, errors: 0, status: "running", description: "Transcodes to H.264 renditions for smooth playback." },
-    { id: "8", title: "Image Conversion", icon: RefreshCw, total: 300, completed: 300, failed: 0, errors: 0, status: "completed", description: "Converts images to efficient web formats such as WebP." },
-    { id: "9", title: "Organization", icon: FolderTree, total: 500, completed: 450, failed: 2, errors: 1, status: "running", description: "Generates album suggestions and basic categories." },
-];
 
-export function JobsPage({ onOpenJob }: { onOpenJob: (jobId: string) => void }) {
-    const [jobs, setJobs] = useState<Job[]>(INITIAL_JOBS);
-
-    const toggleJobStatus = (id: string) => {
-        setJobs((prev) =>
-            prev.map((job) => {
-                if (job.id !== id) return job;
-                if (job.status === "completed") return job;
-                return { ...job, status: job.status === "running" ? "paused" : "running" };
-            })
-        );
-    };
-
-    const restartJob = (id: string) => {
-        setJobs((prev) =>
-            prev.map((job) => {
-                if (job.id !== id) return job;
-                return { ...job, completed: 0, failed: 0, errors: 0, status: "running" };
-            })
-        );
-    };
+export function JobsPage() {
+    const { jobs, toggleJobStatus, restartJob } = useJobs();
+    const navigate = useNavigate();
 
     return (
         <div style={{ padding: "40px 24px", height: "100%", overflowY: "auto", backgroundColor: "var(--bg-primary)", scrollbarWidth: "none" }}>
-            <div style={{ maxWidth: "720px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "32px" }}>
+            <div style={{ maxWidth: "1000px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "32px" }}>
                 <header>
                     <h1 style={{ fontSize: "28px", fontWeight: 500, color: "var(--text-primary)", marginBottom: "8px" }}>Background Jobs</h1>
                     <p style={{ color: "var(--text-secondary)", fontSize: "15px" }}>Monitor and manage indexing and processing tasks.</p>
                 </header>
 
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(400px, 1fr))",
+                    gap: "24px",
+                    alignItems: "start"
+                }}>
                     {jobs.map((job) => (
                         <JobCard
                             key={job.id}
                             job={job}
-                            onOpen={() => onOpenJob(job.id)}
+                            onOpen={() => navigate(`/jobs/${job.id}`)}
                             onToggle={() => toggleJobStatus(job.id)}
                             onRestart={() => restartJob(job.id)}
                         />

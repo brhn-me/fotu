@@ -37,6 +37,13 @@
 
   --bg-selection: #303134;
   --bg-placeholder: rgba(255, 255, 255, 0.1);
+
+  --terminal-bg: #0f1014;
+  --terminal-fg: #ffffff;
+  --terminal-muted: #71717a;
+  --terminal-info: #3b82f6;
+  --terminal-warn: #f59e0b;
+  --terminal-error: #ef4444;
 }
 
 :root[data-theme='light'] {
@@ -63,6 +70,13 @@
 
   --bg-selection: #E8F0FE;
   --bg-placeholder: rgba(0, 0, 0, 0.1);
+
+  --terminal-bg: #ffffff;
+  --terminal-fg: #18181b;
+  --terminal-muted: #71717a;
+  --terminal-info: #2563eb;
+  --terminal-warn: #d97706;
+  --terminal-error: #dc2626;
 }
 
 * {
@@ -103,4 +117,18 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
