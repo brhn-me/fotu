@@ -4,23 +4,81 @@ import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
 import formStyles from "../../styles/Form.module.css";
 import cardStyles from "../../components/ui/CollapsibleCard.module.css";
 import { JOBS_DATA } from "../jobs/jobsData";
-
-// Initial concurrency config based on available jobs
-const INITIAL_CONFIG = JOBS_DATA.map(job => ({
-    id: job.id,
-    name: job.title,
-    concurrency: 2, // Default
-    description: job.description
-}));
+import { useSettings } from "../../context/SettingsContext";
 
 export function JobsSettings() {
-    const [configs, setConfigs] = useState(INITIAL_CONFIG);
-    const [isDirty, setIsDirty] = useState(false);
+    const { settings, updateSettings } = useSettings();
+    const [configs, setConfigs] = useState<any[]>([]);
 
+    // Initialize configs from settings or defaults
     useEffect(() => {
-        const hasChanges = JSON.stringify(configs) !== JSON.stringify(INITIAL_CONFIG);
-        setIsDirty(hasChanges);
-    }, [configs]);
+        let savedConfigs = [];
+        try {
+            savedConfigs = JSON.parse(settings.jobsConcurrency || '[]');
+        } catch (e) {
+            console.error("Failed to parse jobs config", e);
+        }
+
+        // Merge saved configs with JOBS_DATA to ensure all jobs exist
+        const merged = JOBS_DATA.map(job => {
+            const saved = savedConfigs.find((s: any) => s.id === job.id);
+            return {
+                id: job.id,
+                name: job.title,
+                concurrency: saved ? saved.concurrency : 2, // Default
+                description: job.description
+            };
+        });
+
+        setConfigs(merged);
+    }, [settings.jobsConcurrency]);
+
+    const isDirty = (() => {
+        try {
+            const currentSaved = JSON.parse(settings.jobsConcurrency || '[]');
+            // Simple check: if length differs or any concurrency differs
+            // Actually, comparing current `configs` with `settings.jobsConcurrency` logic is tricky
+            // Let's just create the "would be saved" string and compare.
+            const serialized = JSON.stringify(configs.map(c => ({ id: c.id, concurrency: c.concurrency })));
+            // We need to compare this serialized version with the one in settings, BUT
+            // settings might be empty/default. 
+            // Better: Compare with the state we loaded initially? No, we need to compare with "server state".
+
+            // To be precise:
+            // 1. Get what's effectively in settings now (or implied defaults)
+            // 2. Compare.
+
+            // Simplified: If the user changes locally, enable save.
+            // But we need to correctly detect "clean" state.
+
+            // Let's rely on JSON string comparison of the *subset* of data we actually save.
+            const currentlySavedSubset = JSON.stringify(currentSaved.map((s: any) => ({ id: s.id, concurrency: s.concurrency })).sort((a: any, b: any) => a.id.localeCompare(b.id)));
+            const newSubset = JSON.stringify(configs.map(c => ({ id: c.id, concurrency: c.concurrency })).sort((a: any, b: any) => a.id.localeCompare(b.id)));
+
+            // If settings was empty/default "[]", and we have defaults "2", then "dirty" might be true if we consider "we want to save defaults".
+            // But usually dirty means "user changed from what's in DB".
+            // If DB is empty, user sees 2. User didn't change 2. So it should not be dirty.
+            // Problem is `currentSaved` comes from DB. If DB is empty `[]`, but UI shows `2`, then `newSubset` is not empty.
+            // So it "looks" dirty.
+            // We should treat empty DB as "synced with defaults". 
+            // So `startingPoint` is NOT just `settings`, but `settings merged with defaults`.
+
+            // Re-derive "server effective state"
+            const serverEffective = JOBS_DATA.map(job => {
+                const saved = currentSaved.find((s: any) => s.id === job.id);
+                return { id: job.id, concurrency: saved ? saved.concurrency : 2 };
+            });
+            const serverEffectiveJson = JSON.stringify(serverEffective);
+
+            const currentEffective = configs.map(c => ({ id: c.id, concurrency: c.concurrency }));
+            const currentEffectiveJson = JSON.stringify(currentEffective);
+
+            return serverEffectiveJson !== currentEffectiveJson;
+
+        } catch (e) {
+            return false;
+        }
+    })();
 
     const handleConcurrencyChange = (id: string, value: number) => {
         setConfigs(prev => prev.map(c =>
@@ -29,9 +87,8 @@ export function JobsSettings() {
     };
 
     const handleSave = () => {
-        console.log("Saving job configs:", configs);
-        // Simulate save
-        setIsDirty(false);
+        const toSave = configs.map(c => ({ id: c.id, concurrency: c.concurrency }));
+        updateSettings({ jobsConcurrency: JSON.stringify(toSave) });
     };
 
     return (

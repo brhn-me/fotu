@@ -18,10 +18,8 @@
     padding: 10px 14px;
     font-size: 14px;
     border: 1px solid transparent;
-    /* Cleaner initial border */
     border-radius: 8px;
     background-color: var(--bg-secondary);
-    /* Added shade */
     color: var(--text-primary);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     outline: none;
@@ -37,9 +35,9 @@
 .input:focus,
 .select:focus {
     background-color: var(--bg-surface);
-    /* White/lighter on focus */
     border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(52, 168, 83, 0.1);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    /* Blue glow instead of green hardcoded */
 }
 
 .select {
@@ -59,7 +57,6 @@
     border: 1px solid transparent;
     border-radius: 8px;
     background-color: var(--bg-secondary);
-    /* Added shade */
     transition: all 0.2s;
 }
 

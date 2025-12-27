@@ -43,8 +43,9 @@ app.get('/health', (req, res) => {
 })
 
 // TODO: Import and use routes
+import settingsRouter from './api/settings'
+app.use('/api/settings', settingsRouter)
 // import sourcesRouter from './api/sources'
-// app.use('/api/sources', sourcesRouter)
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`)

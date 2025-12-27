@@ -3,24 +3,29 @@ import { Image, Video, Save } from "lucide-react";
 import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
 import formStyles from "../../styles/Form.module.css";
 import cardStyles from "../../components/ui/CollapsibleCard.module.css";
-
-const DEFAULT_IMAGE_ENC = "webp";
-const DEFAULT_VIDEO_ENC = "h264";
+import { useSettings } from "../../context/SettingsContext";
 
 export function EncodingSettings() {
-    const [imageEnc, setImageEnc] = useState(DEFAULT_IMAGE_ENC);
-    const [videoEnc, setVideoEnc] = useState(DEFAULT_VIDEO_ENC);
+    const { settings, updateSettings } = useSettings();
 
-    const [imageDirty, setImageDirty] = useState(false);
-    const [videoDirty, setVideoDirty] = useState(false);
-
-    useEffect(() => {
-        setImageDirty(imageEnc !== DEFAULT_IMAGE_ENC);
-    }, [imageEnc]);
+    const [imageEnc, setImageEnc] = useState(settings.imageEncoder);
+    const [videoEnc, setVideoEnc] = useState(settings.videoEncoder);
 
     useEffect(() => {
-        setVideoDirty(videoEnc !== DEFAULT_VIDEO_ENC);
-    }, [videoEnc]);
+        setImageEnc(settings.imageEncoder);
+        setVideoEnc(settings.videoEncoder);
+    }, [settings]);
+
+    const imageDirty = imageEnc !== settings.imageEncoder;
+    const videoDirty = videoEnc !== settings.videoEncoder;
+
+    const handleSaveImage = () => {
+        updateSettings({ imageEncoder: imageEnc });
+    };
+
+    const handleSaveVideo = () => {
+        updateSettings({ videoEncoder: videoEnc });
+    };
 
     return (
         <div style={{ padding: "40px", maxWidth: "800px", margin: "0 auto" }}>
@@ -46,7 +51,11 @@ export function EncodingSettings() {
                     </div>
 
                     <div className={cardStyles.footer}>
-                        <button className={formStyles.saveButton} disabled={!imageDirty}>
+                        <button
+                            className={formStyles.saveButton}
+                            disabled={!imageDirty}
+                            onClick={handleSaveImage}
+                        >
                             <Save size={16} /> Save Changes
                         </button>
                     </div>
@@ -73,7 +82,11 @@ export function EncodingSettings() {
                     </div>
 
                     <div className={cardStyles.footer}>
-                        <button className={formStyles.saveButton} disabled={!videoDirty}>
+                        <button
+                            className={formStyles.saveButton}
+                            disabled={!videoDirty}
+                            onClick={handleSaveVideo}
+                        >
                             <Save size={16} /> Save Changes
                         </button>
                     </div>

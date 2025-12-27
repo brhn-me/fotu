@@ -8,10 +8,9 @@ datasource db {
 }
 
 model Settings {
-  id             String   @id @default(uuid())
-  key            String   @unique
-  value          String
-  updatedAt      DateTime @updatedAt
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
 }
 
 model Source {
