@@ -17,6 +17,7 @@ const getSidebarView = (path: string) => {
     if (path.startsWith("/metadata")) return "metadata";
     if (path.startsWith("/jobs")) return "jobs";
     if (path.startsWith("/map")) return "map";
+    if (path.startsWith("/files")) return "files";
     return "photos";
 };
 

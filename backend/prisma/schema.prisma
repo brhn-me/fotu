@@ -16,6 +16,9 @@ model Settings {
 model Source {
   id        String   @id @default(uuid())
   path      String   @unique
+  mode      String   @default("watch") // scanOnce, watch
+  enabled   Boolean  @default(true)
+  status    String   @default("IDLE") // IDLE, SCANNING, ERROR
   scannedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

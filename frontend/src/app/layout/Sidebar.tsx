@@ -1,10 +1,10 @@
 // src/components/Sidebar.tsx
 
 import React from "react";
-import { Image, Library, Map, MapPin, Info, Trash2, Cloud, BarChart3, Clock, HardDrive, Activity } from "lucide-react";
+import { Image, Library, Map, MapPin, Info, Trash2, Cloud, BarChart3, Clock, HardDrive, Activity, Files } from "lucide-react";
 import styles from "./Sidebar.module.css";
 
-type AppView = "photos" | "albums" | "sources" | "metadata" | "jobs" | "jobDetails" | "map";
+type AppView = "photos" | "albums" | "sources" | "metadata" | "jobs" | "jobDetails" | "map" | "files";
 
 interface SidebarProps {
     isOpen: boolean;
@@ -135,6 +135,14 @@ export function Sidebar({ isOpen, view, onNavigate }: SidebarProps) {
             <NavItem icon={<Image size={20} />} label="Photos" isOpen={isOpen} active={isPhotosActive} onClick={() => onNavigate("photos")} />
 
             <NavItem icon={<Library size={20} />} label="Albums" isOpen={isOpen} active={isAlbumsActive} onClick={() => onNavigate("albums")} />
+
+            <NavItem
+                icon={<Files size={20} />}
+                label="Files"
+                isOpen={isOpen}
+                active={view === "files"}
+                onClick={() => onNavigate("files")}
+            />
 
             <NavItem
                 icon={<Map size={20} />}

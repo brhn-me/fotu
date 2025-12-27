@@ -1,0 +1,91 @@
+.pageContainer {
+    padding: 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.pageTitle {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 32px;
+    color: var(--text-primary);
+}
+
+.explorerContainer {
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+    overflow: hidden;
+}
+
+.headerRow {
+    display: grid;
+    grid-template-columns: 40px 1fr 120px 180px;
+    padding: 12px 20px;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.fileRow {
+    display: grid;
+    grid-template-columns: 40px 1fr 120px 180px;
+    padding: 14px 20px;
+    align-items: center;
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+.fileRow:last-child {
+    border-bottom: none;
+}
+
+.fileRow:hover {
+    background-color: var(--bg-hover);
+}
+
+.iconWrapper {
+    display: flex;
+    align-items: center;
+    color: var(--accent-primary);
+}
+
+.folderIcon {
+    color: #FFB020;
+}
+
+.fileName {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.fileSize,
+.fileDate {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.breadcrumbItem {
+    cursor: pointer;
+}
+
+.breadcrumbItem:hover {
+    color: var(--text-primary);
+}
+
+.breadcrumbSeparator {
+    opacity: 0.5;
+}

@@ -19,6 +19,7 @@ const RuntimesSettings = React.lazy(() => import("../../pages/settings/RuntimesS
 const ProfilePage = React.lazy(() => import("../../pages/profile/ProfilePage").then(module => ({ default: module.ProfilePage })));
 const AccountsPage = React.lazy(() => import("../../pages/accounts/AccountsPage").then(module => ({ default: module.AccountsPage })));
 const MapPage = React.lazy(() => import("../../pages/map/MapPage").then(module => ({ default: module.MapPage })));
+const FilesPage = React.lazy(() => import("../../pages/files/FilesPage").then(module => ({ default: module.FilesPage })));
 
 export function AppRoutes() {
     return (
@@ -34,6 +35,7 @@ export function AppRoutes() {
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/accounts" element={<AccountsPage />} />
                     <Route path="/map" element={<MapPage />} />
+                    <Route path="/files" element={<FilesPage />} />
 
                     {/* Settings Routes */}
                     <Route path="/settings" element={<Navigate to="/settings/images" replace />} />
