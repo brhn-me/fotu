@@ -48,7 +48,7 @@ export function JobsPage() {
 
                     <div className={shared.pageHeaderActions} style={{ display: "flex", alignItems: "center" }}>
                         <button
-                            onClick={() => navigate("/jobs/concurrency")}
+                            onClick={() => navigate("/settings/jobs")}
                             title="Concurrency Settings"
                             style={{
                                 background: "transparent",

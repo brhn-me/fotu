@@ -7,7 +7,6 @@ const GalleryPage = React.lazy(() => import("../../pages/gallery/GalleryPage").t
 const SourcesPage = React.lazy(() => import("../../pages/sources/SourcesPage").then(module => ({ default: module.SourcesPage })));
 const MetadataPage = React.lazy(() => import("../../pages/metadata/MetadataPage").then(module => ({ default: module.MetadataPage })));
 const JobsPage = React.lazy(() => import("../../pages/jobs/JobsPage").then(module => ({ default: module.JobsPage })));
-const JobConcurrencyPage = React.lazy(() => import("../../pages/jobs/JobConcurrencyPage").then(module => ({ default: module.JobConcurrencyPage })));
 // Lazy Load Settings Pages
 const ImagesSettings = React.lazy(() => import("../../pages/settings/ImagesSettings").then(module => ({ default: module.ImagesSettings })));
 const VideosSettings = React.lazy(() => import("../../pages/settings/VideosSettings").then(module => ({ default: module.VideosSettings })));
@@ -32,7 +31,6 @@ export function AppRoutes() {
                     <Route path="/sources" element={<SourcesPage />} />
                     <Route path="/metadata" element={<MetadataPage />} />
                     <Route path="/jobs" element={<JobsPage />} />
-                    <Route path="/jobs/concurrency" element={<JobConcurrencyPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/accounts" element={<AccountsPage />} />
                     <Route path="/map" element={<MapPage />} />

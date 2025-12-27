@@ -2,12 +2,21 @@ import prisma from '../db/client';
 import { DEFAULT_SETTINGS } from '../config/defaultSettings';
 
 export interface InternalSettings {
-    // Typed interface for internal backend usage
+    core: {
+        albumStructure: string;
+    };
+    jobs: Record<string, number>;
+    raw: {
+        formats: string[];
+        darktableEnabled: boolean;
+        sidecarEnabled: boolean;
+    };
     video: {
         autoplay: boolean;
         defaultVolume: number;
         previewDuration: number;
         resolution: string;
+        encoder: string;
     };
     runtimes: {
         exiftool: string;
@@ -20,6 +29,9 @@ export interface InternalSettings {
         previewQuality: number;
         thumbnailResolution: string;
         previewResolution: string;
+        thumbnailFormat: string;
+        previewFormat: string;
+        encoder: string;
     };
 }
 
@@ -80,12 +92,41 @@ class SettingsService {
     async getTyped(): Promise<InternalSettings> {
         const all = await this.getAll();
 
+        // Parse Jobs Config
+        let jobsConfig: Record<string, number> = {};
+        try {
+            const parsed = JSON.parse(all.jobsConcurrency || '[]');
+            if (Array.isArray(parsed)) {
+                parsed.forEach((p: any) => {
+                    if (p.id && typeof p.concurrency === 'number') {
+                        jobsConfig[p.id] = p.concurrency;
+                    }
+                });
+            }
+        } catch { /* ignore */ }
+
+        // Parse Raw Formats
+        let rawFormats: string[] = [];
+        try {
+            rawFormats = JSON.parse(all.rawFormats || '[]');
+        } catch { /* ignore */ }
+
         return {
+            core: {
+                albumStructure: all.albumStructure || '{yyyy}/{mm}'
+            },
+            jobs: jobsConfig,
+            raw: {
+                formats: rawFormats,
+                darktableEnabled: all.darktableEnabled === 'true',
+                sidecarEnabled: all.useSidecar === 'true'
+            },
             video: {
                 autoplay: all.videoAutoplay === 'true',
                 defaultVolume: Number(all.videoDefaultVolume || 100),
                 previewDuration: Number(all.videoPreviewDuration || 4),
-                resolution: all.videoResolution || '720p'
+                resolution: all.videoResolution || '720p',
+                encoder: all.videoEncoder || 'h264'
             },
             runtimes: {
                 exiftool: all.exiftoolPath || '',
@@ -94,10 +135,13 @@ class SettingsService {
                 darktable: all.darktableCliPath || ''
             },
             images: {
-                thumbnailQuality: Number(all.thumbnailQuality || 80),
-                previewQuality: Number(all.previewQuality || 90),
+                thumbnailQuality: Number(all.thumbnailQuality || 70),
+                previewQuality: Number(all.previewQuality || 80),
                 thumbnailResolution: all.thumbnailResolution || '480p',
-                previewResolution: all.previewResolution || '1080p'
+                previewResolution: all.previewResolution || '1080p',
+                thumbnailFormat: all.thumbnailFormat || 'webp',
+                previewFormat: all.previewFormat || 'webp',
+                encoder: all.imageEncoder || 'webp'
             }
         };
     }
