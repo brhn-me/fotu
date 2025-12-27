@@ -1,0 +1,76 @@
+.card {
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    background-color: var(--bg-surface);
+    overflow: hidden;
+    margin-bottom: 24px;
+    transition: box-shadow 0.2s;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-sm);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+    background-color: transparent;
+    transition: background-color 0.2s;
+}
+
+.header:hover {
+    background-color: var(--bg-secondary);
+}
+
+.titleGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.description {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.chevron {
+    color: var(--text-secondary);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chevronOpen {
+    transform: rotate(180deg);
+}
+
+.content {
+    padding: 0 20px 20px 20px;
+    animation: slideDown 0.2s ease-out;
+}
+
+.contentHidden {
+    display: none;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

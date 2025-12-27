@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { AlbumsSidebar } from "./AlbumsSidebar";
+import { SettingsSidebar } from "./SettingsSidebar";
 import { FilterModal } from "../../components/search/FilterModal";
 import { usePhotos } from "../../context/PhotoContext";
 import { Lightbox } from "../../components/gallery/Lightbox";
@@ -28,22 +29,30 @@ export function MainLayout() {
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Determine if we are in settings section
+    const isSettings = location.pathname.startsWith("/settings");
+
     return (
         <div className={styles.layoutRoot}>
             <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} onFilterClick={() => setIsFilterModalOpen(true)} />
 
             <div className={styles.contentWrapper}>
-                <Sidebar
-                    isOpen={isSidebarOpen}
-                    view={getSidebarView(location.pathname)}
-                    onNavigate={(view) => {
-                        if (view === "photos") navigate("/");
-                        else if (view === "albums") navigate("/albums");
-                        else navigate("/" + view);
-                    }}
-                />
+                {isSettings ? (
+                    <SettingsSidebar />
+                ) : (
+                    <Sidebar
+                        isOpen={isSidebarOpen}
+                        view={getSidebarView(location.pathname)}
+                        onNavigate={(view) => {
+                            if (view === "photos") navigate("/");
+                            else if (view === "albums") navigate("/albums");
+                            else navigate("/" + view);
+                        }}
+                    />
+                )}
 
-                {location.pathname.startsWith("/albums") && (
+                {/* Only show Albums sidebar if NOT in settings and path matches */}
+                {!isSettings && location.pathname.startsWith("/albums") && (
                     <AlbumsSidebar
                         photos={photos}
                         isMainSidebarOpen={isSidebarOpen}

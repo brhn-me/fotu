@@ -10,8 +10,13 @@ import { PrismaClient } from '@prisma/client'
 import dotenv from 'dotenv'
 dotenv.config()
 
+import { config, initializeStorage } from './config'
+
+// Initialize storage directories
+initializeStorage()
+
 const app = express()
-const port = process.env.PORT || 3000
+const port = config.port
 
 // Middleware
 app.use(helmet())

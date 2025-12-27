@@ -8,29 +8,41 @@ const SourcesPage = React.lazy(() => import("../../pages/sources/SourcesPage").t
 const MetadataPage = React.lazy(() => import("../../pages/metadata/MetadataPage").then(module => ({ default: module.MetadataPage })));
 const JobsPage = React.lazy(() => import("../../pages/jobs/JobsPage").then(module => ({ default: module.JobsPage })));
 const JobConcurrencyPage = React.lazy(() => import("../../pages/jobs/JobConcurrencyPage").then(module => ({ default: module.JobConcurrencyPage })));
-const SettingsPage = React.lazy(() => import("../../pages/settings/SettingsPage").then(module => ({ default: module.SettingsPage })));
-const ProfilePage = React.lazy(() => import("../../pages/profile/ProfilePage").then(module => ({ default: module.ProfilePage })));
-const AccountsPage = React.lazy(() => import("../../pages/accounts/AccountsPage").then(module => ({ default: module.AccountsPage })));
-const MapPage = React.lazy(() => import("../../pages/map/MapPage").then(module => ({ default: module.MapPage })));
+// Lazy Load Settings Pages
+const ImagesSettings = React.lazy(() => import("../../pages/settings/ImagesSettings").then(module => ({ default: module.ImagesSettings })));
+const VideosSettings = React.lazy(() => import("../../pages/settings/VideosSettings").then(module => ({ default: module.VideosSettings })));
+const RawSettings = React.lazy(() => import("../../pages/settings/RawSettings").then(module => ({ default: module.RawSettings })));
+const JobsSettings = React.lazy(() => import("../../pages/settings/JobsSettings").then(module => ({ default: module.JobsSettings })));
+const EncodingSettings = React.lazy(() => import("../../pages/settings/EncodingSettings").then(module => ({ default: module.EncodingSettings })));
+const OrganizationSettings = React.lazy(() => import("../../pages/settings/OrganizationSettings").then(module => ({ default: module.OrganizationSettings })));
+
+// ... existing lazy loads
 
 export function AppRoutes() {
     return (
         <Suspense fallback={<div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}>
             <Routes>
                 <Route element={<MainLayout />}>
+                    {/* ... other routes */}
                     <Route path="/" element={<GalleryPage />} />
                     <Route path="/albums" element={<GalleryPage />} />
                     <Route path="/sources" element={<SourcesPage />} />
                     <Route path="/metadata" element={<MetadataPage />} />
-
-                    {/* Jobs Routes */}
                     <Route path="/jobs" element={<JobsPage />} />
                     <Route path="/jobs/concurrency" element={<JobConcurrencyPage />} />
-
-                    <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/accounts" element={<AccountsPage />} />
                     <Route path="/map" element={<MapPage />} />
+
+                    {/* Settings Routes */}
+                    <Route path="/settings" element={<Navigate to="/settings/images" replace />} />
+                    <Route path="/settings/images" element={<ImagesSettings />} />
+                    <Route path="/settings/videos" element={<VideosSettings />} />
+                    <Route path="/settings/raw" element={<RawSettings />} />
+                    <Route path="/settings/jobs" element={<JobsSettings />} />
+                    <Route path="/settings/encoding" element={<EncodingSettings />} />
+                    <Route path="/settings/organization" element={<OrganizationSettings />} />
+
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Route>
             </Routes>
