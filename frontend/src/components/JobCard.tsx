@@ -1,6 +1,7 @@
 import React from "react";
 import { Play, Pause, RotateCcw } from "lucide-react";
-import styles from "../pages/jobs/Jobs.module.css";
+import jobStyles from "../pages/jobs/Jobs.module.css";
+import localStyles from "./JobCard.module.css";
 import { Button } from "./ui/Button";
 import { Card, CardHeader, CardBody } from "./ui/Card";
 import { JobStats } from "./ui/JobStats";
@@ -44,29 +45,17 @@ export function JobCard({
     return (
         <Card className={className || ""}>
             <CardHeader>
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "16px", flex: 1 }}>
-                    <div
-                        style={{
-                            width: "48px",
-                            height: "48px",
-                            borderRadius: "12px",
-                            backgroundColor: "var(--bg-secondary)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            color: "var(--accent-primary)",
-                            flexShrink: 0,
-                        }}
-                    >
+                <div className={localStyles.headerInner}>
+                    <div className={localStyles.iconContainer}>
                         <Icon size={24} />
                     </div>
 
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                        <div className={styles.jobTitle} style={{ cursor: "default", textDecoration: "none" }}>
+                    <div className={localStyles.contentContainer}>
+                        <div className={`${jobStyles.jobTitle} ${localStyles.clickableTitle}`}>
                             {children ? children : job.title}
                         </div>
                         {!children && (
-                            <p className={styles.jobDescription}>
+                            <p className={jobStyles.jobDescription}>
                                 {job.description}
                             </p>
                         )}
@@ -74,15 +63,13 @@ export function JobCard({
                 </div>
 
                 {showActions && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div className={localStyles.actionsContainer}>
                         {job.status !== "completed" ? (
                             onToggle && (
                                 <Button
                                     onClick={onToggle}
                                     title={job.status === "running" ? "Pause" : "Resume"}
-                                    style={{ padding: 6, color: "var(--text-secondary)" }}
-                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-secondary)")}
-                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                                    className={localStyles.actionButton}
                                 >
                                     {job.status === "running" ? <Pause size={18} /> : <Play size={18} fill="currentColor" />}
                                 </Button>
@@ -92,9 +79,7 @@ export function JobCard({
                                 <Button
                                     onClick={onRestart}
                                     title="Restart"
-                                    style={{ padding: 6, color: "var(--text-secondary)" }}
-                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-secondary)")}
-                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                                    className={localStyles.actionButton}
                                 >
                                     <RotateCcw size={18} />
                                 </Button>
@@ -105,14 +90,14 @@ export function JobCard({
             </CardHeader>
 
             <CardBody>
-                <div className={styles.progressContainer}>
+                <div className={jobStyles.progressContainer}>
                     <ProgressBar progress={progress} status={job.status} showPercentage={false} />
                 </div>
 
                 {/* Footer: Stats left, Progress right */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "12px" }}>
+                <div className={localStyles.footer}>
                     <JobStats total={job.total} completed={job.completed} failed={job.failed} />
-                    <span className={styles.progressText}>
+                    <span className={jobStyles.progressText}>
                         {Math.round(progress)}%
                     </span>
                 </div>

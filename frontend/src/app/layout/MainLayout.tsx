@@ -7,6 +7,8 @@ import { FilterModal } from "../../components/search/FilterModal";
 import { usePhotos } from "../../context/PhotoContext";
 import { Lightbox } from "../../components/gallery/Lightbox";
 
+import styles from "./MainLayout.module.css";
+
 // Map Sidebar views
 const getSidebarView = (path: string) => {
     if (path.startsWith("/albums")) return "albums";
@@ -27,10 +29,10 @@ export function MainLayout() {
     const location = useLocation();
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", height: "100vh", width: "100vw", overflow: "hidden", backgroundColor: "var(--bg-primary)" }}>
+        <div className={styles.layoutRoot}>
             <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} onFilterClick={() => setIsFilterModalOpen(true)} />
 
-            <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+            <div className={styles.contentWrapper}>
                 <Sidebar
                     isOpen={isSidebarOpen}
                     view={getSidebarView(location.pathname)}
@@ -53,8 +55,8 @@ export function MainLayout() {
                     />
                 )}
 
-                <main style={{ flex: 1, position: "relative", overflow: "hidden", minWidth: 0 }}>
-                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
+                <main className={styles.mainContent}>
+                    <div className={styles.mainInner}>
                         <Outlet />
                     </div>
                 </main>
