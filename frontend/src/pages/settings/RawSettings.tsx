@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
-import { FileCode, Save } from "lucide-react";
+import { FileCode } from "lucide-react";
 import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
 import formStyles from "../../styles/Form.module.css";
 import { useSettings } from "../../context/SettingsContext";
+import { Switch } from "../../components/ui/Switch";
+import { Checkbox } from "../../components/ui/Checkbox";
+import { SaveButton } from "../../components/ui/SaveButton";
 
 const RAW_FORMATS = ["GPR", "NEF", "CR2", "CR3", "ARW", "RAF", "ORF", "DNG"];
 
@@ -68,93 +71,59 @@ export function RawSettings() {
     const isDarktableDirty = darktableEnabled !== settings.darktableEnabled || useSidecar !== settings.useSidecar;
 
     return (
-        <div style={{ padding: "40px", maxWidth: "800px", margin: "0 auto" }}>
-            <h1 style={{ fontSize: "28px", fontWeight: 700, marginBottom: "32px", color: "var(--text-primary)" }}>Raw Conversion</h1>
+        <div className={formStyles.pageContainer}>
+            <h1 className={formStyles.pageTitle}>Raw Conversion</h1>
 
             <CollapsibleCard
                 title="Supported Formats"
                 description="Select which RAW formats to process and index."
                 icon={<FileCode size={20} />}
             >
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "16px" }}>
+                <div className={formStyles.grid}>
                     {RAW_FORMATS.map(fmt => (
-                        <label key={fmt} className={formStyles.checkboxWrapperRow}>
-                            <input
-                                type="checkbox"
-                                checked={enabledFormats.includes(fmt)}
-                                onChange={() => handleToggleFormat(fmt)}
-                                className={formStyles.checkbox}
-                                style={{ marginTop: "2px" }}
-                            />
-                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                                <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-primary)" }}>{fmt}</span>
-                                <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{FORMAT_DESCRIPTIONS[fmt]}</span>
-                            </div>
-                        </label>
+                        <Checkbox
+                            key={fmt}
+                            label={fmt}
+                            description={FORMAT_DESCRIPTIONS[fmt]}
+                            checked={enabledFormats.includes(fmt)}
+                            onChange={() => handleToggleFormat(fmt)}
+                        />
                     ))}
                 </div>
 
-                <div className={formStyles.cardFooter}>
-                    <button
-                        className={formStyles.saveButton}
-                        disabled={!formatsDirty}
-                        onClick={handleSaveFormats}
-                    >
-                        <Save size={16} /> Save Changes
-                    </button>
-                </div>
+                <SaveButton
+                    onClick={handleSaveFormats}
+                    disabled={!formatsDirty}
+                />
             </CollapsibleCard>
 
-            <div style={{ height: "24px" }} />
+            <div className={formStyles.spacer} />
 
             <CollapsibleCard
                 title="Darktable & Sidecar"
                 description="Configure external raw processing based on Darktable."
                 icon={<FileCode size={20} />}
             >
-                <div className={formStyles.switchRow}>
-                    <div className={formStyles.switchText}>
-                        <div className={formStyles.switchLabel}>Enable Darktable CLI</div>
-                        <div className={formStyles.switchDescription}>Uses local darktable-cli installation for high-quality raw conversion.</div>
-                    </div>
-                    <label>
-                        <input
-                            type="checkbox"
-                            className={formStyles.switchInput}
-                            checked={darktableEnabled}
-                            onChange={(e) => setDarktableEnabled(e.target.checked)}
-                        />
-                        <span className={formStyles.switchToggle}></span>
-                    </label>
-                </div>
+                <Switch
+                    label="Enable Darktable CLI"
+                    description="Uses local darktable-cli installation for high-quality raw conversion."
+                    checked={darktableEnabled}
+                    onChange={setDarktableEnabled}
+                />
 
-                <div style={{ height: "1px", background: "var(--border-subtle)", margin: "8px 0" }} />
+                <div className={formStyles.divider} />
 
-                <div className={formStyles.switchRow}>
-                    <div className={formStyles.switchText}>
-                        <div className={formStyles.switchLabel}>Use Sidecar XMP Profiles</div>
-                        <div className={formStyles.switchDescription}>If a .xmp file exists next to the raw file, use it for processing parameters.</div>
-                    </div>
-                    <label>
-                        <input
-                            type="checkbox"
-                            className={formStyles.switchInput}
-                            checked={useSidecar}
-                            onChange={(e) => setUseSidecar(e.target.checked)}
-                        />
-                        <span className={formStyles.switchToggle}></span>
-                    </label>
-                </div>
+                <Switch
+                    label="Use Sidecar XMP Profiles"
+                    description="If a .xmp file exists next to the raw file, use it for processing parameters."
+                    checked={useSidecar}
+                    onChange={setUseSidecar}
+                />
 
-                <div className={formStyles.cardFooter}>
-                    <button
-                        className={formStyles.saveButton}
-                        disabled={!isDarktableDirty}
-                        onClick={handleSaveDarktable}
-                    >
-                        <Save size={16} /> Save Changes
-                    </button>
-                </div>
+                <SaveButton
+                    onClick={handleSaveDarktable}
+                    disabled={!isDarktableDirty}
+                />
             </CollapsibleCard>
         </div>
     );

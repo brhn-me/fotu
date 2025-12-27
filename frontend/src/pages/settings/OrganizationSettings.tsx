@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { FolderTree, Save } from "lucide-react";
+import { FolderTree } from "lucide-react";
 import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
 import formStyles from "../../styles/Form.module.css";
-import cardStyles from "../../components/ui/CollapsibleCard.module.css";
 import { useSettings } from "../../context/SettingsContext";
+import { SaveButton } from "../../components/ui/SaveButton";
+import { Input } from "../../components/ui/Input";
 
 export function OrganizationSettings() {
     const { settings, updateSettings } = useSettings();
@@ -57,8 +58,8 @@ export function OrganizationSettings() {
     };
 
     return (
-        <div style={{ padding: "40px", maxWidth: "800px", margin: "0 auto" }}>
-            <h1 style={{ fontSize: "28px", fontWeight: 700, marginBottom: "32px", color: "var(--text-primary)" }}>Organization</h1>
+        <div className={formStyles.pageContainer}>
+            <h1 className={formStyles.pageTitle}>Organization</h1>
 
             <CollapsibleCard
                 title="Album Structure"
@@ -66,55 +67,42 @@ export function OrganizationSettings() {
                 icon={<FolderTree size={20} />}
             >
                 <div>
-                    <div className={formStyles.formGroup}>
-                        <label className={formStyles.label}>Directory Pattern</label>
-                        <input
-                            type="text"
-                            className={`${formStyles.input} ${error ? formStyles.inputError : ''}`}
-                            value={albumStructure}
-                            onChange={(e) => handleChange(e.target.value)}
-                            placeholder="{yyyy}/{yyyy-mm-dd}"
-                        />
-                        {error && (
-                            <p className={formStyles.errorMessage}>
-                                {error}
-                            </p>
-                        )}
+                    <Input
+                        label="Directory Pattern"
+                        value={albumStructure}
+                        onChange={(e) => handleChange(e.target.value)}
+                        placeholder="{yyyy}/{yyyy-mm-dd}"
+                        error={error || undefined}
+                    />
 
-                        <div className={formStyles.placeholderSection}>
-                            <p className={formStyles.placeholderTitle}>
-                                Available Placeholders
-                            </p>
-                            <div className={formStyles.placeholderGrid}>
-                                <div className={formStyles.placeholderRow}>
-                                    <code className={formStyles.placeholderCode}>{"{yyyy}"}</code>
-                                    <span className={formStyles.placeholderDesc}>Year 2024</span>
-                                </div>
-                                <div className={formStyles.placeholderRow}>
-                                    <code className={formStyles.placeholderCode}>{"{mm}"}</code>
-                                    <span className={formStyles.placeholderDesc}>Month 01-12</span>
-                                </div>
-                                <div className={formStyles.placeholderRow}>
-                                    <code className={formStyles.placeholderCode}>{"{dd}"}</code>
-                                    <span className={formStyles.placeholderDesc}>Day 01-31</span>
-                                </div>
-                                <div className={formStyles.placeholderRow}>
-                                    <code className={formStyles.placeholderCode}>{"{yyyy-mm-dd}"}</code>
-                                    <span className={formStyles.placeholderDesc}>ISO Date 2024-01-25</span>
-                                </div>
+                    <div className={formStyles.placeholderSection}>
+                        <p className={formStyles.placeholderTitle}>
+                            Available Placeholders
+                        </p>
+                        <div className={formStyles.placeholderGrid}>
+                            <div className={formStyles.placeholderRow}>
+                                <code className={formStyles.placeholderCode}>{"{yyyy}"}</code>
+                                <span className={formStyles.placeholderDesc}>Year 2024</span>
+                            </div>
+                            <div className={formStyles.placeholderRow}>
+                                <code className={formStyles.placeholderCode}>{"{mm}"}</code>
+                                <span className={formStyles.placeholderDesc}>Month 01-12</span>
+                            </div>
+                            <div className={formStyles.placeholderRow}>
+                                <code className={formStyles.placeholderCode}>{"{dd}"}</code>
+                                <span className={formStyles.placeholderDesc}>Day 01-31</span>
+                            </div>
+                            <div className={formStyles.placeholderRow}>
+                                <code className={formStyles.placeholderCode}>{"{yyyy-mm-dd}"}</code>
+                                <span className={formStyles.placeholderDesc}>ISO Date 2024-01-25</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className={cardStyles.footer}>
-                        <button
-                            className={formStyles.saveButton}
-                            disabled={!isDirty || !!error} // Disable if error exists
-                            onClick={handleSave}
-                        >
-                            <Save size={16} /> Save Changes
-                        </button>
-                    </div>
+                    <SaveButton
+                        onClick={handleSave}
+                        disabled={!isDirty || !!error}
+                    />
                 </div>
             </CollapsibleCard>
         </div>

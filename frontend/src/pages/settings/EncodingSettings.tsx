@@ -28,8 +28,8 @@ export function EncodingSettings() {
     };
 
     return (
-        <div style={{ padding: "40px", maxWidth: "800px", margin: "0 auto" }}>
-            <h1 style={{ fontSize: "28px", fontWeight: 700, marginBottom: "32px", color: "var(--text-primary)" }}>Encoding Settings</h1>
+        <div className={formStyles.pageContainer}>
+            <h1 className={formStyles.pageTitle}>Encoding Settings</h1>
 
             <CollapsibleCard
                 title="Image Encoding"

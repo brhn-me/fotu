@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Save, Cpu } from "lucide-react";
+import { Cpu } from "lucide-react";
 import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
 import formStyles from "../../styles/Form.module.css";
-import cardStyles from "../../components/ui/CollapsibleCard.module.css";
 import { JOBS_DATA } from "../jobs/jobsData";
 import { useSettings } from "../../context/SettingsContext";
+import { NumberStepper } from "../../components/ui/NumberStepper";
+import { SaveButton } from "../../components/ui/SaveButton";
 
 export function JobsSettings() {
     const { settings, updateSettings } = useSettings();
@@ -36,31 +37,7 @@ export function JobsSettings() {
     const isDirty = (() => {
         try {
             const currentSaved = JSON.parse(settings.jobsConcurrency || '[]');
-            // Simple check: if length differs or any concurrency differs
-            // Actually, comparing current `configs` with `settings.jobsConcurrency` logic is tricky
-            // Let's just create the "would be saved" string and compare.
-            // We need to compare this serialized version with the one in settings, BUT
-            // settings might be empty/default. 
-            // Better: Compare with the state we loaded initially? No, we need to compare with "server state".
 
-            // To be precise:
-            // 1. Get what's effectively in settings now (or implied defaults)
-            // 2. Compare.
-
-            // Simplified: If the user changes locally, enable save.
-            // But we need to correctly detect "clean" state.
-
-            // Let's rely on JSON string comparison of the *subset* of data we actually save.
-
-            // If settings was empty/default "[]", and we have defaults "2", then "dirty" might be true if we consider "we want to save defaults".
-            // But usually dirty means "user changed from what's in DB".
-            // If DB is empty, user sees 2. User didn't change 2. So it should not be dirty.
-            // Problem is `currentSaved` comes from DB. If DB is empty `[]`, but UI shows `2`, then `newSubset` is not empty.
-            // So it "looks" dirty.
-            // We should treat empty DB as "synced with defaults". 
-            // So `startingPoint` is NOT just `settings`, but `settings merged with defaults`.
-
-            // Re-derive "server effective state"
             const serverEffective = JOBS_DATA.map(job => {
                 const saved = currentSaved.find((s: any) => s.id === job.id);
                 return { id: job.id, concurrency: saved ? saved.concurrency : 2 };
@@ -89,8 +66,8 @@ export function JobsSettings() {
     };
 
     return (
-        <div style={{ padding: "40px", maxWidth: "800px", margin: "0 auto" }}>
-            <h1 style={{ fontSize: "28px", fontWeight: 700, marginBottom: "32px", color: "var(--text-primary)" }}>Jobs Settings</h1>
+        <div className={formStyles.pageContainer}>
+            <h1 className={formStyles.pageTitle}>Jobs Settings</h1>
 
             <CollapsibleCard
                 title="Concurrency"
@@ -98,48 +75,30 @@ export function JobsSettings() {
                 icon={<Cpu size={20} />}
             >
                 <div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                        {configs.map((config, index) => (
-                            <div key={config.id} style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                padding: "16px 0",
-                                borderBottom: index === configs.length - 1 ? "none" : "1px solid var(--border-subtle)"
-                            }}>
-                                <div style={{ flex: 1, paddingRight: "16px" }}>
-                                    <div style={{ fontSize: "15px", fontWeight: 500, color: "var(--text-primary)" }}>{config.name}</div>
-                                    <div style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "4px" }}>{config.description}</div>
-                                </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0px" }}>
+                        {configs.map((config) => (
+                            <div key={config.id} className={formStyles.listItem}>
+                                <div className={formStyles.itemHeader} style={{ marginBottom: 0 }}>
+                                    <div style={{ paddingRight: "16px" }}>
+                                        <div className={formStyles.itemTitle} style={{ fontSize: "15px" }}>{config.name}</div>
+                                        <div className={formStyles.itemDesc} style={{ fontSize: "13px", marginTop: "4px" }}>{config.description}</div>
+                                    </div>
 
-                                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                                    <button
-                                        onClick={() => handleConcurrencyChange(config.id, config.concurrency - 1)}
-                                        style={{
-                                            width: 32, height: 32, borderRadius: 8, border: "1px solid var(--border-subtle)",
-                                            background: "var(--bg-secondary)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                                            color: "var(--text-primary)", fontSize: "16px", transition: "all 0.2s"
-                                        }}
-                                    >−</button>
-                                    <div style={{ width: 32, textAlign: "center", fontWeight: 600, fontSize: "15px", color: "var(--text-primary)" }}>{config.concurrency}</div>
-                                    <button
-                                        onClick={() => handleConcurrencyChange(config.id, config.concurrency + 1)}
-                                        style={{
-                                            width: 32, height: 32, borderRadius: 8, border: "1px solid var(--border-subtle)",
-                                            background: "var(--bg-secondary)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                                            color: "var(--text-primary)", fontSize: "16px", transition: "all 0.2s"
-                                        }}
-                                    >+</button>
+                                    <NumberStepper
+                                        value={config.concurrency}
+                                        min={1}
+                                        max={32}
+                                        onChange={(val) => handleConcurrencyChange(config.id, val)}
+                                    />
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    <div className={cardStyles.footer}>
-                        <button onClick={handleSave} className={formStyles.saveButton} disabled={!isDirty}>
-                            <Save size={16} /> Save Changes
-                        </button>
-                    </div>
+                    <SaveButton
+                        onClick={handleSave}
+                        disabled={!isDirty}
+                    />
                 </div>
             </CollapsibleCard>
         </div>

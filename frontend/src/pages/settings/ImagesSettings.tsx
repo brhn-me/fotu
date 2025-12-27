@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { Image, Monitor, Save } from "lucide-react";
+import { Image, Monitor } from "lucide-react";
 import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
-import formStyles from "../../styles/Form.module.css";
-import cardStyles from "../../components/ui/CollapsibleCard.module.css";
 import { useSettings } from "../../context/SettingsContext";
+import formStyles from "../../styles/Form.module.css";
+import { Select } from "../../components/ui/Select";
+import { RangeSlider } from "../../components/ui/RangeSlider";
+import { SaveButton } from "../../components/ui/SaveButton";
 
 export function ImagesSettings() {
     const { settings, updateSettings } = useSettings();
@@ -62,8 +64,8 @@ export function ImagesSettings() {
     };
 
     return (
-        <div style={{ padding: "40px", maxWidth: "800px", margin: "0 auto" }}>
-            <h1 style={{ fontSize: "28px", fontWeight: 700, marginBottom: "32px", color: "var(--text-primary)" }}>Image Settings</h1>
+        <div className={formStyles.pageContainer}>
+            <h1 className={formStyles.pageTitle}>Image Settings</h1>
 
             <CollapsibleCard
                 title="Thumbnails"
@@ -71,62 +73,44 @@ export function ImagesSettings() {
                 icon={<Image size={20} />}
             >
                 <div>
-                    <div className={formStyles.formGroup}>
-                        <label className={formStyles.label}>Format</label>
-                        <select
-                            className={formStyles.select}
-                            value={thumbsConfig.format}
-                            onChange={(e) => setThumbsConfig(p => ({ ...p, format: e.target.value }))}
-                        >
-                            <option value="jpg">JPG</option>
-                            <option value="webp">WebP (Recommended)</option>
-                        </select>
-                    </div>
+                    <Select
+                        label="Format"
+                        value={thumbsConfig.format}
+                        options={[
+                            { value: "jpg", label: "JPG" },
+                            { value: "webp", label: "WebP (Recommended)" }
+                        ]}
+                        onChange={(val) => setThumbsConfig(p => ({ ...p, format: val }))}
+                    />
 
-                    <div className={formStyles.formGroup}>
-                        <label className={formStyles.label}>Resolution</label>
-                        <select
-                            className={formStyles.select}
-                            value={thumbsConfig.resolution}
-                            onChange={(e) => setThumbsConfig(p => ({ ...p, resolution: e.target.value }))}
-                        >
-                            <option value="360p">360p (Low)</option>
-                            <option value="480p">480p (Standard)</option>
-                            <option value="720p">720p (High)</option>
-                        </select>
-                    </div>
+                    <Select
+                        label="Resolution"
+                        value={thumbsConfig.resolution}
+                        options={[
+                            { value: "360p", label: "360p (Low)" },
+                            { value: "480p", label: "480p (Standard)" },
+                            { value: "720p", label: "720p (High)" }
+                        ]}
+                        onChange={(val) => setThumbsConfig(p => ({ ...p, resolution: val }))}
+                    />
 
-                    <div className={formStyles.formGroup}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                            <label className={formStyles.label}>Quality</label>
-                            <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--accent-primary)" }}>{thumbsConfig.quality}%</span>
-                        </div>
-                        <input
-                            type="range"
-                            min="60"
-                            max="100"
-                            step="1"
-                            value={thumbsConfig.quality}
-                            onChange={(e) => setThumbsConfig(p => ({ ...p, quality: parseInt(e.target.value) }))}
-                            style={{ width: "100%", cursor: "pointer", accentColor: "var(--accent-primary)" }}
-                        />
-                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px" }}>
-                            <span>60%</span>
-                            <span>100%</span>
-                        </div>
-                    </div>
+                    <RangeSlider
+                        label="Quality"
+                        value={thumbsConfig.quality}
+                        min={60}
+                        max={100}
+                        unit="%"
+                        onChange={(val) => setThumbsConfig(p => ({ ...p, quality: val }))}
+                    />
 
-                    <div className={cardStyles.footer}>
-                        <button
-                            className={formStyles.saveButton}
-                            disabled={!isThumbsDirty}
-                            onClick={handleSaveThumbs}
-                        >
-                            <Save size={16} /> Save Changes
-                        </button>
-                    </div>
+                    <SaveButton
+                        onClick={handleSaveThumbs}
+                        disabled={!isThumbsDirty}
+                    />
                 </div>
             </CollapsibleCard>
+
+            <div className={formStyles.spacer} />
 
             <CollapsibleCard
                 title="Full Preview"
@@ -134,60 +118,40 @@ export function ImagesSettings() {
                 icon={<Monitor size={20} />}
             >
                 <div>
-                    <div className={formStyles.formGroup}>
-                        <label className={formStyles.label}>Format</label>
-                        <select
-                            className={formStyles.select}
-                            value={previewConfig.format}
-                            onChange={(e) => setPreviewConfig(p => ({ ...p, format: e.target.value }))}
-                        >
-                            <option value="jpg">JPG</option>
-                            <option value="webp">WebP (Recommended)</option>
-                        </select>
-                    </div>
+                    <Select
+                        label="Format"
+                        value={previewConfig.format}
+                        options={[
+                            { value: "jpg", label: "JPG" },
+                            { value: "webp", label: "WebP (Recommended)" }
+                        ]}
+                        onChange={(val) => setPreviewConfig(p => ({ ...p, format: val }))}
+                    />
 
-                    <div className={formStyles.formGroup}>
-                        <label className={formStyles.label}>Resolution</label>
-                        <select
-                            className={formStyles.select}
-                            value={previewConfig.resolution}
-                            onChange={(e) => setPreviewConfig(p => ({ ...p, resolution: e.target.value }))}
-                        >
-                            <option value="720p">720p</option>
-                            <option value="1080p">1080p (HD)</option>
-                            <option value="1440p">1440p (QHD)</option>
-                        </select>
-                    </div>
+                    <Select
+                        label="Resolution"
+                        value={previewConfig.resolution}
+                        options={[
+                            { value: "720p", label: "720p" },
+                            { value: "1080p", label: "1080p (HD)" },
+                            { value: "1440p", label: "1440p (QHD)" }
+                        ]}
+                        onChange={(val) => setPreviewConfig(p => ({ ...p, resolution: val }))}
+                    />
 
-                    <div className={formStyles.formGroup}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                            <label className={formStyles.label}>Quality</label>
-                            <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--accent-primary)" }}>{previewConfig.quality}%</span>
-                        </div>
-                        <input
-                            type="range"
-                            min="60"
-                            max="100"
-                            step="1"
-                            value={previewConfig.quality}
-                            onChange={(e) => setPreviewConfig(p => ({ ...p, quality: parseInt(e.target.value) }))}
-                            style={{ width: "100%", cursor: "pointer", accentColor: "var(--accent-primary)" }}
-                        />
-                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px" }}>
-                            <span>60%</span>
-                            <span>100%</span>
-                        </div>
-                    </div>
+                    <RangeSlider
+                        label="Quality"
+                        value={previewConfig.quality}
+                        min={60}
+                        max={100}
+                        unit="%"
+                        onChange={(val) => setPreviewConfig(p => ({ ...p, quality: val }))}
+                    />
 
-                    <div className={cardStyles.footer}>
-                        <button
-                            className={formStyles.saveButton}
-                            disabled={!isPreviewDirty}
-                            onClick={handleSavePreview}
-                        >
-                            <Save size={16} /> Save Changes
-                        </button>
-                    </div>
+                    <SaveButton
+                        onClick={handleSavePreview}
+                        disabled={!isPreviewDirty}
+                    />
                 </div>
             </CollapsibleCard>
         </div>
