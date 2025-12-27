@@ -24,6 +24,14 @@ useSidecar: "false"
 # Video
 videoAutoplay: "true"
 videoDefaultVolume: "100"
+videoPreviewDuration: "4"
+videoResolution: "720p"
+
+# Runtimes
+exiftoolPath: ""
+ffmpegPath: ""
+ffprobePath: ""
+darktableCliPath: ""
 
 # Organization
 albumStructure: "{yyyy}/{yyyy-mm-dd}"

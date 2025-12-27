@@ -1,17 +1,12 @@
 import { Router } from 'express';
-import prisma from '../db/client';
+import { settingsService } from '../services/settingsService';
 
 const router = Router();
 
 // GET /settings - Fetch all settings as key-value pairs
 router.get('/', async (req, res) => {
     try {
-        const settings = await prisma.settings.findMany();
-        const settingsMap = settings.reduce((acc, curr) => {
-            acc[curr.key] = curr.value;
-            return acc;
-        }, {} as Record<string, string>);
-
+        const settingsMap = await settingsService.getAll();
         res.json(settingsMap);
     } catch (error) {
         console.error('Failed to fetch settings:', error);
@@ -28,18 +23,7 @@ router.put('/', async (req, res) => {
     }
 
     try {
-        const operations = Object.entries(updates).map(([key, value]) => {
-            // Ensure value is stored as string
-            const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
-
-            return prisma.settings.upsert({
-                where: { key },
-                update: { value: stringValue },
-                create: { key, value: stringValue },
-            });
-        });
-
-        await prisma.$transaction(operations);
+        await settingsService.update(updates);
         res.json({ success: true, message: 'Settings updated' });
     } catch (error) {
         console.error('Failed to update settings:', error);
