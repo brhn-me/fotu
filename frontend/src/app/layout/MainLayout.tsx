@@ -38,7 +38,7 @@ export function MainLayout() {
 
             <div className={styles.contentWrapper}>
                 {isSettings ? (
-                    <SettingsSidebar />
+                    <SettingsSidebar isOpen={isSidebarOpen} />
                 ) : (
                     <Sidebar
                         isOpen={isSidebarOpen}

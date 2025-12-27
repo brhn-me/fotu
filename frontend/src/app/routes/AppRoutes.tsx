@@ -16,7 +16,9 @@ const JobsSettings = React.lazy(() => import("../../pages/settings/JobsSettings"
 const EncodingSettings = React.lazy(() => import("../../pages/settings/EncodingSettings").then(module => ({ default: module.EncodingSettings })));
 const OrganizationSettings = React.lazy(() => import("../../pages/settings/OrganizationSettings").then(module => ({ default: module.OrganizationSettings })));
 
-// ... existing lazy loads
+const ProfilePage = React.lazy(() => import("../../pages/profile/ProfilePage").then(module => ({ default: module.ProfilePage })));
+const AccountsPage = React.lazy(() => import("../../pages/accounts/AccountsPage").then(module => ({ default: module.AccountsPage })));
+const MapPage = React.lazy(() => import("../../pages/map/MapPage").then(module => ({ default: module.MapPage })));
 
 export function AppRoutes() {
     return (

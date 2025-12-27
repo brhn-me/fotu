@@ -1,6 +1,6 @@
 .card {
     border: 1px solid var(--border-subtle);
-    border-radius: 12px;
+    border-radius: 16px;
     background-color: var(--bg-surface);
     overflow: hidden;
     margin-bottom: 24px;
@@ -8,14 +8,15 @@
 }
 
 .card:hover {
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
+    /* Removed border color change on hover */
 }
 
 .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
+    padding: 20px 24px;
     cursor: pointer;
     user-select: none;
     background-color: transparent;
@@ -28,8 +29,31 @@
 
 .titleGroup {
     display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.iconBox {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background-color: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-primary);
+    transition: all 0.2s;
+}
+
+.header:hover .iconBox {
+    background-color: var(--bg-primary);
+    transform: scale(1.05);
+}
+
+.textContent {
+    display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
 .title {
@@ -48,6 +72,11 @@
 .chevron {
     color: var(--text-secondary);
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.6;
+}
+
+.card:hover .chevron {
+    opacity: 1;
 }
 
 .chevronOpen {
@@ -55,22 +84,26 @@
 }
 
 .content {
-    padding: 0 20px 20px 20px;
-    animation: slideDown 0.2s ease-out;
-}
-
-.contentHidden {
-    display: none;
+    padding: 0 24px 24px 24px;
+    animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes slideDown {
     from {
         opacity: 0;
-        transform: translateY(-4px);
+        transform: translateY(-8px);
     }
 
     to {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 24px;
+    margin-top: 8px;
+    /* Removed top border as requested */
 }

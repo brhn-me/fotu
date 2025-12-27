@@ -19,15 +19,26 @@ const SETTINGS_MENU = [
     { path: "/settings/organization", label: "Organization", icon: FolderTree },
 ];
 
-export function SettingsSidebar() {
-    return (
-        <aside className={styles.sidebar}>
-            <Link to="/" className={styles.backLink}>
-                <ChevronLeft size={14} /> Back to Gallery
-            </Link>
+interface SettingsSidebarProps {
+    isOpen: boolean;
+}
 
-            <div className={styles.header}>
-                <h1 className={styles.headerTitle}>Settings</h1>
+export function SettingsSidebar({ isOpen }: SettingsSidebarProps) {
+    return (
+        <aside
+            className={styles.sidebar}
+            style={{ width: isOpen ? "var(--sidebar-width)" : "var(--sidebar-collapsed-width)" }}
+        >
+            <div
+                className={styles.sectionHeader}
+                style={{
+                    opacity: isOpen ? 1 : 0,
+                    height: isOpen ? "auto" : "0px",
+                    paddingTop: isOpen ? "16px" : "0px",
+                    paddingBottom: isOpen ? "8px" : "0px",
+                }}
+            >
+                <span className={styles.sectionLabel}>Configuration</span>
             </div>
 
             <nav className={styles.nav}>
@@ -39,11 +50,39 @@ export function SettingsSidebar() {
                             `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
                         }
                     >
-                        <item.icon size={18} className={styles.icon} />
-                        {item.label}
+                        <div className={styles.iconWrapper}>
+                            <item.icon size={20} />
+                        </div>
+                        <span
+                            className={styles.label}
+                            style={{
+                                opacity: isOpen ? 1 : 0,
+                            }}
+                        >
+                            {item.label}
+                        </span>
                     </NavLink>
                 ))}
             </nav>
+
+            <div className={styles.bottomSection}>
+                <Link
+                    to="/"
+                    className={styles.navItem}
+                >
+                    <div className={styles.iconWrapper}>
+                        <ChevronLeft size={20} />
+                    </div>
+                    <span
+                        className={styles.label}
+                        style={{
+                            opacity: isOpen ? 1 : 0,
+                        }}
+                    >
+                        Back to Gallery
+                    </span>
+                </Link>
+            </div>
         </aside>
     );
 }
