@@ -1,9 +1,14 @@
 // src/components/ui/Card.tsx
-import React from 'react';
 import shared from '../../styles/shared.module.css';
 
-export function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-    return <div className={`${shared.card} ${className}`}>{children}</div>;
+interface CardProps {
+    children: React.ReactNode;
+    className?: string;
+    style?: React.CSSProperties;
+}
+
+export function Card({ children, className = '', style }: CardProps) {
+    return <div className={`${shared.card} ${className}`} style={style}>{children}</div>;
 }
 
 export function CardHeader({ children, className = '' }: { children: React.ReactNode; className?: string }) {

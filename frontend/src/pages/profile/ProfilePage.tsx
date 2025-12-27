@@ -14,7 +14,7 @@ export function ProfilePage() {
                     </div>
                     <div className={styles.profileInfo}>
                         <div className={styles.nameRow}>
-                            <h1 className={styles.name}>Burhan</h1>
+                            <h1 className={styles.name}>Fotu</h1>
                             <div className={styles.badge}>
                                 <Shield size={12} />
                                 ADMIN

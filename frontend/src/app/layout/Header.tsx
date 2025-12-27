@@ -27,11 +27,10 @@ export const Header = ({ onMenuClick, onFilterClick }: { onMenuClick: () => void
             <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
                 <button onClick={onMenuClick} style={{ background: "transparent", border: "none", color: "var(--text-primary)", cursor: "pointer", padding: "8px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", marginRight: "8px" }}><Menu size={20} /></button>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginRight: "8px" }}><PinwheelLogo /></div>
-                <h1 style={{ fontSize: "18px", fontWeight: 400, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>Photika</h1>
+                <h1 style={{ fontSize: "18px", fontWeight: 400, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>Fotu</h1>
             </div>
             <SearchBar onFilterClick={onFilterClick} />
             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
-                <div onClick={() => navigate("/jobs")}><HeaderAction icon={<Activity size={20} />} label="Jobs" /></div>
                 <div style={{ width: "1px", height: "24px", backgroundColor: "var(--border-subtle)", margin: "0 8px" }} />
                 <ThemeToggle />
                 <ProfileMenu />

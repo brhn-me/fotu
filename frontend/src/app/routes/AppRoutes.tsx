@@ -7,7 +7,6 @@ const GalleryPage = React.lazy(() => import("../../pages/gallery/GalleryPage").t
 const SourcesPage = React.lazy(() => import("../../pages/sources/SourcesPage").then(module => ({ default: module.SourcesPage })));
 const MetadataPage = React.lazy(() => import("../../pages/metadata/MetadataPage").then(module => ({ default: module.MetadataPage })));
 const JobsPage = React.lazy(() => import("../../pages/jobs/JobsPage").then(module => ({ default: module.JobsPage })));
-const JobDetailsPage = React.lazy(() => import("../../pages/jobs/JobDetailsPage").then(module => ({ default: module.JobDetailsPage })));
 const JobConcurrencyPage = React.lazy(() => import("../../pages/jobs/JobConcurrencyPage").then(module => ({ default: module.JobConcurrencyPage })));
 const SettingsPage = React.lazy(() => import("../../pages/settings/SettingsPage").then(module => ({ default: module.SettingsPage })));
 const ProfilePage = React.lazy(() => import("../../pages/profile/ProfilePage").then(module => ({ default: module.ProfilePage })));
@@ -27,7 +26,6 @@ export function AppRoutes() {
                     {/* Jobs Routes */}
                     <Route path="/jobs" element={<JobsPage />} />
                     <Route path="/jobs/concurrency" element={<JobConcurrencyPage />} />
-                    <Route path="/jobs/:id" element={<JobDetailsPage />} />
 
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/profile" element={<ProfilePage />} />

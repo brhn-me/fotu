@@ -1,7 +1,7 @@
 // src/components/Sidebar.tsx
 
 import React from "react";
-import { Image, Library, Map, MapPin, Info, Trash2, Cloud, BarChart3, Clock, HardDrive } from "lucide-react";
+import { Image, Library, Map, MapPin, Info, Trash2, Cloud, BarChart3, Clock, HardDrive, Activity } from "lucide-react";
 
 type AppView = "photos" | "albums" | "sources" | "metadata" | "jobs" | "jobDetails" | "map";
 
@@ -253,6 +253,14 @@ export function Sidebar({ isOpen, view, onNavigate }: SidebarProps) {
                 onClick={() => {
                     // placeholder
                 }}
+            />
+
+            <NavItem
+                icon={<Activity size={20} />}
+                label="Jobs"
+                isOpen={isOpen}
+                active={view === "jobs"}
+                onClick={() => onNavigate("jobs")}
             />
 
             <Divider />

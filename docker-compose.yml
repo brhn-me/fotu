@@ -5,9 +5,9 @@ services:
     image: postgres:15-alpine
     restart: always
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: photo_manager
+      POSTGRES_USER: fotu
+      POSTGRES_PASSWORD: fotu
+      POSTGRES_DB: fotu
     ports:
       - "5433:5432"
     volumes:
