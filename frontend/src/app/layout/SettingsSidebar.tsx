@@ -6,7 +6,8 @@ import {
     Cpu,
     Code,
     FolderTree,
-    ChevronLeft
+    ChevronLeft,
+    Terminal
 } from "lucide-react";
 import styles from "./SettingsSidebar.module.css";
 
@@ -17,6 +18,7 @@ const SETTINGS_MENU = [
     { path: "/settings/jobs", label: "Jobs", icon: Cpu },
     { path: "/settings/encoding", label: "Encoding", icon: Code },
     { path: "/settings/organization", label: "Organization", icon: FolderTree },
+    { path: "/settings/runtimes", label: "Runtimes", icon: Terminal },
 ];
 
 interface SettingsSidebarProps {

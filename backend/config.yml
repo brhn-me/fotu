@@ -1,0 +1,29 @@
+# Default Application Settings
+# Usage: These values are seeded into the database on startup if missing.
+
+# Images
+thumbnailFormat: "webp"
+thumbnailResolution: "480p"
+thumbnailQuality: "80"
+previewFormat: "webp"
+previewResolution: "1080p"
+previewQuality: "90"
+
+# Encoding
+imageEncoder: "webp"
+videoEncoder: "h264"
+
+# Jobs (JSON stringified)
+jobsConcurrency: "[]"
+
+# Raw (JSON stringified array)
+rawFormats: "[\"GPR\", \"NEF\", \"CR2\", \"CR3\", \"ARW\", \"RAF\", \"ORF\", \"DNG\"]"
+darktableEnabled: "false"
+useSidecar: "false"
+
+# Video
+videoAutoplay: "true"
+videoDefaultVolume: "100"
+
+# Organization
+albumStructure: "{yyyy}/{yyyy-mm-dd}"

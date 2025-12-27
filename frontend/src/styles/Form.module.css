@@ -102,3 +102,156 @@
     transform: none;
     box-shadow: none;
 }
+
+.hint {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-left: 38px;
+    /* Indent to align with text next to checkbox */
+    margin-top: -4px;
+}
+
+/* Switch Component */
+.switchRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+}
+
+.switchText {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.switchLabel {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.switchDescription {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.switchInput {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switchToggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    background-color: var(--bg-secondary);
+    border-radius: 24px;
+    border: 1px solid var(--border-subtle);
+    transition: .3s;
+    cursor: pointer;
+}
+
+.switchToggle:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 2px;
+    bottom: 2px;
+    background-color: var(--text-muted);
+    border-radius: 50%;
+    transition: .3s;
+}
+
+.switchInput:checked+.switchToggle {
+    background-color: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.switchInput:checked+.switchToggle:before {
+    transform: translateX(20px);
+    background-color: white;
+}
+
+.switchInput:focus+.switchToggle {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Validation & Placeholders */
+.inputError {
+    border-color: var(--color-destructive) !important;
+}
+
+.inputError:focus {
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
+    border-color: var(--color-destructive) !important;
+}
+
+.errorMessage {
+    font-size: 12px;
+    color: var(--color-destructive);
+    margin-top: 6px;
+    font-weight: 400;
+    /* Not bold */
+}
+
+.placeholderSection {
+    margin-top: 16px;
+}
+
+.placeholderTitle {
+    font-size: 13px;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.placeholderGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.placeholderRow {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    align-items: center;
+    gap: 16px;
+}
+
+.placeholderCode {
+    font-size: 13px;
+    color: var(--text-secondary);
+    /* Match description color */
+    font-family: monospace;
+    font-weight: 700;
+    /* Bold as requested */
+}
+
+.placeholderDesc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    /* Darker than muted */
+}
+
+.checkboxWrapperRow {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    padding: 12px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    /* Removed background-color */
+    transition: all 0.2s;
+}
+
+.cardFooter {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 20px;
+}

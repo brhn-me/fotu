@@ -44,6 +44,8 @@
   --terminal-info: #3b82f6;
   --terminal-warn: #f59e0b;
   --terminal-error: #ef4444;
+
+  --color-destructive: oklch(0.62 0.20 28);
 }
 
 :root[data-theme='light'] {
@@ -77,6 +79,8 @@
   --terminal-info: #2563eb;
   --terminal-warn: #d97706;
   --terminal-error: #dc2626;
+
+  --color-destructive: oklch(0.62 0.20 28);
 }
 
 * {

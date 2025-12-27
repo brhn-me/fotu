@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { settingsApi } from '../api/settings';
 
 // Define the shape of our settings
 export interface AppSettings {
@@ -19,6 +21,23 @@ export interface AppSettings {
 
     // Raw
     rawFormats: string; // JSON Array
+    darktableEnabled: boolean;
+    useSidecar: boolean;
+
+    // Video
+    videoAutoplay: boolean;
+    videoDefaultVolume: number;
+    videoPreviewDuration: number;
+    videoResolution: string;
+
+    // Runtimes
+    exiftoolPath: string;
+    ffmpegPath: string;
+    ffprobePath: string;
+    darktableCliPath: string;
+
+    // Organization
+    albumStructure: string;
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -31,7 +50,18 @@ const DEFAULT_SETTINGS: AppSettings = {
     imageEncoder: 'webp',
     videoEncoder: 'h264',
     jobsConcurrency: '[]',
-    rawFormats: '["GPR", "NEF", "CR2", "CR3", "ARW", "RAF", "ORF", "DNG"]'
+    rawFormats: '["GPR", "NEF", "CR2", "CR3", "ARW", "RAF", "ORF", "DNG"]',
+    darktableEnabled: false,
+    useSidecar: false,
+    videoAutoplay: true,
+    videoDefaultVolume: 100,
+    videoPreviewDuration: 4,
+    videoResolution: '720p',
+    albumStructure: '{yyyy}/{yyyy-mm-dd}',
+    exiftoolPath: '',
+    ffmpegPath: '',
+    ffprobePath: '',
+    darktableCliPath: ''
 };
 
 interface SettingsContextType {
@@ -49,12 +79,23 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
     const fetchSettings = async () => {
         try {
-            const res = await fetch('http://localhost:3000/api/settings');
-            if (res.ok) {
-                const data = await res.json();
-                // Merge with defaults to handle missing keys
-                setSettings(prev => ({ ...prev, ...data }));
-            }
+            const data = await settingsApi.getSettings();
+            // Merge with defaults to handle missing keys
+            setSettings(prev => ({
+                ...prev,
+                ...data,
+                // Ensure number types are actually numbers (API returns strings for map values possibly if we aren't careful,
+                // but our backend treats everything as string currently. We need to parse.)
+                // Wait, backend `findMany` returns generic key/value strings.
+                // We need to parse appropriate fields if they are numbers or booleans.
+                thumbnailQuality: Number(data.thumbnailQuality ?? prev.thumbnailQuality),
+                previewQuality: Number(data.previewQuality ?? prev.previewQuality),
+                videoAutoplay: String(data.videoAutoplay) === 'true', // Handle string persist
+                videoDefaultVolume: Number(data.videoDefaultVolume ?? prev.videoDefaultVolume),
+                videoPreviewDuration: Number(data.videoPreviewDuration ?? prev.videoPreviewDuration),
+                darktableEnabled: String(data.darktableEnabled) === 'true',
+                useSidecar: String(data.useSidecar) === 'true',
+            }));
         } catch (error) {
             console.error('Failed to load settings:', error);
         } finally {
@@ -71,16 +112,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setSettings(prev => ({ ...prev, ...newSettings }));
 
         try {
-            const res = await fetch('http://localhost:3000/api/settings', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newSettings)
-            });
-
-            if (!res.ok) throw new Error('Failed to save settings');
+            await settingsApi.updateSettings(newSettings);
+            toast.success("Settings saved");
         } catch (error) {
             console.error('Failed to save settings:', error);
-            // Revert on error? For now, we just log, but in robust app we'd revert.
+            toast.error("Failed to save settings");
             fetchSettings();
         }
     };

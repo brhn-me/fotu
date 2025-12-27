@@ -15,6 +15,10 @@ import { config, initializeStorage } from './config'
 // Initialize storage directories
 initializeStorage()
 
+// Seed default settings
+import { seedDefaultSettings } from './services/settingsService'
+seedDefaultSettings()
+
 const app = express()
 const port = config.port
 
@@ -44,7 +48,10 @@ app.get('/health', (req, res) => {
 
 // TODO: Import and use routes
 import settingsRouter from './api/settings'
+import runtimesRouter from './api/runtimes'
+
 app.use('/api/settings', settingsRouter)
+app.use('/api/runtimes', runtimesRouter)
 // import sourcesRouter from './api/sources'
 
 app.listen(port, () => {

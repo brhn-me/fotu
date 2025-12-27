@@ -39,7 +39,6 @@ export function JobsSettings() {
             // Simple check: if length differs or any concurrency differs
             // Actually, comparing current `configs` with `settings.jobsConcurrency` logic is tricky
             // Let's just create the "would be saved" string and compare.
-            const serialized = JSON.stringify(configs.map(c => ({ id: c.id, concurrency: c.concurrency })));
             // We need to compare this serialized version with the one in settings, BUT
             // settings might be empty/default. 
             // Better: Compare with the state we loaded initially? No, we need to compare with "server state".
@@ -52,8 +51,6 @@ export function JobsSettings() {
             // But we need to correctly detect "clean" state.
 
             // Let's rely on JSON string comparison of the *subset* of data we actually save.
-            const currentlySavedSubset = JSON.stringify(currentSaved.map((s: any) => ({ id: s.id, concurrency: s.concurrency })).sort((a: any, b: any) => a.id.localeCompare(b.id)));
-            const newSubset = JSON.stringify(configs.map(c => ({ id: c.id, concurrency: c.concurrency })).sort((a: any, b: any) => a.id.localeCompare(b.id)));
 
             // If settings was empty/default "[]", and we have defaults "2", then "dirty" might be true if we consider "we want to save defaults".
             // But usually dirty means "user changed from what's in DB".
@@ -102,8 +99,14 @@ export function JobsSettings() {
             >
                 <div>
                     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                        {configs.map(config => (
-                            <div key={config.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 0", borderBottom: "1px solid var(--border-subtle)" }}>
+                        {configs.map((config, index) => (
+                            <div key={config.id} style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                padding: "16px 0",
+                                borderBottom: index === configs.length - 1 ? "none" : "1px solid var(--border-subtle)"
+                            }}>
                                 <div style={{ flex: 1, paddingRight: "16px" }}>
                                     <div style={{ fontSize: "15px", fontWeight: 500, color: "var(--text-primary)" }}>{config.name}</div>
                                     <div style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "4px" }}>{config.description}</div>

@@ -15,6 +15,7 @@ const RawSettings = React.lazy(() => import("../../pages/settings/RawSettings").
 const JobsSettings = React.lazy(() => import("../../pages/settings/JobsSettings").then(module => ({ default: module.JobsSettings })));
 const EncodingSettings = React.lazy(() => import("../../pages/settings/EncodingSettings").then(module => ({ default: module.EncodingSettings })));
 const OrganizationSettings = React.lazy(() => import("../../pages/settings/OrganizationSettings").then(module => ({ default: module.OrganizationSettings })));
+const RuntimesSettings = React.lazy(() => import("../../pages/settings/RuntimesSettings").then(module => ({ default: module.RuntimesSettings })));
 
 const ProfilePage = React.lazy(() => import("../../pages/profile/ProfilePage").then(module => ({ default: module.ProfilePage })));
 const AccountsPage = React.lazy(() => import("../../pages/accounts/AccountsPage").then(module => ({ default: module.AccountsPage })));
@@ -44,6 +45,7 @@ export function AppRoutes() {
                     <Route path="/settings/jobs" element={<JobsSettings />} />
                     <Route path="/settings/encoding" element={<EncodingSettings />} />
                     <Route path="/settings/organization" element={<OrganizationSettings />} />
+                    <Route path="/settings/runtimes" element={<RuntimesSettings />} />
 
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Route>
