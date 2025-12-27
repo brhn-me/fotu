@@ -1,0 +1,110 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+
+.modal {
+    width: 500px;
+    background-color: var(--bg-primary);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-subtle);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.closeButton {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.closeButton:hover {
+    background-color: var(--bg-surface);
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.categoryList {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.categoryButton {
+    padding: 8px 16px;
+    border-radius: 18px;
+    border: 1px solid var(--border-subtle);
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.categoryButton:hover {
+    background-color: var(--bg-surface);
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    marginTop: 40px;
+}
+
+.resetButton {
+    padding: 10px 20px;
+    background: transparent;
+    border: none;
+    color: var(--accent-primary);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.applyButton {
+    padding: 10px 24px;
+    border-radius: 20px;
+    border: none;
+    background: var(--accent-primary);
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.applyButton:hover {
+    opacity: 0.9;
+}

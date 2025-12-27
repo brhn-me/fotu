@@ -232,24 +232,6 @@ export function AlbumsSidebar({
                     />
                 )}
             </div>
-
-            <style>{`
-                /* Ensure Virtuoso's scroller has a nice scrollbar */
-                div[data-test-id="virtuoso-scroller"]::-webkit-scrollbar {
-                    width: 8px;
-                    display: block;
-                }
-                div[data-test-id="virtuoso-scroller"]::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-                div[data-test-id="virtuoso-scroller"]::-webkit-scrollbar-thumb {
-                    background-color: var(--border-subtle);
-                    border-radius: 4px;
-                }
-                div[data-test-id="virtuoso-scroller"]::-webkit-scrollbar-thumb:hover {
-                    background-color: var(--text-secondary);
-                }
-            `}</style>
         </aside>
     );
 }
