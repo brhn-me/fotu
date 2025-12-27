@@ -97,15 +97,23 @@ export function ImagesSettings() {
                     </div>
 
                     <div className={formStyles.formGroup}>
-                        <label className={formStyles.label}>Quality (60-100)</label>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                            <label className={formStyles.label}>Quality</label>
+                            <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--accent-primary)" }}>{thumbsConfig.quality}%</span>
+                        </div>
                         <input
-                            type="number"
+                            type="range"
                             min="60"
                             max="100"
+                            step="1"
                             value={thumbsConfig.quality}
                             onChange={(e) => setThumbsConfig(p => ({ ...p, quality: parseInt(e.target.value) }))}
-                            className={formStyles.input}
+                            style={{ width: "100%", cursor: "pointer", accentColor: "var(--accent-primary)" }}
                         />
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px" }}>
+                            <span>60%</span>
+                            <span>100%</span>
+                        </div>
                     </div>
 
                     <div className={cardStyles.footer}>
@@ -152,15 +160,23 @@ export function ImagesSettings() {
                     </div>
 
                     <div className={formStyles.formGroup}>
-                        <label className={formStyles.label}>Quality (60-100)</label>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                            <label className={formStyles.label}>Quality</label>
+                            <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--accent-primary)" }}>{previewConfig.quality}%</span>
+                        </div>
                         <input
-                            type="number"
+                            type="range"
                             min="60"
                             max="100"
+                            step="1"
                             value={previewConfig.quality}
                             onChange={(e) => setPreviewConfig(p => ({ ...p, quality: parseInt(e.target.value) }))}
-                            className={formStyles.input}
+                            style={{ width: "100%", cursor: "pointer", accentColor: "var(--accent-primary)" }}
                         />
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px" }}>
+                            <span>60%</span>
+                            <span>100%</span>
+                        </div>
                     </div>
 
                     <div className={cardStyles.footer}>
