@@ -1,7 +1,7 @@
 // src/components/Sidebar.tsx
 
 import React from "react";
-import { Image, Library, Map, HardDrive, Files, RefreshCcw, Settings, Wrench, Trash2, Cloud, BarChart3 } from "lucide-react";
+import { Image, Library, Map, HardDrive, Files, RefreshCcw, Settings, Wrench, Trash2, Cloud } from "lucide-react";
 import styles from "./Sidebar.module.css";
 import { useStats } from "../../hooks/useStats";
 
@@ -87,52 +87,49 @@ const SystemStatus = ({ isOpen }: { isOpen: boolean }) => {
                 margin: isOpen ? "24px 16px 24px 24px" : "0px",
                 padding: isOpen ? 16 : 0,
                 opacity: isOpen ? 1 : 0,
-                height: isOpen ? "auto" : 0,
+                maxHeight: isOpen ? 300 : 0, // Use max-height for transition (height: auto doesn't animate)
+                height: "auto",
                 overflow: "hidden",
-                // When closing: Fade opacity (0.2s), then collapse height/margin/padding (0.3s)
-                // When opening: Expand height/margin/padding (0.3s), then fade opacity (0.2s)
+                // When closing: Fade opacity (0.2s), then collapse max-height/margin/padding (0.3s)
+                // When opening: Expand max-height/margin/padding (0.3s), then fade opacity (0.2s)
                 transition: isOpen
-                    ? "height 0.3s ease, margin 0.3s ease, padding 0.3s ease, opacity 0.2s ease 0.2s"
-                    : "opacity 0.2s ease, height 0.3s ease 0.2s, margin 0.3s ease 0.2s, padding 0.3s ease 0.2s",
+                    ? "max-height 0.3s ease, margin 0.3s ease, padding 0.3s ease, opacity 0.2s ease 0.2s"
+                    : "opacity 0.2s ease, max-height 0.3s ease 0.2s, margin 0.3s ease 0.2s, padding 0.3s ease 0.2s",
                 pointerEvents: isOpen ? "auto" : "none"
             }}
             title={!isOpen ? "System Status" : undefined}
         >
-            <div className={styles.statsHeader} style={{ marginBottom: isOpen ? 12 : 0, justifyContent: isOpen ? "flex-start" : "center" }}>
+            <div className={styles.statsHeader} style={{ marginBottom: 12 }}>
                 <Cloud size={18} color={percentage > 90 ? "#EA4335" : "var(--accent-primary)"} />
-                {isOpen && <span>System</span>}
+                <span>System</span>
             </div>
 
-            {isOpen && (
-                <>
-                    <div className={styles.statsList}>
-                        <div className={styles.statItem}>
-                            <span className={styles.statItemLabel}>Photos</span>
-                            <span className={styles.statItemValue}>{stats?.photos?.toLocaleString() || "-"}</span>
-                        </div>
-                        <div className={styles.statItem}>
-                            <span className={styles.statItemLabel}>Videos</span>
-                            <span className={styles.statItemValue}>{stats?.videos?.toLocaleString() || "-"}</span>
-                        </div>
-                    </div>
+            <div className={styles.statsList}>
+                <div className={styles.statItem}>
+                    <span className={styles.statItemLabel}>Photos</span>
+                    <span className={styles.statItemValue}>{stats?.photos?.toLocaleString() || "-"}</span>
+                </div>
+                <div className={styles.statItem}>
+                    <span className={styles.statItemLabel}>Videos</span>
+                    <span className={styles.statItemValue}>{stats?.videos?.toLocaleString() || "-"}</span>
+                </div>
+            </div>
 
-                    <div style={{ marginTop: 12 }}>
-                        <div className={styles.progressOuter}>
-                            <div
-                                className={styles.progressInner}
-                                style={{
-                                    width: `${Math.max(2, percentage)}%`,
-                                    backgroundColor: percentage > 90 ? "#EA4335" : "var(--accent-primary)",
-                                }}
-                            />
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-                            <span className={styles.storageText}>{usedGB.toFixed(0)} GB used</span>
-                            <span className={styles.storageText}>{totalGB.toFixed(0)} GB total</span>
-                        </div>
-                    </div>
-                </>
-            )}
+            <div style={{ marginTop: 12 }}>
+                <div className={styles.progressOuter}>
+                    <div
+                        className={styles.progressInner}
+                        style={{
+                            width: `${Math.max(2, percentage)}%`,
+                            backgroundColor: percentage > 90 ? "#EA4335" : "var(--accent-primary)",
+                        }}
+                    />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+                    <span className={styles.storageText}>{usedGB.toFixed(0)} GB used</span>
+                    <span className={styles.storageText}>{totalGB.toFixed(0)} GB total</span>
+                </div>
+            </div>
         </div>
     );
 };
