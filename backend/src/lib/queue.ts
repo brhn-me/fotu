@@ -21,8 +21,8 @@ export function getQueue(name: JobType): Queue {
                     type: 'exponential',
                     delay: 1000
                 },
-                removeOnComplete: 100, // Keep last 100
-                removeOnFail: 500      // Keep last 500 for debugging
+                removeOnComplete: 1000000, // Keep large history for stats
+                removeOnFail: 1000000      // Keep failed for debugging
             }
         });
     }

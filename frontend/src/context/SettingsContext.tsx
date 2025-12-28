@@ -42,7 +42,7 @@ export interface AppSettings {
 
 const DEFAULT_SETTINGS: AppSettings = {
     thumbnailFormat: 'webp',
-    thumbnailResolution: '480p',
+    thumbnailResolution: '240p',
     thumbnailQuality: 80,
     previewFormat: 'webp',
     previewResolution: '1080p',
@@ -56,7 +56,7 @@ const DEFAULT_SETTINGS: AppSettings = {
     videoAutoplay: true,
     videoDefaultVolume: 100,
     videoPreviewDuration: 4,
-    videoResolution: '720p',
+    videoResolution: '240p',
     albumStructure: '{yyyy}/{yyyy-mm-dd}',
     exiftoolPath: '',
     ffmpegPath: '',
@@ -67,7 +67,7 @@ const DEFAULT_SETTINGS: AppSettings = {
 interface SettingsContextType {
     settings: AppSettings;
     isLoading: boolean;
-    updateSettings: (newSettings: Partial<AppSettings>) => Promise<void>;
+    updateSettings: (newSettings: Partial<AppSettings>, successMessage?: string) => Promise<void>;
     refreshSettings: () => Promise<void>;
 }
 
@@ -107,13 +107,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         fetchSettings();
     }, []);
 
-    const updateSettings = async (newSettings: Partial<AppSettings>) => {
+    const updateSettings = async (newSettings: Partial<AppSettings>, successMessage?: string) => {
         // Optimistic update
         setSettings(prev => ({ ...prev, ...newSettings }));
 
         try {
             await settingsApi.updateSettings(newSettings);
-            toast.success("Settings saved");
+            toast.success(successMessage || "Settings saved");
         } catch (error) {
             console.error('Failed to save settings:', error);
             toast.error("Failed to save settings");

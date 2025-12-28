@@ -8,8 +8,8 @@ const SourcesPage = React.lazy(() => import("../../pages/sources/SourcesPage").t
 const MetadataPage = React.lazy(() => import("../../pages/metadata/MetadataPage").then(module => ({ default: module.MetadataPage })));
 const JobsPage = React.lazy(() => import("../../pages/jobs/JobsPage").then(module => ({ default: module.JobsPage })));
 // Lazy Load Settings Pages
-const ImagesSettings = React.lazy(() => import("../../pages/settings/ImagesSettings").then(module => ({ default: module.ImagesSettings })));
-const VideosSettings = React.lazy(() => import("../../pages/settings/VideosSettings").then(module => ({ default: module.VideosSettings })));
+const ThumbnailsSettings = React.lazy(() => import("../../pages/settings/ThumbnailsSettings").then(module => ({ default: module.ThumbnailsSettings })));
+const LightboxSettings = React.lazy(() => import("../../pages/settings/LightboxSettings").then(module => ({ default: module.LightboxSettings })));
 const RawSettings = React.lazy(() => import("../../pages/settings/RawSettings").then(module => ({ default: module.RawSettings })));
 const JobsSettings = React.lazy(() => import("../../pages/settings/JobsSettings").then(module => ({ default: module.JobsSettings })));
 const EncodingSettings = React.lazy(() => import("../../pages/settings/EncodingSettings").then(module => ({ default: module.EncodingSettings })));
@@ -38,9 +38,9 @@ export function AppRoutes() {
                     <Route path="/files" element={<FilesPage />} />
 
                     {/* Settings Routes */}
-                    <Route path="/settings" element={<Navigate to="/settings/images" replace />} />
-                    <Route path="/settings/images" element={<ImagesSettings />} />
-                    <Route path="/settings/videos" element={<VideosSettings />} />
+                    <Route path="/settings" element={<Navigate to="/settings/thumbnails" replace />} />
+                    <Route path="/settings/thumbnails" element={<ThumbnailsSettings />} />
+                    <Route path="/settings/lightbox" element={<LightboxSettings />} />
                     <Route path="/settings/raw" element={<RawSettings />} />
                     <Route path="/settings/jobs" element={<JobsSettings />} />
                     <Route path="/settings/encoding" element={<EncodingSettings />} />

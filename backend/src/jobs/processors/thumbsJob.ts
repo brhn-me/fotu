@@ -13,7 +13,7 @@ const DATA_ROOT = process.env.FOTU_DATA_DIR || path.join(process.cwd(), '.cache'
 export class ThumbsJob extends BaseJob {
     async process(job: Job) {
         // SISULATION DELAY: 3 seconds
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 200));
 
         const { mediaId, filePath } = job.data;
 
@@ -22,76 +22,116 @@ export class ThumbsJob extends BaseJob {
         const media = await prisma.media.findUnique({ where: { id: mediaId } });
         if (!media) throw new Error('Media not found');
 
-        // Fetch settings or use defaults
-        const settings = await settingsService.getAll();
-        const sizesStr = settings['thumbnailSizes'];
-        let sizes = [
-            { name: 'small', width: 200 }, // Fallback default
-            { name: 'medium', width: 800 }
-        ];
+        // Fetch typed settings
+        const settings = await settingsService.getTyped();
 
-        if (sizesStr) {
-            try {
-                sizes = JSON.parse(sizesStr);
-            } catch (e) {
-                console.warn('Failed to parse thumbnailSizes setting, using defaults');
-            }
-        }
+        // Helper to parse "480p" -> 480
+        const parseRes = (resStr: string): number => {
+            const match = resStr.match(/(\d+)p?/);
+            return match ? parseInt(match[1], 10) : 240; // Default to 240 if parse fails
+        };
 
         const triePath = getTriePath(mediaId);
-        // Desired output: DATA_ROOT/thumbs/<sizeName>/<triePath>.webp
-        // e.g. .cache/thumbs/medium/ab/cd/abcd123.webp
 
-        for (const size of sizes) {
-            const outDir = path.join(DATA_ROOT, 'thumbs', size.name, path.dirname(triePath));
-            const fileName = path.basename(triePath) + '.webp';
+        // Define outputs to generate
+        const outputs = [
+            {
+                type: 'thumbnail',
+                resolution: parseRes(settings.images.thumbnailResolution),
+                format: settings.images.thumbnailFormat,
+                quality: settings.images.thumbnailQuality,
+                label: settings.images.thumbnailResolution
+            },
+            {
+                type: 'preview',
+                resolution: parseRes(settings.images.previewResolution),
+                format: settings.images.previewFormat,
+                quality: settings.images.previewQuality,
+                label: settings.images.previewResolution
+            }
+        ];
+
+        for (const out of outputs) {
+            // Path structure: thumbs/<resolution>/<trie>.<ext>
+            // e.g. thumbs/480p/ab/cd/ef.webp
+            const outDir = path.join(DATA_ROOT, 'thumbs', out.label, path.dirname(triePath));
+            const fileName = `${path.basename(triePath)}.${out.format}`;
             const outPath = path.join(outDir, fileName);
 
             if (!fs.existsSync(outDir)) {
                 fs.mkdirSync(outDir, { recursive: true });
             }
 
-            if (media.type === 'image') {
-                await sharp(filePath)
-                    .resize(size.width)
-                    .webp({ quality: 80 })
-                    .toFile(outPath);
-            } else if (media.type === 'video') {
+            // Processing logic
+            const sharpInstance = sharp(filePath);
+
+            // Resize (Height based, maintain aspect ratio)
+            // For video, we need to extract frame first if sharp doesn't support it directly (sharp supports some, but ffmpeg is safer for frames)
+            if (media.type === 'video') {
                 await new Promise((resolve, reject) => {
-                    // ffmpeg cannot output directly to webp easily in one go with sizing without complex filters, 
-                    // easiest is to extract a frame then use sharp, OR use ffmpeg filter.
-                    // For simplicity and quality, let's extract a png frame then convert with sharp.
-                    // But strictly using fluent-ffmpeg:
                     ffmpeg(filePath)
                         .screenshots({
                             count: 1,
                             folder: outDir,
-                            filename: fileName, // fluent-ffmpeg might append .png provided filename doesn't have ext? No, it respects ext.
-                            size: `${size.width}x?`
+                            filename: `temp_${fileName}.png`,
+                            size: `?x${out.resolution}`
                         })
-                        .on('end', resolve)
+                        .on('end', async () => {
+                            // Process the temp extracted frame
+                            const tempPath = path.join(outDir, `temp_${fileName}.png`);
+                            try {
+                                const processor = sharp(tempPath);
+                                if (out.format === 'webp') {
+                                    processor.webp({ quality: out.quality });
+                                } else if (out.format === 'jpg' || out.format === 'jpeg') {
+                                    processor.jpeg({ quality: out.quality });
+                                }
+                                await processor.toFile(outPath);
+                                fs.unlinkSync(tempPath);
+                                resolve(null);
+                            } catch (e) {
+                                reject(e);
+                            }
+                        })
                         .on('error', reject);
                 });
+            } else {
+                // Image
+                // Resize (Height based, maintain aspect ratio, do not upscale)
+                sharpInstance.resize(null, out.resolution, {
+                    withoutEnlargement: true
+                });
+
+                if (out.format === 'webp') {
+                    sharpInstance.webp({ quality: out.quality });
+                } else if (out.format === 'jpg' || out.format === 'jpeg') {
+                    sharpInstance.jpeg({ quality: out.quality });
+                }
+
+                await sharpInstance.toFile(outPath);
             }
 
+            // Save to DB
             const meta = await sharp(outPath).metadata();
 
+            // Store with size label (e.g. '480p', '1080p')
+            // Using the resolution setting string as the 'size' key in DB
             await prisma.thumbnail.upsert({
                 where: {
                     mediaId_size: {
                         mediaId,
-                        size: size.name
+                        size: out.label
                     }
                 },
                 update: {
-                    path: path.join(size.name, triePath + '.webp'), // Store relative path
+                    path: path.join(out.label, fileName),
                     width: meta.width || 0,
                     height: meta.height || 0
                 },
                 create: {
                     mediaId,
-                    size: size.name,
-                    path: path.join(size.name, triePath + '.webp'),
+                    size: out.label,
+                    path: path.join(out.label, fileName),
                     width: meta.width || 0,
                     height: meta.height || 0
                 }
@@ -99,7 +139,8 @@ export class ThumbsJob extends BaseJob {
         }
 
         // --- LQIP Generation ---
-        const lqipSize = { name: 'lqip', width: 32 };
+        const LQIP_HEIGHT = 32;
+        const lqipSize = { name: 'lqip' };
         const lqipDir = path.join(DATA_ROOT, 'thumbs', lqipSize.name, path.dirname(triePath));
         const lqipName = path.basename(triePath) + '.webp';
         const lqipPath = path.join(lqipDir, lqipName);
@@ -113,7 +154,7 @@ export class ThumbsJob extends BaseJob {
         try {
             if (media.type === 'image') {
                 await sharp(filePath)
-                    .resize(lqipSize.width, lqipSize.width, { fit: 'inside' }) // 32x32 max
+                    .resize(null, LQIP_HEIGHT) // Fixed height 32
                     .blur(5) // High blur for LQIP
                     .webp({ quality: 30 }) // Low quality
                     .toFile(lqipPath);
@@ -128,7 +169,7 @@ export class ThumbsJob extends BaseJob {
                             count: 1,
                             folder: lqipDir,
                             filename: `temp_${lqipName}.png`,
-                            size: `${lqipSize.width}x?`
+                            size: `?x${LQIP_HEIGHT}`
                         })
                         .on('end', resolve)
                         .on('error', reject);
@@ -137,7 +178,7 @@ export class ThumbsJob extends BaseJob {
                 // Process temp frame
                 if (fs.existsSync(tempFrame)) {
                     await sharp(tempFrame)
-                        .resize(lqipSize.width, lqipSize.width, { fit: 'inside' })
+                        .resize(null, LQIP_HEIGHT)
                         .blur(5)
                         .webp({ quality: 30 })
                         .toFile(lqipPath);

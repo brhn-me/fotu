@@ -347,3 +347,10 @@
     color: var(--color-destructive);
     background: rgba(239, 68, 68, 0.1);
 }
+.divider {
+    height: 1px;
+    background-color: var(--border-subtle);
+    margin: 24px 0;
+    border: none;
+    width: 100%;
+}

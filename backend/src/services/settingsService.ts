@@ -125,7 +125,7 @@ class SettingsService {
                 autoplay: all.videoAutoplay === 'true',
                 defaultVolume: Number(all.videoDefaultVolume || 100),
                 previewDuration: Number(all.videoPreviewDuration || 4),
-                resolution: all.videoResolution || '720p',
+                resolution: all.videoResolution || '240p',
                 encoder: all.videoEncoder || 'h264'
             },
             runtimes: {
@@ -137,7 +137,7 @@ class SettingsService {
             images: {
                 thumbnailQuality: Number(all.thumbnailQuality || 70),
                 previewQuality: Number(all.previewQuality || 80),
-                thumbnailResolution: all.thumbnailResolution || '480p',
+                thumbnailResolution: all.thumbnailResolution || '240p',
                 previewResolution: all.previewResolution || '1080p',
                 thumbnailFormat: all.thumbnailFormat || 'webp',
                 previewFormat: all.previewFormat || 'webp',

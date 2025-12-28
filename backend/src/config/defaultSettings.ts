@@ -18,18 +18,48 @@ try {
 }
 
 // Merge or set factory defaults if not present
-if (!defaults.thumbnailSizes) {
-    defaults.thumbnailSizes = JSON.stringify([
-        { name: '480p', width: 854 },
-        { name: '720p', width: 1280 }
-    ]);
-}
+const defaultValues: Record<string, string> = {
+    // Images
+    thumbnailFormat: 'webp',
+    thumbnailResolution: '240p',
+    thumbnailQuality: '80',
+    previewFormat: 'webp',
+    previewResolution: '1080p',
+    previewQuality: '90',
 
-if (!defaults.videoResolutions) {
-    defaults.videoResolutions = JSON.stringify([
-        { name: '480p', height: 480 },
-        { name: '720p', height: 720 }
-    ]);
-}
+    // Encoders
+    imageEncoder: 'webp',
+    videoEncoder: 'h264',
+
+    // Jobs
+    jobsConcurrency: '[]',
+
+    // Raw
+    rawFormats: '["GPR", "NEF", "CR2", "CR3", "ARW", "RAF", "ORF", "DNG"]',
+    darktableEnabled: 'false',
+    useSidecar: 'false',
+
+    // Video
+    videoAutoplay: 'true',
+    videoDefaultVolume: '100',
+    videoPreviewDuration: '4',
+    videoResolution: '240p',
+
+    // Organization
+    albumStructure: '{yyyy}/{yyyy-mm-dd}',
+
+    // Runtimes
+    exiftoolPath: '',
+    ffmpegPath: '',
+    ffprobePath: '',
+    darktableCliPath: ''
+};
+
+// Apply defaults for missing keys
+Object.entries(defaultValues).forEach(([key, val]) => {
+    if (defaults[key] === undefined) {
+        defaults[key] = val;
+    }
+});
 
 export const DEFAULT_SETTINGS = defaults;

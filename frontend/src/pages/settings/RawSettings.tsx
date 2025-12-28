@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { FileCode } from "lucide-react";
+import { FileCode, Save } from "lucide-react";
 import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
 import formStyles from "../../styles/Form.module.css";
+import cardStyles from "../../components/ui/CollapsibleCard.module.css";
 import { useSettings } from "../../context/SettingsContext";
 import { Switch } from "../../components/ui/Switch";
 import { Checkbox } from "../../components/ui/Checkbox";
-import { SaveButton } from "../../components/ui/SaveButton";
 
 const RAW_FORMATS = ["GPR", "NEF", "CR2", "CR3", "ARW", "RAF", "ORF", "DNG"];
 
@@ -57,7 +57,7 @@ export function RawSettings() {
     const handleSaveFormats = async () => {
         await updateSettings({
             rawFormats: JSON.stringify(enabledFormats)
-        });
+        }, "Raw format settings saved");
         setFormatsDirty(false);
     };
 
@@ -65,7 +65,7 @@ export function RawSettings() {
         await updateSettings({
             darktableEnabled: String(darktableEnabled) as any,
             useSidecar: String(useSidecar) as any
-        });
+        }, "Darktable settings saved");
     };
 
     const isDarktableDirty = darktableEnabled !== settings.darktableEnabled || useSidecar !== settings.useSidecar;
@@ -91,10 +91,15 @@ export function RawSettings() {
                     ))}
                 </div>
 
-                <SaveButton
-                    onClick={handleSaveFormats}
-                    disabled={!formatsDirty}
-                />
+                <div className={cardStyles.footer}>
+                    <button
+                        className={formStyles.saveButton}
+                        disabled={!formatsDirty}
+                        onClick={handleSaveFormats}
+                    >
+                        <Save size={16} /> Save Changes
+                    </button>
+                </div>
             </CollapsibleCard>
 
             <div className={formStyles.spacer} />
@@ -120,10 +125,15 @@ export function RawSettings() {
                     onChange={setUseSidecar}
                 />
 
-                <SaveButton
-                    onClick={handleSaveDarktable}
-                    disabled={!isDarktableDirty}
-                />
+                <div className={cardStyles.footer}>
+                    <button
+                        className={formStyles.saveButton}
+                        disabled={!isDarktableDirty}
+                        onClick={handleSaveDarktable}
+                    >
+                        <Save size={16} /> Save Changes
+                    </button>
+                </div>
             </CollapsibleCard>
         </div>
     );

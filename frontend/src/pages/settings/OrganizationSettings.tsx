@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { FolderTree } from "lucide-react";
+import { FolderTree, Save } from "lucide-react";
 import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
 import formStyles from "../../styles/Form.module.css";
+import cardStyles from "../../components/ui/CollapsibleCard.module.css";
 import { useSettings } from "../../context/SettingsContext";
-import { SaveButton } from "../../components/ui/SaveButton";
 import { Input } from "../../components/ui/Input";
 
 export function OrganizationSettings() {
@@ -49,7 +49,7 @@ export function OrganizationSettings() {
             return;
         }
         setError(null);
-        await updateSettings({ albumStructure });
+        await updateSettings({ albumStructure }, "Organization settings saved");
     };
 
     const handleChange = (val: string) => {
@@ -99,10 +99,15 @@ export function OrganizationSettings() {
                         </div>
                     </div>
 
-                    <SaveButton
-                        onClick={handleSave}
-                        disabled={!isDirty || !!error}
-                    />
+                    <div className={cardStyles.footer}>
+                        <button
+                            className={formStyles.saveButton}
+                            disabled={!isDirty || !!error}
+                            onClick={handleSave}
+                        >
+                            <Save size={16} /> Save Changes
+                        </button>
+                    </div>
                 </div>
             </CollapsibleCard>
         </div>

@@ -14,7 +14,7 @@ export class ScanJob extends BaseJob {
 
     async process(job: Job) {
         // SISULATION DELAY: 3 seconds
-        await new Promise(resolve => setTimeout(resolve, 250));
+        await new Promise(resolve => setTimeout(resolve, 25));
 
         const { sourceId, path: scanPath, parentId } = job.data;
 

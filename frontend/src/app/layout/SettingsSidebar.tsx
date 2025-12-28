@@ -1,7 +1,7 @@
 import { NavLink, Link } from "react-router-dom";
 import {
     Image,
-    Video,
+    Monitor,
     FileCode,
     Cpu,
     Code,
@@ -12,8 +12,8 @@ import {
 import styles from "./SettingsSidebar.module.css";
 
 const SETTINGS_MENU = [
-    { path: "/settings/images", label: "Images", icon: Image },
-    { path: "/settings/videos", label: "Videos", icon: Video },
+    { path: "/settings/thumbnails", label: "Thumbnails", icon: Image },
+    { path: "/settings/lightbox", label: "Lightbox", icon: Monitor },
     { path: "/settings/raw", label: "Raw Conversion", icon: FileCode },
     { path: "/settings/jobs", label: "Jobs", icon: Cpu },
     { path: "/settings/encoding", label: "Encoding", icon: Code },

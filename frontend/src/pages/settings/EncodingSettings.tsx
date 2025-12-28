@@ -20,11 +20,11 @@ export function EncodingSettings() {
     const videoDirty = videoEnc !== settings.videoEncoder;
 
     const handleSaveImage = () => {
-        updateSettings({ imageEncoder: imageEnc });
+        updateSettings({ imageEncoder: imageEnc }, "Image encoding settings saved");
     };
 
     const handleSaveVideo = () => {
-        updateSettings({ videoEncoder: videoEnc });
+        updateSettings({ videoEncoder: videoEnc }, "Video encoding settings saved");
     };
 
     return (

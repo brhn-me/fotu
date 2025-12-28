@@ -10,7 +10,7 @@ import { exiftool } from 'exiftool-vendored';
 export class MetadataJob extends BaseJob {
     async process(job: Job) {
         // SISULATION DELAY: 3 seconds
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 150));
 
         const { mediaId, fileId, filePath } = job.data;
 
@@ -66,9 +66,10 @@ export class MetadataJob extends BaseJob {
                 }
 
                 // Map new fields
-                make = tags.Make;
-                model = tags.Model;
-                lens = tags.LensModel || tags.Lens;
+                // Ensure string fields are actually strings (ExifTool can return numbers for Model/Make)
+                make = tags.Make ? String(tags.Make) : undefined;
+                model = tags.Model ? String(tags.Model) : undefined;
+                lens = (tags.LensModel || tags.Lens) ? String(tags.LensModel || tags.Lens) : undefined;
                 iso = tags.ISO;
                 fNumber = tags.FNumber;
                 // Handle ExposureTime safe parsing
@@ -108,7 +109,7 @@ export class MetadataJob extends BaseJob {
                 duration = data.format.duration ? parseFloat(data.format.duration) : 0;
 
                 // Add enhanced video info to metadata
-                codec = stream.codec_name;
+                codec = stream.codec_name ? String(stream.codec_name) : undefined;
                 bitrate = parseInt(data.format.bit_rate || '0', 10);
                 try {
                     fps = eval(stream.r_frame_rate);

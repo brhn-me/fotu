@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { Cpu } from "lucide-react";
+import { Cpu, Save } from "lucide-react";
 import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
 import formStyles from "../../styles/Form.module.css";
+import cardStyles from "../../components/ui/CollapsibleCard.module.css";
 import { JOBS_DATA } from "../jobs/jobsData";
 import { useSettings } from "../../context/SettingsContext";
 import { NumberStepper } from "../../components/ui/NumberStepper";
-import { SaveButton } from "../../components/ui/SaveButton";
 
 export function JobsSettings() {
     const { settings, updateSettings } = useSettings();
@@ -95,10 +95,15 @@ export function JobsSettings() {
                         ))}
                     </div>
 
-                    <SaveButton
-                        onClick={handleSave}
-                        disabled={!isDirty}
-                    />
+                    <div className={cardStyles.footer}>
+                        <button
+                            className={formStyles.saveButton}
+                            disabled={!isDirty}
+                            onClick={handleSave}
+                        >
+                            <Save size={16} /> Save Changes
+                        </button>
+                    </div>
                 </div>
             </CollapsibleCard>
         </div>

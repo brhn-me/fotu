@@ -23,7 +23,7 @@ class JobService {
         const queue = getQueue(type);
         await queue.add(name, data, {
             jobId: jobRun.id, // Link DB ID to BullMQ ID
-            removeOnComplete: 1000,
+            removeOnComplete: 1000000, // Keep more history so stats look correct
             removeOnFail: 5000
         });
 
