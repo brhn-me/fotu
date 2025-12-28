@@ -46,7 +46,13 @@ export class PreviewJob extends BaseJob {
                 .videoCodec('libx264')
                 .audioCodec('aac')
                 .format('mp4')
-                // Basic flags for compatibility
+                // Optimization flags
+                .outputOptions('-r 30')           // Cap at 30fps
+                .outputOptions('-b:v 2000k')      // Target 2Mbps video bitrate
+                .outputOptions('-maxrate 2000k')  // Max bitrate cap
+                .outputOptions('-bufsize 4000k')  // Buffer size for rate control
+                .outputOptions('-b:a 128k')       // 128k audio
+                .outputOptions('-preset veryfast') // Faster encoding
                 .outputOptions('-pix_fmt yuv420p')
                 .outputOptions('-movflags +faststart')
                 .on('end', resolve)

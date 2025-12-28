@@ -29,6 +29,8 @@ export class ThumbsJob extends BaseJob {
             return match ? parseInt(match[1], 10) : 240; // Default to 240 if parse fails
         };
 
+        // console.log(`[ThumbsJob] Processing ${mediaId}. Settings: Thumb=${settings.images.thumbnailResolution}, Preview=${settings.images.previewResolution}`);
+
         const triePath = getTriePath(mediaId);
 
         // Define outputs to generate
@@ -59,6 +61,8 @@ export class ThumbsJob extends BaseJob {
             if (!fs.existsSync(outDir)) {
                 fs.mkdirSync(outDir, { recursive: true });
             }
+
+            console.log(`[ThumbsJob] Generating ${out.type} at resolution target: ${out.resolution}px. Output: ${outPath}`);
 
             // Processing logic
             const sharpInstance = sharp(filePath);
