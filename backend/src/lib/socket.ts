@@ -6,32 +6,39 @@ let io: Server | null = null;
 export function initSocket(httpServer: HttpServer) {
     io = new Server(httpServer, {
         cors: {
-            origin: "*", // Adjust for production
-            methods: ["GET", "POST"]
+            origin: '*', // Adjust for production
+            methods: ['GET', 'POST']
         }
     });
 
     io.on('connection', (socket: Socket) => {
-        console.log('Client connected', socket.id);
+        console.log('Client connected to socket:', socket.id);
 
         socket.on('disconnect', () => {
-            console.log('Client disconnected', socket.id);
+            console.log('Client disconnected:', socket.id);
         });
     });
 
+    console.log('Socket.IO initialized');
     return io;
 }
 
-export function getIO(): Server {
+export function getSocket() {
     if (!io) {
-        throw new Error('Socket.io not initialized!');
+        throw new Error('Socket.IO not initialized!');
     }
     return io;
 }
 
-export function broadcastJobUpdate(jobId: string, data: any) {
+export function emitJobUpdate(jobId: string, status: string, data?: any) {
     if (io) {
-        io.emit(`job:${jobId}`, data);
-        io.emit('job:update', { jobId, ...data });
+        io.emit('job-update', { id: jobId, status, ...data });
+    }
+}
+
+// Helper for generic events
+export function emitEvent(event: string, data: any) {
+    if (io) {
+        io.emit(event, data);
     }
 }

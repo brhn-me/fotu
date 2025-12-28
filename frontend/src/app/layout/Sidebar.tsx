@@ -3,6 +3,7 @@
 import React from "react";
 import { Image, Library, Map, MapPin, Info, Trash2, Cloud, BarChart3, Clock, HardDrive, Activity, Files } from "lucide-react";
 import styles from "./Sidebar.module.css";
+import { useStats } from "../../hooks/useStats";
 
 type AppView = "photos" | "albums" | "sources" | "metadata" | "jobs" | "jobDetails" | "map" | "files";
 
@@ -63,22 +64,30 @@ const SectionHeader = ({ label, isOpen }: { label: string; isOpen: boolean }) =>
 );
 
 const StatisticsCard = ({ isOpen }: { isOpen: boolean }) => {
-    if (!isOpen) return null;
+    const stats = useStats();
 
-    const stats = [
-        { label: "Photos", value: "1,248" },
-        { label: "Videos", value: "156" },
-        { label: "Total Files", value: "1,404" },
+    if (!stats) return null;
+
+    const items = [
+        { label: "Photos", value: stats.photos.toLocaleString() },
+        { label: "Videos", value: stats.videos.toLocaleString() },
+        { label: "Total Files", value: stats.totalFiles.toLocaleString() },
     ];
 
     return (
-        <div className={styles.statsCard}>
+        <div
+            className={styles.statsCard}
+            style={{
+                opacity: isOpen ? 1 : 0,
+                transition: `opacity 0.2s ease ${isOpen ? '0.2s' : '0s'}`
+            }}
+        >
             <div className={styles.statsHeader}>
                 <BarChart3 size={18} />
                 <span>Statistics</span>
             </div>
             <div className={styles.statsList}>
-                {stats.map((stat) => (
+                {items.map((stat) => (
                     <div key={stat.label} className={styles.statItem}>
                         <span className={styles.statItemLabel}>{stat.label}</span>
                         <span className={styles.statItemValue}>{stat.value}</span>
@@ -90,14 +99,25 @@ const StatisticsCard = ({ isOpen }: { isOpen: boolean }) => {
 };
 
 const StorageCard = ({ isOpen }: { isOpen: boolean }) => {
-    if (!isOpen) return null;
+    const stats = useStats();
 
-    const used = 12.8;
-    const total = 15;
-    const percentage = (used / total) * 100;
+    if (!stats) return null;
+
+    // Use reported total from OS, or fallback
+    const totalGB = stats.totalGB || 100;
+    const freeGB = stats.freeGB || 0;
+    const usedGB = totalGB - freeGB;
+
+    const percentage = totalGB > 0 ? (usedGB / totalGB) * 100 : 0;
 
     return (
-        <div className={styles.storageCard}>
+        <div
+            className={styles.storageCard}
+            style={{
+                opacity: isOpen ? 1 : 0,
+                transition: `opacity 0.2s ease ${isOpen ? '0.2s' : '0s'}`
+            }}
+        >
             <div className={styles.storageHeader}>
                 <div className={styles.storageIcon} style={{ color: percentage > 90 ? "#EA4335" : "var(--accent-primary)" }}>
                     <Cloud size={20} />
@@ -109,13 +129,13 @@ const StorageCard = ({ isOpen }: { isOpen: boolean }) => {
                 <div
                     className={styles.progressInner}
                     style={{
-                        width: `${percentage}%`,
+                        width: `${Math.max(2, percentage)}%`,
                         backgroundColor: percentage > 90 ? "#EA4335" : "var(--accent-primary)",
                     }}
                 />
             </div>
             <span className={styles.storageText}>
-                {used} GB of {total} GB used
+                {freeGB.toFixed(1)} GB Free of {totalGB.toFixed(0)} GB
             </span>
         </div>
     );
@@ -130,7 +150,10 @@ export function Sidebar({ isOpen, view, onNavigate }: SidebarProps) {
     return (
         <aside
             className={styles.sidebar}
-            style={{ width: isOpen ? "var(--sidebar-width)" : "var(--sidebar-collapsed-width)" }}
+            style={{
+                width: isOpen ? "var(--sidebar-width)" : "var(--sidebar-collapsed-width)",
+                transition: `width 0.3s ease ${isOpen ? '0s' : '0.2s'}`
+            }}
         >
             <NavItem icon={<Image size={20} />} label="Photos" isOpen={isOpen} active={isPhotosActive} onClick={() => onNavigate("photos")} />
 

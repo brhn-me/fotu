@@ -40,7 +40,7 @@ export function SettingsSidebar({ isOpen }: SettingsSidebarProps) {
                     paddingBottom: isOpen ? "8px" : "0px",
                 }}
             >
-                <span className={styles.sectionLabel}>Configuration</span>
+                <span className={styles.sectionLabel}>Settings</span>
             </div>
 
             <nav className={styles.nav}>

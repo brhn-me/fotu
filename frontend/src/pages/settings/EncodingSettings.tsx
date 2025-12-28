@@ -29,8 +29,6 @@ export function EncodingSettings() {
 
     return (
         <div className={formStyles.pageContainer}>
-            <h1 className={formStyles.pageTitle}>Encoding Settings</h1>
-
             <CollapsibleCard
                 title="Image Encoding"
                 description="Codecs used for image conversion and previews."

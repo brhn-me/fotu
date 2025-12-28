@@ -1,109 +1,197 @@
-import { useState, useEffect } from "react";
-import { Cpu, Save } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import { Clock, Save, Cpu } from "lucide-react";
 import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
 import formStyles from "../../styles/Form.module.css";
 import cardStyles from "../../components/ui/CollapsibleCard.module.css";
-import { JOBS_DATA } from "../jobs/jobsData";
 import { useSettings } from "../../context/SettingsContext";
 import { NumberStepper } from "../../components/ui/NumberStepper";
+import { EditableDropdown } from "../../components/ui/EditableDropdown";
+import { Job, JOB_ICONS } from "../jobs/jobsIcons";
+import { jobsService } from "../../services/jobsService";
 
 export function JobsSettings() {
     const { settings, updateSettings } = useSettings();
-    const [configs, setConfigs] = useState<any[]>([]);
+    const [jobs, setJobs] = useState<Job[]>([]);
 
-    // Initialize configs from settings or defaults
+    // Local state for pending changes
+    const [pendingConcurrency, setPendingConcurrency] = useState<any[]>([]);
+    const [pendingDelays, setPendingDelays] = useState<Record<string, number>>({});
+
     useEffect(() => {
-        let savedConfigs = [];
-        try {
-            savedConfigs = JSON.parse(settings.jobsConcurrency || '[]');
-        } catch (e) {
-            console.error("Failed to parse jobs config", e);
-        }
+        jobsService.getConfig()
+            .then(data => {
+                const jobList: Job[] = Object.values(data).map((j: any) => ({
+                    ...j,
+                    icon: JOB_ICONS[j.id] || Clock
+                }));
+                setJobs(jobList);
+            })
+            .catch(err => console.error("Failed to load job config", err));
+    }, []);
 
-        // Merge saved configs with JOBS_DATA to ensure all jobs exist
-        const merged = JOBS_DATA.map(job => {
-            const saved = savedConfigs.find((s: any) => s.id === job.id);
-            return {
-                id: job.id,
-                name: job.title,
-                concurrency: saved ? saved.concurrency : 2, // Default
-                description: job.description
-            };
+    // Sync local state when settings change
+    useEffect(() => {
+        try {
+            setPendingConcurrency(JSON.parse(settings.jobsConcurrency || '[]'));
+        } catch {
+            setPendingConcurrency([]);
+        }
+        try {
+            setPendingDelays(JSON.parse(settings.jobDelays || '{}'));
+        } catch {
+            setPendingDelays({});
+        }
+    }, [settings.jobsConcurrency, settings.jobDelays]);
+
+    const getDelay = (id: string) => pendingDelays[id] ?? 100;
+
+    const getConcurrency = (id: string) => {
+        if (id === 'scan' || id === 'organize') return 1;
+        const found = pendingConcurrency.find((c: any) => c.id === id);
+        return found ? found.concurrency : 4;
+    };
+
+    const updateLocalConcurrency = (jobId: string, value: number) => {
+        if (jobId === 'scan' || jobId === 'organize') return;
+        setPendingConcurrency(prev => {
+            const current = [...prev];
+            const index = current.findIndex((c: any) => c.id === jobId);
+            if (index >= 0) {
+                current[index] = { ...current[index], concurrency: value };
+            } else {
+                current.push({ id: jobId, concurrency: value });
+            }
+            return current;
         });
-
-        setConfigs(merged);
-    }, [settings.jobsConcurrency]);
-
-    const isDirty = (() => {
-        try {
-            const currentSaved = JSON.parse(settings.jobsConcurrency || '[]');
-
-            const serverEffective = JOBS_DATA.map(job => {
-                const saved = currentSaved.find((s: any) => s.id === job.id);
-                return { id: job.id, concurrency: saved ? saved.concurrency : 2 };
-            });
-            const serverEffectiveJson = JSON.stringify(serverEffective);
-
-            const currentEffective = configs.map(c => ({ id: c.id, concurrency: c.concurrency }));
-            const currentEffectiveJson = JSON.stringify(currentEffective);
-
-            return serverEffectiveJson !== currentEffectiveJson;
-
-        } catch (e) {
-            return false;
-        }
-    })();
-
-    const handleConcurrencyChange = (id: string, value: number) => {
-        setConfigs(prev => prev.map(c =>
-            c.id === id ? { ...c, concurrency: Math.max(1, Math.min(32, value)) } : c
-        ));
     };
 
-    const handleSave = () => {
-        const toSave = configs.map(c => ({ id: c.id, concurrency: c.concurrency }));
-        updateSettings({ jobsConcurrency: JSON.stringify(toSave) });
+    const updateLocalDelay = (jobId: string, value: number) => {
+        setPendingDelays(prev => ({
+            ...prev,
+            [jobId]: value
+        }));
     };
+
+    const isConcurrencyDirty = useMemo(() => {
+        return settings.jobsConcurrency !== JSON.stringify(pendingConcurrency);
+    }, [settings.jobsConcurrency, pendingConcurrency]);
+
+    const isDelayDirty = useMemo(() => {
+        return settings.jobDelays !== JSON.stringify(pendingDelays);
+    }, [settings.jobDelays, pendingDelays]);
+
+    const handleSaveConcurrency = async () => {
+        await updateSettings({ jobsConcurrency: JSON.stringify(pendingConcurrency) }, "Job concurrency updated");
+    };
+
+    const handleSaveDelay = async () => {
+        await updateSettings({ jobDelays: JSON.stringify(pendingDelays) }, "Job delay updated");
+    };
+
+    const PRESETS = [0, 100, 250, 500, 1000, 2000, 3000, 5000];
 
     return (
         <div className={formStyles.pageContainer}>
-            <h1 className={formStyles.pageTitle}>Jobs Settings</h1>
-
             <CollapsibleCard
-                title="Concurrency"
-                description="Adjust worker threads and parallel processing limits per job type."
+                title="Concurrency Configuration"
+                description="Configure the number of simultaneous tasks for each job."
                 icon={<Cpu size={20} />}
             >
-                <div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0px" }}>
-                        {configs.map((config) => (
-                            <div key={config.id} className={formStyles.listItem}>
-                                <div className={formStyles.itemHeader} style={{ marginBottom: 0 }}>
-                                    <div style={{ paddingRight: "16px" }}>
-                                        <div className={formStyles.itemTitle} style={{ fontSize: "15px" }}>{config.name}</div>
-                                        <div className={formStyles.itemDesc} style={{ fontSize: "13px", marginTop: "4px" }}>{config.description}</div>
+                {jobs.map((job: Job, index: number) => {
+                    const Icon = job.icon;
+                    const isConcurrencyDisabled = job.id === 'scan' || job.id === 'organize';
+                    const isLast = index === jobs.length - 1;
+
+                    return (
+                        <div key={job.id} className={`${formStyles.listItem} ${isLast ? formStyles.noBorder : ''}`}>
+                            <div className={formStyles.itemHeader} style={{ marginBottom: 0 }}>
+                                <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flex: 1 }}>
+                                    <div style={{
+                                        padding: '8px',
+                                        borderRadius: '8px',
+                                        backgroundColor: 'var(--bg-secondary)',
+                                        color: 'var(--accent-primary)',
+                                    }}>
+                                        <Icon size={20} />
                                     </div>
-
-                                    <NumberStepper
-                                        value={config.concurrency}
-                                        min={1}
-                                        max={32}
-                                        onChange={(val) => handleConcurrencyChange(config.id, val)}
-                                    />
+                                    <div>
+                                        <h3 className={formStyles.itemTitle}>{job.title}</h3>
+                                        <p className={formStyles.itemDesc} style={{ fontSize: '13px' }}>
+                                            {job.description}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
 
-                    <div className={cardStyles.footer}>
-                        <button
-                            className={formStyles.saveButton}
-                            disabled={!isDirty}
-                            onClick={handleSave}
-                        >
-                            <Save size={16} /> Save Changes
-                        </button>
-                    </div>
+                                <NumberStepper
+                                    value={getConcurrency(job.id)}
+                                    min={1}
+                                    max={10}
+                                    onChange={(val) => updateLocalConcurrency(job.id, val)}
+                                    disabled={isConcurrencyDisabled}
+                                    title={isConcurrencyDisabled ? "Not safe for concurrent operation" : undefined}
+                                />
+                            </div>
+                        </div>
+                    );
+                })}
+                <div className={cardStyles.footer}>
+                    <button
+                        className={formStyles.saveButton}
+                        disabled={!isConcurrencyDirty}
+                        onClick={handleSaveConcurrency}
+                    >
+                        <Save size={16} /> Save Changes
+                    </button>
+                </div>
+            </CollapsibleCard>
+
+            <CollapsibleCard
+                title="Time Delay Configuration"
+                description="Adjust processing intervals between items to balance load."
+                icon={<Clock size={20} />}
+            >
+                {jobs.map((job: Job, index: number) => {
+                    const Icon = job.icon;
+                    const isLast = index === jobs.length - 1;
+
+                    return (
+                        <div key={job.id} className={`${formStyles.listItem} ${isLast ? formStyles.noBorder : ''}`}>
+                            <div className={formStyles.itemHeader} style={{ marginBottom: 0 }}>
+                                <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flex: 1 }}>
+                                    <div style={{
+                                        padding: '8px',
+                                        borderRadius: '8px',
+                                        backgroundColor: 'var(--bg-secondary)',
+                                        color: 'var(--accent-primary)',
+                                    }}>
+                                        <Icon size={20} />
+                                    </div>
+                                    <div>
+                                        <h3 className={formStyles.itemTitle}>{job.title}</h3>
+                                        <p className={formStyles.itemDesc} style={{ fontSize: '13px' }}>
+                                            {job.description}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <EditableDropdown
+                                    value={getDelay(job.id)}
+                                    options={PRESETS}
+                                    unit="ms"
+                                    onChange={(val: number) => updateLocalDelay(job.id, val)}
+                                />
+                            </div>
+                        </div>
+                    );
+                })}
+                <div className={cardStyles.footer}>
+                    <button
+                        className={formStyles.saveButton}
+                        disabled={!isDelayDirty}
+                        onClick={handleSaveDelay}
+                    >
+                        <Save size={16} /> Save Changes
+                    </button>
                 </div>
             </CollapsibleCard>
         </div>

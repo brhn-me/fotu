@@ -1,84 +1,108 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
     Activity,
     Settings,
     RefreshCcw,
-    Database,
-    Image,
-    Film,
-    FileImage,
-    LayoutGrid,
-    Search,
-    Zap
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Jobs.module.css";
 import shared from "../../styles/shared.module.css";
-import { JobCard, Job } from "../../components/JobCard";
-import { Button } from "../../components/ui/Button";
-
-// Map job IDs to icons
-const JOB_ICONS: Record<string, any> = {
-    scan: Database,
-    hash: Zap,
-    thumbs: Image,
-    metadata: Search,
-    preview: FileImage,
-    raw: Film,
-    encoding: Film,
-    conversion: Activity,
-    organize: LayoutGrid
-};
+import { Modal } from "../../components/ui/Modal";
+import { Button } from "../../components/ui/Button"; // Assuming Button exists based on usage
+import { useSocket } from "../../hooks/useSocket";
+import { Job, JOB_ICONS } from "./jobsIcons";
+import { JobCard } from "../../components/JobCard";
+import { api, BASE_URL } from "../../api/client";
 
 export function JobsPage() {
     const [jobs, setJobs] = useState<Job[]>([]);
+    const [restartJobId, setRestartJobId] = useState<string | null>(null);
     const navigate = useNavigate();
+    const { socket, isConnected } = useSocket();
 
-    useEffect(() => {
-        const fetchJobs = async () => {
-            try {
-                const res = await fetch('http://localhost:3000/api/jobs');
-                const data = await res.json();
+    const fetchJobs = useCallback(async () => {
+        try {
+            // Get Config first
+            const configData = await api.get<any>('/jobs/config');
 
-                const mappedJobs: Job[] = data.map((q: any) => {
-                    const total = (q.counts.active || 0) + (q.counts.completed || 0) + (q.counts.failed || 0) + (q.counts.delayed || 0) + (q.counts.waiting || 0);
-                    const completed = q.counts.completed || 0;
-                    const failed = q.counts.failed || 0;
-                    const active = q.counts.active || 0;
+            // Get Live Status
+            const statusData = await api.get<any>('/jobs');
 
-                    let status: Job['status'] = 'pending';
-                    if (q.isPaused) status = 'paused';
-                    else if (active > 0) status = 'running';
-                    else if (total > 0 && total === completed) status = 'completed';
-                    else if (failed > 0) status = 'failed';
+            // Merge
+            // statusData is array of { id, counts, isPaused }
+            // configData is object { [id]: { title, description } }
 
-                    return {
-                        id: q.id,
-                        title: q.title,
-                        description: q.description,
-                        status,
-                        icon: JOB_ICONS[q.id] || Activity,
-                        total,
-                        completed,
-                        failed,
-                        errors: failed,
-                        concurrency: 0
-                    };
-                });
+            const merged = Object.keys(configData).map(key => {
+                const conf = configData[key];
+                const stats = statusData.find((s: any) => s.id === key) || { counts: {}, isPaused: false };
 
-                setJobs(mappedJobs);
-            } catch (err) {
-                console.error("Failed to poll jobs:", err);
-            }
-        };
+                const active = stats.counts.active || 0;
+                const completed = stats.counts.completed || 0;
+                const failed = stats.counts.failed || 0;
+                const total = active + completed + failed + (stats.counts.delayed || 0) + (stats.counts.waiting || 0);
 
-        fetchJobs();
-        const interval = setInterval(fetchJobs, 2000);
-        return () => clearInterval(interval);
+                let status: Job['status'] = 'pending';
+                if (stats.isPaused) status = 'paused';
+                else if (active > 0) status = 'running';
+                else if (total > 0 && total === completed) status = 'completed';
+                else if (failed > 0) status = 'failed';
+
+                return {
+                    id: key,
+                    title: conf.title,
+                    description: conf.description,
+                    status,
+                    icon: JOB_ICONS[key] || Activity,
+                    total,
+                    completed,
+                    failed,
+                    errors: failed,
+                };
+            });
+
+            setJobs(merged);
+        } catch (err) {
+            console.error("Failed to fetch jobs:", err);
+        }
     }, []);
 
+    useEffect(() => {
+        fetchJobs();
+
+        if (socket) {
+            socket.on('jobs-updated', () => {
+                fetchJobs(); // Simple strategy: re-fetch all on any update
+            });
+        }
+
+        return () => {
+            if (socket) {
+                socket.off('jobs-updated');
+            }
+        };
+    }, [fetchJobs, socket]);
+
+    const handlePause = async (id: string) => {
+        await api.post(`/jobs/${id}/pause`, {});
+    };
+
+    const handleResume = async (id: string) => {
+        await api.post(`/jobs/${id}/resume`, {});
+    };
+
+    const handleRestartClick = (id: string) => {
+        setRestartJobId(id);
+    };
+
+    const confirmRestart = async () => {
+        if (restartJobId) {
+            await api.post(`/jobs/${restartJobId}/restart`, {});
+            setRestartJobId(null);
+        }
+    };
+
     const openBullBoard = () => {
-        window.open('http://localhost:3000/jobs/queues', '_blank');
+        window.open(`${BASE_URL.replace('/api', '')}/jobs/queues`, '_blank');
     };
 
     return (
@@ -107,7 +131,7 @@ export function JobsPage() {
                                     Jobs
                                 </h1>
                                 <p className={shared.pageSubtitle} style={{ margin: "4px 0 0 0", color: "var(--text-muted)" }}>
-                                    Monitor and manage indexing and processing tasks.
+                                    Monitor processing tasks. {isConnected ? <span style={{ color: 'green' }}>● Live</span> : <span style={{ color: 'orange' }}>● Connecting...</span>}
                                 </p>
                             </div>
                         </div>
@@ -155,11 +179,30 @@ export function JobsPage() {
                         <JobCard
                             key={job.id}
                             job={job}
-                            showActions={false}
+                            showActions={true}
+                            onToggle={() => job.status === 'paused' ? handleResume(job.id) : handlePause(job.id)}
+                            onRestart={() => handleRestartClick(job.id)}
                         />
                     ))}
                 </div>
             </div>
+
+            <Modal
+                isOpen={!!restartJobId}
+                onClose={() => setRestartJobId(null)}
+                onConfirm={confirmRestart}
+                title="Restart Job?"
+                type="danger"
+                confirmLabel="Restart"
+            >
+                <p>
+                    Are you sure you want to restart the <strong>{restartJobId}</strong> job?
+                </p>
+                <br />
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9em' }}>
+                    This will purge the current queue (clearing active, completed, and failed jobs) and re-queue all items from the beginning.
+                </p>
+            </Modal>
         </div>
     );
 }

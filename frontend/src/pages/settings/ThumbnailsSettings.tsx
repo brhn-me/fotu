@@ -62,8 +62,6 @@ export function ThumbnailsSettings() {
 
     return (
         <div className={formStyles.pageContainer}>
-            <h1 className={formStyles.pageTitle}>Thumbnails & Previews</h1>
-
             <CollapsibleCard
                 title="Thumbnails"
                 description="Configure generation settings for grid thumbnails."

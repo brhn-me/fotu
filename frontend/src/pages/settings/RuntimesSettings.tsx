@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Terminal, CheckCircle2, XCircle } from "lucide-react";
 import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
-import { runtimesApi, RuntimeInfo } from "../../api/runtimes";
+import { runtimesApi, RuntimeInfo } from "../../api/endpoints/runtimes";
 import formStyles from "../../styles/Form.module.css";
 import { useSettings } from "../../context/SettingsContext";
 import { SaveButton } from "../../components/ui/SaveButton";
@@ -111,12 +111,7 @@ export function RuntimesSettings() {
                 } else {
                     // Verify
                     try {
-                        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/runtimes/verify`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ path: currentPath })
-                        });
-                        const data = await res.json();
+                        const data = await runtimesApi.verifyRuntime(currentPath);
                         if (data.valid) {
                             updates[settingKey] = currentPath;
                         } else {
@@ -143,8 +138,6 @@ export function RuntimesSettings() {
 
     return (
         <div className={formStyles.pageContainer}>
-            <h1 className={formStyles.pageTitle}>Runtimes</h1>
-
             <CollapsibleCard
                 title="System Binaries"
                 description="Status of external tools required for media processing."

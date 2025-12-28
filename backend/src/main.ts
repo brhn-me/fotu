@@ -37,6 +37,8 @@ const port = config.port
 
 // Create HTTP Server
 const httpServer = createServer(app)
+import { initSocket } from './lib/socket'
+initSocket(httpServer)
 
 // Initialize Workers
 initWorkers()
@@ -89,12 +91,14 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 import settingsRouter from './api/settings'
 import runtimesRouter from './api/runtimes'
 import sourcesRouter from './api/sources'
-import jobsRouter from './api/jobs' // We will create this next
+import jobsRouter from './api/jobs'
+import statsRouter from './api/stats'
 
 app.use('/api/settings', settingsRouter)
 app.use('/api/runtimes', runtimesRouter)
 app.use('/api/sources', sourcesRouter)
 app.use('/api/jobs', jobsRouter)
+app.use('/api/stats', statsRouter)
 
 const server = httpServer.listen(port, () => {
     console.log(`Server running on port ${port}`)

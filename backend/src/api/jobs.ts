@@ -1,8 +1,32 @@
 import express from 'express';
-import { JOBS_CONFIG } from '../config/jobsConfig';
+import { JOBS_CONFIG, JobType } from '../config/jobsConfig';
+import { jobService } from '../services/jobService';
 import { getQueue } from '../lib/queue';
 
 const router = express.Router();
+
+// GET /api/jobs/config - Return the static job definitions
+router.get('/config', (req, res) => {
+    res.json(JOBS_CONFIG);
+});
+
+router.post('/:id/pause', async (req, res) => {
+    const { id } = req.params;
+    await jobService.pauseQueue(id as JobType);
+    res.json({ success: true });
+});
+
+router.post('/:id/resume', async (req, res) => {
+    const { id } = req.params;
+    await jobService.resumeQueue(id as JobType);
+    res.json({ success: true });
+});
+
+router.post('/:id/restart', async (req, res) => {
+    const { id } = req.params;
+    await jobService.restartJob(id as JobType);
+    res.json({ success: true });
+});
 
 /**
  * @swagger

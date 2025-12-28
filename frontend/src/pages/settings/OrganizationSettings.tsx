@@ -59,8 +59,6 @@ export function OrganizationSettings() {
 
     return (
         <div className={formStyles.pageContainer}>
-            <h1 className={formStyles.pageTitle}>Organization</h1>
-
             <CollapsibleCard
                 title="Album Structure"
                 description="Define how imported photos are organized into folders."

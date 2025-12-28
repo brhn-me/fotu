@@ -307,6 +307,10 @@
     border-bottom: none;
 }
 
+.noBorder {
+    border-bottom: none !important;
+}
+
 .itemHeader {
     display: flex;
     align-items: center;
@@ -347,6 +351,7 @@
     color: var(--color-destructive);
     background: rgba(239, 68, 68, 0.1);
 }
+
 .divider {
     height: 1px;
     background-color: var(--border-subtle);

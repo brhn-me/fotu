@@ -72,8 +72,6 @@ export function RawSettings() {
 
     return (
         <div className={formStyles.pageContainer}>
-            <h1 className={formStyles.pageTitle}>Raw Conversion</h1>
-
             <CollapsibleCard
                 title="Supported Formats"
                 description="Select which RAW formats to process and index."

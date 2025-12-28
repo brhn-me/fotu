@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { settingsApi } from '../api/settings';
+import { settingsApi } from '../api/endpoints/settings';
 
 // Define the shape of our settings
 export interface AppSettings {
@@ -18,6 +18,7 @@ export interface AppSettings {
 
     // Jobs (JSON stringified)
     jobsConcurrency: string;
+    jobDelays: string; // JSON Record<string, number>
 
     // Raw
     rawFormats: string; // JSON Array
@@ -50,6 +51,7 @@ const DEFAULT_SETTINGS: AppSettings = {
     imageEncoder: 'webp',
     videoEncoder: 'h264',
     jobsConcurrency: '[]',
+    jobDelays: '{}',
     rawFormats: '["GPR", "NEF", "CR2", "CR3", "ARW", "RAF", "ORF", "DNG"]',
     darktableEnabled: false,
     useSidecar: false,

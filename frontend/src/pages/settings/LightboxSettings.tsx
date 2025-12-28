@@ -39,8 +39,6 @@ export function LightboxSettings() {
 
     return (
         <div className={formStyles.pageContainer}>
-            <h1 className={formStyles.pageTitle}>Lightbox Settings</h1>
-
             <CollapsibleCard
                 title="Full Preview"
                 description="Settings for high-quality single view previews (Lightbox)."

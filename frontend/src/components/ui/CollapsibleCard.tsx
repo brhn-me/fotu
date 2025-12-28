@@ -20,7 +20,7 @@ export function CollapsibleCard({
     const [isOpen, setIsOpen] = useState(defaultOpen);
 
     return (
-        <div className={styles.card}>
+        <div className={`${styles.card} ${isOpen ? styles.cardOpen : styles.cardCollapsed}`}>
             <div className={styles.header} onClick={() => setIsOpen(!isOpen)}>
                 <div className={styles.titleGroup}>
                     <div className={styles.iconBox}>

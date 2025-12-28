@@ -3,8 +3,7 @@ import { FolderPlus, RefreshCw, Trash2, HardDrive } from "lucide-react";
 import toast from "react-hot-toast";
 import formStyles from "../../styles/Form.module.css";
 import { Modal } from "../../components/ui/Modal";
-
-const API_Base = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+import { api } from "../../api/client";
 
 type Source = {
     id: string;
@@ -27,11 +26,8 @@ export function SourcesPage() {
 
     const fetchSources = async () => {
         try {
-            const res = await fetch(`${API_Base}/api/sources`);
-            if (res.ok) {
-                const data = await res.json();
-                setSources(data);
-            }
+            const data = await api.get<Source[]>('/sources');
+            setSources(data);
         } catch (error) {
             console.error("Failed to fetch sources", error);
         }
@@ -46,16 +42,7 @@ export function SourcesPage() {
         setIsLoading(true);
         setError(undefined);
         try {
-            const res = await fetch(`${API_Base}/api/sources`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ path, mode: 'watch' })
-            });
-
-            if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.error || 'Failed to add source');
-            }
+            await api.post('/sources', { path, mode: 'watch' });
 
             toast.success("Source added successfully");
             setPath("");
@@ -75,13 +62,9 @@ export function SourcesPage() {
     const confirmDelete = async () => {
         if (!sourceToDelete) return;
         try {
-            const res = await fetch(`${API_Base}/api/sources/${sourceToDelete.id}`, { method: 'DELETE' });
-            if (res.ok) {
-                toast.success("Source removed");
-                fetchSources();
-            } else {
-                toast.error("Failed to remove source");
-            }
+            await api.delete(`/sources/${sourceToDelete.id}`);
+            toast.success("Source removed");
+            fetchSources();
         } catch (error) {
             toast.error("Failed to remove source");
         } finally {
@@ -94,7 +77,7 @@ export function SourcesPage() {
 
     const handleRescan = async (id: string) => {
         toast.promise(
-            fetch(`${API_Base}/api/sources/${id}/scan`, { method: 'POST' }),
+            api.post(`/sources/${id}/scan`, {}),
             {
                 loading: 'Scanning source...',
                 success: 'Scan triggered',

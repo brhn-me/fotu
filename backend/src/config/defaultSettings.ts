@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
+import { JOBS_CONFIG } from './jobsConfig';
 
 const CONFIG_PATH = path.join(process.cwd(), 'config.yml');
 
@@ -33,6 +34,12 @@ const defaultValues: Record<string, string> = {
 
     // Jobs
     jobsConcurrency: '[]',
+    jobDelays: JSON.stringify(
+        Object.values(JOBS_CONFIG).reduce((acc, job) => {
+            acc[job.id] = job.defaultDelay || 100;
+            return acc;
+        }, {} as Record<string, number>)
+    ),
 
     // Raw
     rawFormats: '["GPR", "NEF", "CR2", "CR3", "ARW", "RAF", "ORF", "DNG"]',

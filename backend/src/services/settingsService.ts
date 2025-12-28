@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events';
 import prisma from '../db/client';
 import { DEFAULT_SETTINGS } from '../config/defaultSettings';
 
@@ -6,6 +7,8 @@ export interface InternalSettings {
         albumStructure: string;
     };
     jobs: Record<string, number>;
+    jobDelays: Record<string, number>;
+    jobDelay: number; // Keep for backward compat if needed, or remove?
     raw: {
         formats: string[];
         darktableEnabled: boolean;
@@ -35,7 +38,7 @@ export interface InternalSettings {
     };
 }
 
-class SettingsService {
+class SettingsService extends EventEmitter {
     /**
      * Seeds default settings into the database if they don't exist.
      */
@@ -83,6 +86,7 @@ class SettingsService {
         });
 
         await prisma.$transaction(operations);
+        this.emit('settingsUpdated');
     }
 
     /**
@@ -111,11 +115,22 @@ class SettingsService {
             rawFormats = JSON.parse(all.rawFormats || '[]');
         } catch { /* ignore */ }
 
+        // Parse Job Delays
+        let jobDelays: Record<string, number> = {};
+        try {
+            const parsed = JSON.parse(all.jobDelays || '{}');
+            if (typeof parsed === 'object' && parsed !== null) {
+                jobDelays = parsed;
+            }
+        } catch { /* ignore */ }
+
         return {
             core: {
                 albumStructure: all.albumStructure || '{yyyy}/{mm}'
             },
             jobs: jobsConfig,
+            jobDelays: jobDelays,
+            jobDelay: Number(all.jobDelay || 100),
             raw: {
                 formats: rawFormats,
                 darktableEnabled: all.darktableEnabled === 'true',
