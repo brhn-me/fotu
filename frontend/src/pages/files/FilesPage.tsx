@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate, useParams, Link } from "react-router-dom";
 import { Folder, FileText, Image, Film, ChevronRight, HardDrive, LayoutGrid, List as ListIcon, Info, Pencil, Clock, Trash2, ExternalLink, Move } from "lucide-react";
 import styles from "./FilesPage.module.css";
 import { MetadataEditorModal } from "./MetadataEditorModal";
+import { ChangeLocationModal } from "./ChangeLocationModal";
 import { FixDateTimeModal } from "./FixDateTimeModal";
 import { FilePropertiesModal } from './FilePropertiesModal';
 
@@ -40,18 +41,21 @@ const MOCK_FILE_TREE: Record<string, FileNode[]> = {
             id: 'f1', name: 'Photos', type: 'folder', children: [
                 {
                     id: 'f1-1', name: '2023_Holidays', type: 'folder', children: [
-                        { id: 'img1', name: 'Beach_Sunset.jpg', type: 'image', size: '4.2 MB', modified: '2023-12-20', metadata: { camera: 'Canon EOS R5', location: 'Maui, Hawaii', tags: ['sunset', 'beach', 'vacation'] } },
-                        { id: 'img2', name: 'Family_Dinner.jpg', type: 'image', size: '3.8 MB', modified: '2023-12-20', metadata: { camera: 'iPhone 14 Pro', location: 'Home', tags: ['family', 'dinner'] } },
+                        { id: 'img1', name: 'Beach_Sunset.jpg', type: 'image', size: '4.2 MB', modified: '2023-12-20', metadata: { camera: 'Canon EOS R5', location: { lat: 20.7984, lng: -156.3319 }, tags: ['sunset', 'beach'] } },
+                        { id: 'img2', name: 'Family_Dinner.jpg', type: 'image', size: '3.8 MB', modified: '2023-12-20', metadata: { camera: 'iPhone 14 Pro', location: { lat: 51.505, lng: -0.09 }, tags: ['family'] } },
                         { id: 'vid1', name: 'Fireworks.mp4', type: 'video', size: '150 MB', modified: '2023-12-21', metadata: { resolution: '1080p', duration: '0:02:30' } },
-                        { id: 'img3', name: 'Hotel_View.png', type: 'image', size: '2.1 MB', modified: '2023-12-22', metadata: { camera: 'GoPro Hero 10', location: 'Hotel Balcony', tags: ['view', 'hotel'] } },
+                        { id: 'img3', name: 'Hotel_View.png', type: 'image', size: '2.1 MB', modified: '2023-12-22', metadata: { camera: 'GoPro Hero 10', location: { lat: 20.7950, lng: -156.3350 }, tags: ['view'] } },
+                        { id: 'img4', name: 'Poolside.jpg', type: 'image', size: '3.2 MB', modified: '2023-12-22', metadata: { camera: 'iPhone 14 Pro', location: { lat: 20.7960, lng: -156.3330 } } },
+                        { id: 'img5', name: 'Lunch_Spot.jpg', type: 'image', size: '2.8 MB', modified: '2023-12-23', metadata: { camera: 'Canon EOS R5', location: { lat: 20.8000, lng: -156.3300 } } },
+                        { id: 'img6', name: 'Hike_Entrance.jpg', type: 'image', size: '4.5 MB', modified: '2023-12-24', metadata: { camera: 'GoPro', location: { lat: 20.7990, lng: -156.3340 } } },
                     ]
                 },
                 {
                     id: 'f1-2', name: '2022_Trips', type: 'folder', children: [
                         {
                             id: 'f1-2-1', name: 'Paris', type: 'folder', children: [
-                                { id: 'p1', name: 'Eiffel_Tower.jpg', type: 'image', size: '5.1 MB', modified: '2022-06-15', metadata: { camera: 'Nikon D850', location: 'Paris, France', tags: ['landmark', 'city'] } },
-                                { id: 'p2', name: 'Louvre.jpg', type: 'image', size: '4.9 MB', modified: '2022-06-16', metadata: { camera: 'Nikon D850', location: 'Paris, France', tags: ['museum', 'art'] } },
+                                { id: 'p1', name: 'Eiffel_Tower.jpg', type: 'image', size: '5.1 MB', modified: '2022-06-15', metadata: { camera: 'Nikon D850', location: { lat: 48.8584, lng: 2.2945 }, tags: ['landmark'] } },
+                                { id: 'p2', name: 'Louvre.jpg', type: 'image', size: '4.9 MB', modified: '2022-06-16', metadata: { camera: 'Nikon D850', location: { lat: 48.8606, lng: 2.3376 }, tags: ['museum'] } },
                             ]
                         },
                         { id: 'f1-2-2', name: 'Tokyo', type: 'folder', children: [] },
@@ -250,6 +254,7 @@ const FileExplorer = () => {
     const [fixingDateFile, setFixingDateFile] = useState<FileNode | null>(null);
     const [propertiesFile, setPropertiesFile] = useState<FileNode | null>(null);
     const [renamingFile, setRenamingFile] = useState<FileNode | null>(null);
+    const [changingLocationFile, setChangingLocationFile] = useState<FileNode | null>(null);
 
     // Auto-expand parents on mount/path change
     useMemo(() => {
@@ -361,6 +366,8 @@ const FileExplorer = () => {
 
         if (action === 'rename') {
             setRenamingFile(file);
+        } else if (action === 'move') {
+            setChangingLocationFile(file);
         } else if (action === 'edit-metadata') {
             setEditingFile(file);
         } else if (action === 'fix-date') {
@@ -591,6 +598,16 @@ const FileExplorer = () => {
                     isOpen={true}
                     onClose={() => setPropertiesFile(null)}
                     file={propertiesFile}
+                />
+            )}
+
+            {changingLocationFile && (
+                <ChangeLocationModal
+                    isOpen={true}
+                    onClose={() => setChangingLocationFile(null)}
+                    file={changingLocationFile}
+                    siblings={currentFiles}
+                    onSave={(id, location) => handleSaveMetadata(id, { metadata: { location } })}
                 />
             )}
         </div>
