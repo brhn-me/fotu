@@ -12,6 +12,27 @@ const BINARIES = [
     { key: 'darktable', cmd: 'darktable-cli' }
 ];
 
+/**
+ * @swagger
+ * /api/runtimes:
+ *   get:
+ *     summary: Get status of external binaries (exiftool, ffmpeg, etc.)
+ *     tags: [Runtimes]
+ *     responses:
+ *       200:
+ *         description: List of binaries and their availability
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   key: { type: string }
+ *                   name: { type: string }
+ *                   found: { type: boolean }
+ *                   path: { type: string, nullable: true }
+ */
 router.get('/', async (req, res) => {
     const results = await Promise.all(BINARIES.map(async (bin) => {
         try {
@@ -37,6 +58,33 @@ router.get('/', async (req, res) => {
     res.json(results);
 });
 
+/**
+ * @swagger
+ * /api/runtimes/verify:
+ *   post:
+ *     summary: Verify if a path is executable
+ *     tags: [Runtimes]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               path:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Verification result
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 valid: { type: boolean }
+ *       400:
+ *         description: Path is required
+ */
 router.post('/verify', async (req, res) => {
     const { path } = req.body;
     if (!path) {

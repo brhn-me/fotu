@@ -1,6 +1,7 @@
 import prisma from '../db/client';
-
+import { jobService } from './jobService'; // Use jobService instead of direct queue
 import { promises as fs } from 'fs';
+import * as path from 'path';
 
 export interface CreateSourceDto {
     path: string;
@@ -29,15 +30,23 @@ class SourcesService {
         }
 
         try {
-            return await prisma.source.create({
+            const source = await prisma.source.create({
                 data: {
                     path: data.path,
                     mode: data.mode,
                     enabled: data.mode === 'watch',
-                    status: 'IDLE',
-                    scannedAt: null
+                    status: 'SCANNING', // Start as scanning
+                    scannedAt: new Date()
                 }
             });
+
+            // Trigger scan job via JobService for proper tracking
+            await jobService.addJob('scan', `scan-root-${source.id}`, {
+                sourceId: source.id,
+                path: source.path
+            });
+
+            return source;
         } catch (error: any) {
             if (error.code === 'P2002') {
                 throw new Error('Source path already exists');
@@ -60,24 +69,20 @@ class SourcesService {
      * In a real app, this would trigger the scan job which would eventually set it back to IDLE.
      */
     async scan(id: string) {
-        // TODO: Trigger actual background job - for now just set status
-        const source = await prisma.source.update({
-            where: { id },
-            data: {
-                status: 'Scanning',
-                scannedAt: new Date()
-            }
+        const source = await prisma.source.findUnique({ where: { id } });
+        if (!source) throw new Error('Source not found');
+
+        // Trigger scan job via JobService
+        await jobService.addJob('scan', `scan-root-${source.id}`, {
+            sourceId: source.id,
+            path: source.path
         });
 
-        // Simulate completion after 2 seconds for UI demo
-        setTimeout(async () => {
-            await prisma.source.update({
-                where: { id },
-                data: { status: 'IDLE' }
-            });
-        }, 2000);
-
-        return source;
+        // Optimistically update status
+        return prisma.source.update({
+            where: { id },
+            data: { status: 'SCANNING' }
+        });
     }
 
     /**

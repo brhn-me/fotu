@@ -17,4 +17,19 @@ try {
     defaults = {};
 }
 
+// Merge or set factory defaults if not present
+if (!defaults.thumbnailSizes) {
+    defaults.thumbnailSizes = JSON.stringify([
+        { name: '480p', width: 854 },
+        { name: '720p', width: 1280 }
+    ]);
+}
+
+if (!defaults.videoResolutions) {
+    defaults.videoResolutions = JSON.stringify([
+        { name: '480p', height: 480 },
+        { name: '720p', height: 720 }
+    ]);
+}
+
 export const DEFAULT_SETTINGS = defaults;

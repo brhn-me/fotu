@@ -3,7 +3,22 @@ import { settingsService } from '../services/settingsService';
 
 const router = Router();
 
-// GET /settings - Fetch all settings as key-value pairs
+/**
+ * @swagger
+ * /api/settings:
+ *   get:
+ *     summary: Fetch all settings
+ *     tags: [Settings]
+ *     responses:
+ *       200:
+ *         description: A map of setting keys and values
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               additionalProperties:
+ *                 type: string
+ */
 router.get('/', async (req, res) => {
     try {
         const settingsMap = await settingsService.getAll();
@@ -14,7 +29,26 @@ router.get('/', async (req, res) => {
     }
 });
 
-// PUT /settings - Update multiple settings
+/**
+ * @swagger
+ * /api/settings:
+ *   put:
+ *     summary: Update multiple settings
+ *     tags: [Settings]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             additionalProperties:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: Settings updated successfully
+ *       400:
+ *         description: Invalid request body
+ */
 router.put('/', async (req, res) => {
     const updates = req.body; // Expects { key: value, ... }
 

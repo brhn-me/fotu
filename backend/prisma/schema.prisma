@@ -22,36 +22,66 @@ model Source {
   scannedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  files     File[]
+  media     Media[]
 }
 
 model File {
   id        String   @id @default(uuid())
   path      String   @unique
+  name      String
+  extension String?
   size      BigInt
+  // mimeType removed, only in Media
+  hash      String?
+  isDirectory Boolean @default(false)
+  
+  parentId  String?
+  parent    File?    @relation("DirectoryTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children  File[]   @relation("DirectoryTree")
+  
+  sourceId  String
+  source    Source   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  
+  media     Media?
+  sidecarFor Metadata? @relation("Sidecar")
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  media     Media?
+  @@index([sourceId])
+  @@index([hash])
+  @@index([parentId])
 }
 
 model Media {
   id          String   @id @default(uuid())
   fileId      String   @unique
   file        File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  
+  sourceId    String
+  source      Source   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  
   type        String   // image, video
   mimeType    String
-  hash        String?  @unique
   
   metadata    Metadata?
   thumbnails  Thumbnail[]
   
   createdAt   DateTime @default(now())
+  
+  @@index([sourceId])
 }
+
 
 model Metadata {
   id          String   @id @default(uuid())
   mediaId     String   @unique
   media       Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  sidecarFileId String? @unique
+  sidecarFile   File?   @relation("Sidecar", fields: [sidecarFileId], references: [id])
   
   dateTaken   DateTime?
   width       Int?
@@ -61,6 +91,19 @@ model Metadata {
   // Locations (simplified)
   latitude    Float?
   longitude   Float?
+
+  // Camera Info
+  make        String?
+  model       String?
+  lens        String?
+  iso         Int?
+  fNumber     Float?
+  exposureTime Float? // in seconds
+
+  // Video Info
+  fps         Float?
+  codec       String?
+  bitrate     Int?
   
   raw         Json?    // Full EXIF/ffprobe dump
 }
