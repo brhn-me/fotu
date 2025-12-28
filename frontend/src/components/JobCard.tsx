@@ -11,7 +11,7 @@ export interface Job {
     id: string;
     title: string;
     description: string;
-    status: "running" | "paused" | "completed";
+    status: "running" | "paused" | "completed" | "pending" | "failed";
     progress?: number;
     icon: React.ElementType;
     total: number;

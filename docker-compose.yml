@@ -20,6 +20,10 @@ services:
       - "6380:6379"
     volumes:
       - redis_data:/data
+  # Backend service for volume mapping documentation/future use
+  # backend:
+  #   volumes:
+  #     - /home/burhan/Fotu:/data/fotu
 
 volumes:
   postgres_data:

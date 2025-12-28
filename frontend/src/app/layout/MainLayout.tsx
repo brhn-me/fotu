@@ -3,6 +3,8 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { AlbumsSidebar } from "./AlbumsSidebar";
+import { SettingsSidebar } from "./SettingsSidebar";
+import { ToolsSidebar } from "./ToolsSidebar";
 import { FilterModal } from "../../components/search/FilterModal";
 import { usePhotos } from "../../context/PhotoContext";
 import { Lightbox } from "../../components/gallery/Lightbox";
@@ -16,6 +18,7 @@ const getSidebarView = (path: string) => {
     if (path.startsWith("/metadata")) return "metadata";
     if (path.startsWith("/jobs")) return "jobs";
     if (path.startsWith("/map")) return "map";
+    if (path.startsWith("/files")) return "files";
     return "photos";
 };
 
@@ -28,22 +31,33 @@ export function MainLayout() {
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Determine if we are in settings or tools section
+    const isSettings = location.pathname.startsWith("/settings");
+    const isTools = location.pathname.startsWith("/tools");
+
     return (
         <div className={styles.layoutRoot}>
             <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} onFilterClick={() => setIsFilterModalOpen(true)} />
 
             <div className={styles.contentWrapper}>
-                <Sidebar
-                    isOpen={isSidebarOpen}
-                    view={getSidebarView(location.pathname)}
-                    onNavigate={(view) => {
-                        if (view === "photos") navigate("/");
-                        else if (view === "albums") navigate("/albums");
-                        else navigate("/" + view);
-                    }}
-                />
+                {isSettings ? (
+                    <SettingsSidebar isOpen={isSidebarOpen} />
+                ) : isTools ? (
+                    <ToolsSidebar isOpen={isSidebarOpen} />
+                ) : (
+                    <Sidebar
+                        isOpen={isSidebarOpen}
+                        view={getSidebarView(location.pathname)}
+                        onNavigate={(view) => {
+                            if (view === "photos") navigate("/");
+                            else if (view === "albums") navigate("/albums");
+                            else navigate("/" + view);
+                        }}
+                    />
+                )}
 
-                {location.pathname.startsWith("/albums") && (
+                {/* Only show Albums sidebar if NOT in settings and path matches */}
+                {!isSettings && location.pathname.startsWith("/albums") && (
                     <AlbumsSidebar
                         photos={photos}
                         isMainSidebarOpen={isSidebarOpen}

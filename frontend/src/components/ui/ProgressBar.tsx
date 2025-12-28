@@ -9,9 +9,9 @@ interface ProgressBarProps {
 
 export function ProgressBar({ progress, status, showPercentage = true }: ProgressBarProps) {
     const getProgressColor = () => {
-        if (status === 'completed') return 'var(--status-success)';
-        if (status === 'running') return 'var(--status-success)';
-        if (status === 'paused') return 'var(--text-muted)';
+        if (status === 'completed') return '#10B981'; // Green
+        if (status === 'running') return '#3B82F6';   // Blue
+        if (status === 'paused') return '#9CA3AF';    // Gray
         return 'var(--accent-primary)';
     };
 
@@ -24,6 +24,7 @@ export function ProgressBar({ progress, status, showPercentage = true }: Progres
                         style={{
                             width: `${progress}%`,
                             backgroundColor: getProgressColor(),
+                            transition: 'width 0.3s ease, background-color 0.3s ease'
                         }}
                     />
                     {status === "running" && progress > 0 && progress < 100 ? (

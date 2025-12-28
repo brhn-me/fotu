@@ -1,0 +1,107 @@
+.container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.inputWrapper {
+    position: relative;
+    width: 120px;
+}
+
+.inputCustom {
+    padding-right: 32px !important;
+    text-align: right;
+    font-family: inherit;
+}
+
+.dropdownButton {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.dropdownButton:hover {
+    color: var(--text-primary);
+}
+
+.iconOpen {
+    transform: rotate(180deg);
+}
+
+.unitText {
+    font-size: 13px;
+    color: var(--text-secondary);
+    min-width: 24px;
+}
+
+.dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    width: 100%;
+    min-width: 160px;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    overflow: hidden;
+    animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.option {
+    padding: 10px 14px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.option:hover {
+    background-color: var(--bg-secondary);
+}
+
+.optionActive {
+    background-color: var(--accent-light);
+    color: var(--accent-primary);
+}
+
+.optionValue {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.optionLabel {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.optionActive .optionLabel {
+    color: var(--accent-primary);
+    opacity: 0.8;
+}

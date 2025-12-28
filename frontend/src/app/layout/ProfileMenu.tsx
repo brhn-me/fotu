@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LogOut, Settings, User, Users } from "lucide-react";
+import { LogOut, User, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import styles from "./ProfileMenu.module.css";
 
@@ -33,7 +33,6 @@ export const ProfileMenu = () => {
                         <div className={styles.menuItems}>
                             <button onClick={() => handleNavigate("/profile")} className={styles.menuItem}><User size={18} />Profile</button>
                             <button onClick={() => handleNavigate("/accounts")} className={styles.menuItem}><Users size={18} />Accounts</button>
-                            <button onClick={() => handleNavigate("/settings")} className={styles.menuItem}><Settings size={18} />Settings</button>
                             <button onClick={() => setIsOpen(false)} className={styles.menuItem}><LogOut size={18} />Logout</button>
                         </div>
                     </div>

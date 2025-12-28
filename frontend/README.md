@@ -1,73 +1,87 @@
-# React + TypeScript + Vite
+# Fotu Frontend 🖼️
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend of Fotu is a modern, responsive gallery application built with React 19, Vite, and TypeScript. It provides a fluid user experience for managing and viewing media libraries.
 
-Currently, two official plugins are available:
+## ✨ Key Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Dynamic Gallery**: Visualizes photos and videos with a responsive grid and virtual lists for high performance.
+- **Job Monitoring**: Real-time status updates for backend jobs (scanning, hashing).
+- **Map View**: Interactive map for exploring media metadata and locations.
+- **Modern UI**: Sleek design with glassmorphism, dark mode support, and smooth transitions.
+- **Selection System**: Robust multi-select capability for batch operations.
 
-## React Compiler
+## 🚀 Core Technologies
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: React 19
+- **Build Tool**: Vite
+- **Language**: TypeScript
+- **Routing**: React Router 7
+- **Icons**: Lucide React
+- **Maps**: Leaflet & React Leaflet
+- **Virtualization**: React Virtuoso
+- **Real-time**: Socket.io-client
+- **Styling**: Vanilla CSS (Modern CSS features)
 
-## Expanding the ESLint configuration
+## 🏗️ Architecture
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 1. State Management
+Used React's Context API to manage shared state across the application:
+- `PhotoContext`: Manages media library data and caching.
+- `JobContext`: Handles real-time job status updates via Socket.io.
+- `SettingsContext`: Manages application-wide settings.
+- `SelectionContext`: Handles multi-select state.
+- `ThemeContext`: Manages light/dark mode.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 2. Routing
+Built with React Router 7, featuring a clean layout structure and protected routes.
+- **Pages**: Gallery, Map View, Jobs, Settings, Sources.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 3. Components
+Atomic component design for high reusability:
+- **UI Components**: Cards, Buttons, Inputs, Modals.
+- **Gallery Components**: Masonry-like grid, high-performance image rendering.
+- **Job Components**: Progress bars, detailed job cards, real-time logs.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🛠️ Getting Started
+
+### Prerequisites
+- Node.js (v18+)
+- pnpm
+
+### Installation & Run
+```bash
+pnpm install
+pnpm dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The app will be available at `http://localhost:5173`. Make sure the backend is running at `http://localhost:3000`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 📁 Project Structure
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```text
+frontend/
+├── src/
+│   ├── api/          # API client and type definitions
+│   ├── app/          # Navigation, routing, and theme definitions
+│   ├── components/   # Reusable UI components
+│   ├── context/      # React Context providers
+│   ├── hooks/        # Custom React hooks
+│   ├── pages/        # Main view components
+│   ├── services/     # Business logic and external API services
+│   ├── styles/       # Global styles and design tokens
+│   ├── types/        # Global TypeScript types
+│   ├── utils/        # Helper functions
+│   ├── main.tsx      # Application entry point
+│   └── index.css     # Global CSS
+├── public/           # Static assets
+└── vite.config.ts    # Vite configuration
 ```
+
+## 📜 Scripts
+
+| Command | Description |
+| :--- | :--- |
+| `pnpm dev` | Starts the development server with Hot Module Replacement (HMR) |
+| `pnpm build` | Compiles the application for production |
+| `pnpm lint` | Runs ESLint to check for code quality issues |
+| `pnpm preview` | Starts a local server to preview the production build |

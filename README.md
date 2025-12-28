@@ -1,5 +1,7 @@
 # Fotu 📸
 
+![Gallery Preview](assets/gallery-preview.png)
+
 Fotu is a modern, high-performance photo management application designed to organize, scan, and view your media library with ease.
 
 ## ✨ Features

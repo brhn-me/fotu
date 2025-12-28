@@ -1,5 +1,5 @@
 // Basic fetch wrapper for now, can switch to axios later
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 class ApiClient {
     private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
