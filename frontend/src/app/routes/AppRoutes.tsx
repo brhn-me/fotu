@@ -21,6 +21,9 @@ const AccountsPage = React.lazy(() => import("../../pages/accounts/AccountsPage"
 const MapPage = React.lazy(() => import("../../pages/map/MapPage").then(module => ({ default: module.MapPage })));
 const FilesPage = React.lazy(() => import("../../pages/files/FilesPage").then(module => ({ default: module.FilesPage })));
 
+const FixLocationsPage = React.lazy(() => import("../../pages/tools/FixLocationsPage").then(module => ({ default: module.FixLocationsPage })));
+const FixDateTimePage = React.lazy(() => import("../../pages/tools/FixDateTimePage").then(module => ({ default: module.FixDateTimePage })));
+
 export function AppRoutes() {
     return (
         <Suspense fallback={<div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}>
@@ -46,6 +49,12 @@ export function AppRoutes() {
                     <Route path="/settings/encoding" element={<EncodingSettings />} />
                     <Route path="/settings/organization" element={<OrganizationSettings />} />
                     <Route path="/settings/runtimes" element={<RuntimesSettings />} />
+
+                    {/* Tools Routes */}
+                    <Route path="/tools" element={<Navigate to="/tools/locations" replace />} />
+                    <Route path="/tools/locations" element={<FixLocationsPage />} />
+                    <Route path="/tools/metadata" element={<MetadataPage />} />
+                    <Route path="/tools/datetime" element={<FixDateTimePage />} />
 
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Route>

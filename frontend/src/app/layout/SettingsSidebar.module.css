@@ -18,6 +18,9 @@
     overflow: hidden;
     transition: all 0.2s ease;
     pointer-events: none;
+    height: 40px;
+    display: flex;
+    white-space: nowrap;
 }
 
 .sectionLabel {

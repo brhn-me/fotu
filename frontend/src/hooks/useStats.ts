@@ -31,16 +31,16 @@ export function useStats() {
         fetchStats();
 
         if (socket) {
-            socket.on('stats-updated', (data: SystemStats) => {
+            const handleStatsUpdate = (data: SystemStats) => {
                 setStats(data);
-            });
-        }
+            };
 
-        return () => {
-            if (socket) {
-                socket.off('stats-updated', fetchStats);
-            }
-        };
+            socket.on('stats-updated', handleStatsUpdate);
+
+            return () => {
+                socket.off('stats-updated', handleStatsUpdate);
+            };
+        }
     }, [socket]);
 
     return stats;

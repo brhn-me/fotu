@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom";
 import styles from "./Jobs.module.css";
 import shared from "../../styles/shared.module.css";
 import { Modal } from "../../components/ui/Modal";
-import { Button } from "../../components/ui/Button"; // Assuming Button exists based on usage
 import { useSocket } from "../../hooks/useSocket";
 import { Job, JOB_ICONS } from "./jobsIcons";
 import { JobCard } from "../../components/JobCard";
@@ -165,23 +164,22 @@ export function JobsPage() {
                     </div>
 
                     <div className={shared.pageHeaderActions} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <Button
+                        <button
                             onClick={openBullBoard}
                             title="Open Bull Board"
-                            className={shared.headerButton}
                             style={{
-                                backgroundColor: "var(--bg-secondary)",
-                                color: "var(--text-primary)",
-                                border: "1px solid var(--border-color)",
-                                padding: "8px 12px",
-                                borderRadius: "6px",
-                                fontSize: "14px",
-                                fontWeight: 500
+                                background: "transparent",
+                                border: "none",
+                                color: "var(--text-secondary)",
+                                cursor: "pointer",
+                                padding: "8px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center"
                             }}
                         >
-                            <Activity size={16} style={{ marginRight: 8 }} />
-                            Bull Board
-                        </Button>
+                            <Activity size={20} />
+                        </button>
                         <button
                             onClick={() => navigate("/settings/jobs")}
                             title="Concurrency Settings"

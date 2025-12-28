@@ -1,31 +1,18 @@
 import { NavLink, Link } from "react-router-dom";
-import {
-    Image,
-    Monitor,
-    FileCode,
-    Cpu,
-    Code,
-    FolderTree,
-    ChevronLeft,
-    Terminal
-} from "lucide-react";
-import styles from "./SettingsSidebar.module.css";
+import { ChevronLeft, MapPin, Info, Clock, Wrench } from "lucide-react";
+import styles from "./SettingsSidebar.module.css"; // Reuse settings sidebar styles for consistency
 
-const SETTINGS_MENU = [
-    { path: "/settings/thumbnails", label: "Thumbnails", icon: Image },
-    { path: "/settings/lightbox", label: "Lightbox", icon: Monitor },
-    { path: "/settings/raw", label: "Raw Conversion", icon: FileCode },
-    { path: "/settings/jobs", label: "Jobs", icon: Cpu },
-    { path: "/settings/encoding", label: "Encoding", icon: Code },
-    { path: "/settings/organization", label: "Organization", icon: FolderTree },
-    { path: "/settings/runtimes", label: "Runtimes", icon: Terminal },
-];
-
-interface SettingsSidebarProps {
+interface ToolsSidebarProps {
     isOpen: boolean;
 }
 
-export function SettingsSidebar({ isOpen }: SettingsSidebarProps) {
+const TOOLS_MENU = [
+    { label: "Fix Locations", icon: MapPin, path: "/tools/locations" },
+    { label: "Update Metadata", icon: Info, path: "/tools/metadata" },
+    { label: "Fix Date Time", icon: Clock, path: "/tools/datetime" },
+];
+
+export function ToolsSidebar({ isOpen }: ToolsSidebarProps) {
     return (
         <aside
             className={styles.sidebar}
@@ -34,15 +21,22 @@ export function SettingsSidebar({ isOpen }: SettingsSidebarProps) {
             <div
                 className={styles.sectionHeader}
                 style={{
-                    opacity: isOpen ? 1 : 0,
-                    transition: 'opacity 0.2s ease',
+                    // Fixed height in CSS, just handle opacity here
                 }}
             >
-                <span className={styles.sectionLabel}>Settings</span>
+                <span
+                    className={styles.sectionLabel}
+                    style={{
+                        opacity: isOpen ? 1 : 0,
+                        transition: 'opacity 0.2s ease',
+                    }}
+                >
+                    Tools
+                </span>
             </div>
 
             <nav className={styles.nav}>
-                {SETTINGS_MENU.map((item) => (
+                {TOOLS_MENU.map((item) => (
                     <NavLink
                         key={item.path}
                         to={item.path}

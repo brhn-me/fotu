@@ -4,6 +4,7 @@ import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { AlbumsSidebar } from "./AlbumsSidebar";
 import { SettingsSidebar } from "./SettingsSidebar";
+import { ToolsSidebar } from "./ToolsSidebar";
 import { FilterModal } from "../../components/search/FilterModal";
 import { usePhotos } from "../../context/PhotoContext";
 import { Lightbox } from "../../components/gallery/Lightbox";
@@ -30,8 +31,9 @@ export function MainLayout() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Determine if we are in settings section
+    // Determine if we are in settings or tools section
     const isSettings = location.pathname.startsWith("/settings");
+    const isTools = location.pathname.startsWith("/tools");
 
     return (
         <div className={styles.layoutRoot}>
@@ -40,6 +42,8 @@ export function MainLayout() {
             <div className={styles.contentWrapper}>
                 {isSettings ? (
                     <SettingsSidebar isOpen={isSidebarOpen} />
+                ) : isTools ? (
+                    <ToolsSidebar isOpen={isSidebarOpen} />
                 ) : (
                     <Sidebar
                         isOpen={isSidebarOpen}
