@@ -7,13 +7,11 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { getTriePath } from '../../utils/pathUtils';
 import { settingsService } from '../../services/settingsService';
-
-const DATA_ROOT = process.env.FOTU_DATA_DIR || path.join(process.cwd(), '.cache');
+import { config } from '../../config';
 
 export class ThumbsJob extends BaseJob {
     async process(job: Job) {
-        // SISULATION DELAY: 3 seconds
-        await new Promise(resolve => setTimeout(resolve, 200));
+
 
         const { mediaId, filePath } = job.data;
 
@@ -52,9 +50,9 @@ export class ThumbsJob extends BaseJob {
         ];
 
         for (const out of outputs) {
-            // Path structure: thumbs/<resolution>/<trie>.<ext>
-            // e.g. thumbs/480p/ab/cd/ef.webp
-            const outDir = path.join(DATA_ROOT, 'thumbs', out.label, path.dirname(triePath));
+            // Path structure: <thumbsDir>/<resolution>/<trie>.<ext>
+            // e.g. .cache/thumbs/480p/ab/cd/ef.webp
+            const outDir = path.join(config.thumbsDir, out.label, path.dirname(triePath));
             const fileName = `${path.basename(triePath)}.${out.format}`;
             const outPath = path.join(outDir, fileName);
 
@@ -141,7 +139,7 @@ export class ThumbsJob extends BaseJob {
         // --- LQIP Generation ---
         const LQIP_HEIGHT = 32;
         const lqipSize = { name: 'lqip' };
-        const lqipDir = path.join(DATA_ROOT, 'thumbs', lqipSize.name, path.dirname(triePath));
+        const lqipDir = path.join(config.thumbsDir, lqipSize.name, path.dirname(triePath));
         const lqipName = path.basename(triePath) + '.webp';
         const lqipPath = path.join(lqipDir, lqipName);
 

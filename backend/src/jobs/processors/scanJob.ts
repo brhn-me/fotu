@@ -9,32 +9,20 @@ import * as crypto from 'crypto';
 import { createReadStream } from 'fs';
 
 import { jobService } from '../../services/jobService';
+import { liveStatsService } from '../../services/liveStatsService';
 
 export class ScanJob extends BaseJob {
 
     async process(job: Job) {
-        // SISULATION DELAY: 3 seconds
-        await new Promise(resolve => setTimeout(resolve, 25));
-
+        // ... existing logic ...
         const { sourceId, path: scanPath, parentId } = job.data;
 
         if (!sourceId && !scanPath && !job.data.sourcePath) {
             throw new Error('Missing sourceId or path');
         }
 
-        // Handle both granular path and initial sourcePath
         const effectivePath = scanPath || job.data.sourcePath;
-
         if (!sourceId) throw new Error('Missing sourceId');
-
-
-        // If this is the root job (no parentId), mark source as scanning
-        if (!parentId) {
-            await prisma.source.update({
-                where: { id: sourceId },
-                data: { status: 'SCANNING', scannedAt: new Date() }
-            });
-        }
 
         const stats = await fs.stat(effectivePath);
 
@@ -43,7 +31,12 @@ export class ScanJob extends BaseJob {
         } else if (stats.isFile()) {
             await this.processFile(effectivePath, sourceId, parentId);
         }
+
+        // Notify that stats might have changed
+        liveStatsService.notifyChange();
     }
+
+
 
     private async processDirectory(dirPath: string, sourceId: string, parentId: string | null) {
         const name = path.basename(dirPath);

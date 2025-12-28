@@ -6,7 +6,8 @@
         "dev:frontend": "pnpm --filter ./frontend dev",
         "dev:backend": "pnpm --filter ./backend dev",
         "build": "pnpm -r build",
-        "test": "pnpm -r test"
+        "test": "pnpm -r test",
+        "cleanup": "./cleanup.sh"
     },
     "devDependencies": {
         "concurrently": "^8.0.0"

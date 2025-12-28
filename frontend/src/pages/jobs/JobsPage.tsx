@@ -39,7 +39,7 @@ export function JobsPage() {
                 const active = stats.counts.active || 0;
                 const completed = stats.counts.completed || 0;
                 const failed = stats.counts.failed || 0;
-                const total = active + completed + failed + (stats.counts.delayed || 0) + (stats.counts.waiting || 0);
+                const total = active + completed + failed + (stats.counts.delayed || 0) + (stats.counts.waiting || 0) + (stats.counts.paused || 0);
 
                 let status: Job['status'] = 'pending';
                 if (stats.isPaused) status = 'paused';
@@ -127,11 +127,38 @@ export function JobsPage() {
                                 <RefreshCcw size={24} />
                             </div>
                             <div>
-                                <h1 className={shared.pageTitle} style={{ margin: 0 }}>
-                                    Jobs
-                                </h1>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <h1 className={shared.pageTitle} style={{ margin: 0 }}>
+                                        Jobs
+                                    </h1>
+                                    {isConnected ? (
+                                        <div style={{
+                                            fontSize: '12px',
+                                            fontWeight: 600,
+                                            color: '#10B981',
+                                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                            padding: '2px 8px',
+                                            borderRadius: '12px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            height: '24px'
+                                        }}>
+                                            <span style={{
+                                                width: 6,
+                                                height: 6,
+                                                borderRadius: '50%',
+                                                backgroundColor: 'currentColor',
+                                                boxShadow: '0 0 8px currentColor'
+                                            }} />
+                                            Live
+                                        </div>
+                                    ) : (
+                                        <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>● Connecting...</span>
+                                    )}
+                                </div>
                                 <p className={shared.pageSubtitle} style={{ margin: "4px 0 0 0", color: "var(--text-muted)" }}>
-                                    Monitor processing tasks. {isConnected ? <span style={{ color: 'green' }}>● Live</span> : <span style={{ color: 'orange' }}>● Connecting...</span>}
+                                    Monitor progress of all running background tasks
                                 </p>
                             </div>
                         </div>

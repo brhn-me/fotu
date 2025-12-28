@@ -1,6 +1,6 @@
 import prisma from '../db/client';
 import { getQueue } from '../lib/queue';
-import { JobType } from '../config/jobsConfig';
+import { JobType, JOBS_CONFIG } from '../config/jobsConfig';
 
 class JobService {
     /**
@@ -85,6 +85,18 @@ class JobService {
      */
     async restartJob(type: JobType) {
         console.log(`Restarting (Purging & Re-queuing) jobs for ${type}...`);
+
+        // Check for dependents and restart them too
+        const jobConfig = JOBS_CONFIG[type];
+        if (jobConfig && jobConfig.dependents) {
+            console.log(`Cascading restart to dependents of ${type}: ${jobConfig.dependents.join(', ')}`);
+            for (const dep of jobConfig.dependents) {
+                // Determine if valid JobType before calling
+                if (JOBS_CONFIG[dep]) {
+                    await this.restartJob(dep as JobType);
+                }
+            }
+        }
 
         // 1. Purge existing queue to reset counts
         await this.purgeQueue(type);

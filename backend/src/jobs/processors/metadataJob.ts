@@ -9,8 +9,7 @@ import { exiftool } from 'exiftool-vendored';
 
 export class MetadataJob extends BaseJob {
     async process(job: Job) {
-        // SISULATION DELAY: 3 seconds
-        await new Promise(resolve => setTimeout(resolve, 150));
+
 
         const { mediaId, fileId, filePath } = job.data;
 

@@ -51,10 +51,9 @@ const SectionHeader = ({ label, isOpen }: { label: string; isOpen: boolean }) =>
     <div
         className={styles.sectionHeader}
         style={{
+            // Keep layout space constant to prevent jumping
             opacity: isOpen ? 1 : 0,
-            height: isOpen ? "auto" : "0px",
-            paddingTop: isOpen ? "16px" : "0px",
-            paddingBottom: isOpen ? "8px" : "0px",
+            transition: 'opacity 0.2s ease',
         }}
     >
         <span className={styles.sectionLabel}>
@@ -66,13 +65,16 @@ const SectionHeader = ({ label, isOpen }: { label: string; isOpen: boolean }) =>
 const StatisticsCard = ({ isOpen }: { isOpen: boolean }) => {
     const stats = useStats();
 
-    if (!stats) return null;
-
     const items = [
-        { label: "Photos", value: stats.photos.toLocaleString() },
-        { label: "Videos", value: stats.videos.toLocaleString() },
-        { label: "Total Files", value: stats.totalFiles.toLocaleString() },
+        { label: "Photos", value: stats?.photos?.toLocaleString() || "-" },
+        { label: "Videos", value: stats?.videos?.toLocaleString() || "-" },
+        { label: "Total Files", value: stats?.totalFiles?.toLocaleString() || "-" },
     ];
+
+    if (!stats && isOpen) {
+        // Only return null if closed? Or just render placeholders.
+        // Let's render placeholders so we can see the card exists.
+    }
 
     return (
         <div
@@ -101,12 +103,10 @@ const StatisticsCard = ({ isOpen }: { isOpen: boolean }) => {
 const StorageCard = ({ isOpen }: { isOpen: boolean }) => {
     const stats = useStats();
 
-    if (!stats) return null;
-
     // Use reported total from OS, or fallback
-    const totalGB = stats.totalGB || 100;
-    const freeGB = stats.freeGB || 0;
-    const usedGB = totalGB - freeGB;
+    const totalGB = stats?.totalGB || 0;
+    const freeGB = stats?.freeGB || 0;
+    const usedGB = totalGB > 0 ? totalGB - freeGB : 0;
 
     const percentage = totalGB > 0 ? (usedGB / totalGB) * 100 : 0;
 

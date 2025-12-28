@@ -33,7 +33,12 @@ const defaultValues: Record<string, string> = {
     videoEncoder: 'h264',
 
     // Jobs
-    jobsConcurrency: '[]',
+    jobsConcurrency: JSON.stringify(
+        Object.values(JOBS_CONFIG).map(job => ({
+            id: job.id,
+            concurrency: job.defaultConcurrency
+        }))
+    ),
     jobDelays: JSON.stringify(
         Object.values(JOBS_CONFIG).reduce((acc, job) => {
             acc[job.id] = job.defaultDelay || 100;
@@ -64,7 +69,8 @@ const defaultValues: Record<string, string> = {
 
 // Apply defaults for missing keys
 Object.entries(defaultValues).forEach(([key, val]) => {
-    if (defaults[key] === undefined) {
+    // If key is missing OR if it's the empty default "[]" for jobsConcurrency, overwrite it
+    if (defaults[key] === undefined || (key === 'jobsConcurrency' && defaults[key] === '[]')) {
         defaults[key] = val;
     }
 });

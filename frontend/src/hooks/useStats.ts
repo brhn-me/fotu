@@ -31,7 +31,9 @@ export function useStats() {
         fetchStats();
 
         if (socket) {
-            socket.on('stats-updated', fetchStats);
+            socket.on('stats-updated', (data: SystemStats) => {
+                setStats(data);
+            });
         }
 
         return () => {

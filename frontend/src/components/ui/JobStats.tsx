@@ -22,8 +22,8 @@ function StatItem({ label, value, color }: { label: string; value: number; color
     return (
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
             <div style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: color, opacity: 0.7 }} />
-            <span style={{ fontSize: "10px", fontWeight: 600, color: "var(--text-muted)", letterSpacing: 0.5 }}>
-                {label} <span style={{ fontWeight: 400, color: "var(--text-muted)" }}>{formattedValue}</span>
+            <span style={{ fontSize: "10px", fontWeight: 500, color: "var(--text-muted)", letterSpacing: 0.5 }}>
+                {label} <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>{formattedValue}</span>
             </span>
         </div>
     );

@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import prisma from '../db/client';
 import { DEFAULT_SETTINGS } from '../config/defaultSettings';
+import { JOBS_CONFIG } from '../config/jobsConfig';
 
 export interface InternalSettings {
     core: {
@@ -39,6 +40,9 @@ export interface InternalSettings {
 }
 
 class SettingsService extends EventEmitter {
+    private cache: InternalSettings | null = null;
+    private rawCache: Record<string, string> = {};
+
     /**
      * Seeds default settings into the database if they don't exist.
      */
@@ -55,25 +59,42 @@ class SettingsService extends EventEmitter {
         try {
             await prisma.$transaction(operations);
             console.log('Default settings seeded successfully.');
+            // Initial load after seeding
+            await this.load();
         } catch (error) {
             console.error('Failed to seed default settings:', error);
         }
     }
 
     /**
-     * Retrieves all settings as a key-value map.
-     * Values are always strings (database format).
+     * Loads settings from DB into memory cache.
+     * Should be called on startup and after updates.
      */
-    async getAll(): Promise<Record<string, string>> {
+    async load() {
         const settings = await prisma.settings.findMany();
-        return settings.reduce((acc, curr) => {
+        this.rawCache = settings.reduce((acc, curr) => {
             acc[curr.key] = curr.value;
             return acc;
         }, {} as Record<string, string>);
+
+        this.cache = this.parseSettings(this.rawCache);
+        this.emit('settingsUpdated', this.cache);
     }
 
     /**
-     * Updates multiple settings.
+     * Retrieves all settings as a key-value map.
+     * Uses cache if available, otherwise falls back to DB.
+     * Values are always strings (database format).
+     */
+    async getAll(): Promise<Record<string, string>> {
+        if (Object.keys(this.rawCache).length === 0) {
+            await this.load();
+        }
+        return { ...this.rawCache };
+    }
+
+    /**
+     * Updates multiple settings and refreshes cache.
      */
     async update(updates: Record<string, any>): Promise<void> {
         const operations = Object.entries(updates).map(([key, value]) => {
@@ -86,20 +107,27 @@ class SettingsService extends EventEmitter {
         });
 
         await prisma.$transaction(operations);
-        this.emit('settingsUpdated');
+        await this.load(); // Refresh cache
+        // Event emitted in load()
     }
 
     /**
      * Retrieves typed settings for internal service consumption.
-     * This acts as a facade to parse raw DB strings into usable numbers/booleans.
+     * Returns cached version for performance.
      */
     async getTyped(): Promise<InternalSettings> {
-        const all = await this.getAll();
+        if (!this.cache) {
+            await this.load();
+        }
+        if (!this.cache) throw new Error('Failed to load settings');
+        return this.cache;
+    }
 
+    private parseSettings(all: Record<string, string>): InternalSettings {
         // Parse Jobs Config
         let jobsConfig: Record<string, number> = {};
         try {
-            const parsed = JSON.parse(all.jobsConcurrency || '[]');
+            const parsed = JSON.parse(all.jobsConcurrency || DEFAULT_SETTINGS.jobsConcurrency || '[]');
             if (Array.isArray(parsed)) {
                 parsed.forEach((p: any) => {
                     if (p.id && typeof p.concurrency === 'number') {
@@ -112,36 +140,44 @@ class SettingsService extends EventEmitter {
         // Parse Raw Formats
         let rawFormats: string[] = [];
         try {
-            rawFormats = JSON.parse(all.rawFormats || '[]');
+            rawFormats = JSON.parse(all.rawFormats || DEFAULT_SETTINGS.rawFormats || '[]');
         } catch { /* ignore */ }
 
         // Parse Job Delays
-        let jobDelays: Record<string, number> = {};
+        // Prioritize dynamic defaults from JOBS_CONFIG if not set in DB
+        const defaultDelays = Object.values(JOBS_CONFIG).reduce((acc, job) => {
+            acc[job.id] = job.defaultDelay || 100;
+            return acc;
+        }, {} as Record<string, number>);
+
+        let jobDelays: Record<string, number> = defaultDelays;
+
         try {
             const parsed = JSON.parse(all.jobDelays || '{}');
             if (typeof parsed === 'object' && parsed !== null) {
-                jobDelays = parsed;
+                // Merge DB values over defaults
+                jobDelays = { ...defaultDelays, ...parsed };
             }
         } catch { /* ignore */ }
 
         return {
             core: {
-                albumStructure: all.albumStructure || '{yyyy}/{mm}'
+                albumStructure: all.albumStructure || DEFAULT_SETTINGS.albumStructure || '{yyyy}/{mm}'
             },
             jobs: jobsConfig,
             jobDelays: jobDelays,
             jobDelay: Number(all.jobDelay || 100),
             raw: {
                 formats: rawFormats,
-                darktableEnabled: all.darktableEnabled === 'true',
+                darktableEnabled: all.darktableEnabled === 'true', // Defaults to false per file string
                 sidecarEnabled: all.useSidecar === 'true'
             },
             video: {
                 autoplay: all.videoAutoplay === 'true',
-                defaultVolume: Number(all.videoDefaultVolume || 100),
-                previewDuration: Number(all.videoPreviewDuration || 4),
-                resolution: all.videoResolution || '240p',
-                encoder: all.videoEncoder || 'h264'
+                defaultVolume: Number(all.videoDefaultVolume || DEFAULT_SETTINGS.videoDefaultVolume),
+                previewDuration: Number(all.videoPreviewDuration || DEFAULT_SETTINGS.videoPreviewDuration),
+                resolution: all.videoResolution || DEFAULT_SETTINGS.videoResolution,
+                encoder: all.videoEncoder || DEFAULT_SETTINGS.videoEncoder
             },
             runtimes: {
                 exiftool: all.exiftoolPath || '',
@@ -150,23 +186,28 @@ class SettingsService extends EventEmitter {
                 darktable: all.darktableCliPath || ''
             },
             images: {
-                thumbnailQuality: Number(all.thumbnailQuality || 70),
-                previewQuality: Number(all.previewQuality || 80),
-                thumbnailResolution: all.thumbnailResolution || '240p',
-                previewResolution: all.previewResolution || '1080p',
-                thumbnailFormat: all.thumbnailFormat || 'webp',
-                previewFormat: all.previewFormat || 'webp',
-                encoder: all.imageEncoder || 'webp'
+                thumbnailQuality: Number(all.thumbnailQuality || DEFAULT_SETTINGS.thumbnailQuality),
+                previewQuality: Number(all.previewQuality || DEFAULT_SETTINGS.previewQuality),
+                thumbnailResolution: all.thumbnailResolution || DEFAULT_SETTINGS.thumbnailResolution,
+                previewResolution: all.previewResolution || DEFAULT_SETTINGS.previewResolution,
+                thumbnailFormat: all.thumbnailFormat || DEFAULT_SETTINGS.thumbnailFormat,
+                previewFormat: all.previewFormat || DEFAULT_SETTINGS.previewFormat,
+                encoder: all.imageEncoder || DEFAULT_SETTINGS.imageEncoder
             }
         };
     }
 
     // Alias for backward compatibility if needed, using generic string
     async get(key: string): Promise<string | null> {
+        if (this.rawCache[key] !== undefined) {
+            return this.rawCache[key];
+        }
+        // Fallback to DB if somehow not in cache (unlikely if loaded)
         const item = await prisma.settings.findUnique({ where: { key } });
         return item?.value || null;
     }
 }
 
 export const settingsService = new SettingsService();
+// We'll call settingsService.load() explicitly in main.ts
 export const seedDefaultSettings = settingsService.seedDefaults.bind(settingsService);

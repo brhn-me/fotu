@@ -48,7 +48,8 @@ export function JobsSettings() {
     const getConcurrency = (id: string) => {
         if (id === 'scan' || id === 'organize') return 1;
         const found = pendingConcurrency.find((c: any) => c.id === id);
-        return found ? found.concurrency : 4;
+        // Fallback to job definition default if not found in user settings, then to 1
+        return found ? found.concurrency : (jobs.find(j => j.id === id)?.defaultConcurrency || 1);
     };
 
     const updateLocalConcurrency = (jobId: string, value: number) => {

@@ -35,10 +35,8 @@ export async function initWorkers() {
 async function syncWorkers(jobsConfig: Record<string, number>) {
     const promises = Object.keys(JOBS_CONFIG).map(async (key) => {
         const type = key as JobType;
-        // Default concurrency if not specified in settings
-        // Scan is always sequential (1) unless overridden (but logically should remain 1)
-        // Others default to 4
-        let targetConcurrency = jobsConfig[type] || (type === 'scan' ? 1 : 4);
+        // Default concurrency from JOBS_CONFIG
+        let targetConcurrency = jobsConfig[type] || JOBS_CONFIG[type]?.defaultConcurrency || 1;
 
         // Scan job should ideally stay sequential to avoid IO trashing and locking issues,
         // but let's allow override if user really wants it. 
@@ -95,9 +93,11 @@ function startWorker(type: JobType, concurrency: number) {
             const settings = await settingsService.getTyped();
             let delay = 100; // Default global fallback
 
-            // Use specific delay if valid number, otherwise fallback
+            // Use specific delay if valid number, otherwise default from config, then hard fallback to 100
             if (settings.jobDelays && typeof settings.jobDelays[type] === 'number') {
                 delay = settings.jobDelays[type];
+            } else if (JOBS_CONFIG[type]?.defaultDelay !== undefined) {
+                delay = JOBS_CONFIG[type].defaultDelay!;
             }
 
             if (delay > 0) {
