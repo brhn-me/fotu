@@ -38,7 +38,7 @@ export function AppRoutes() {
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/accounts" element={<AccountsPage />} />
                     <Route path="/map" element={<MapPage />} />
-                    <Route path="/files" element={<FilesPage />} />
+                    <Route path="/files/*" element={<FilesPage />} />
 
                     {/* Settings Routes */}
                     <Route path="/settings" element={<Navigate to="/settings/thumbnails" replace />} />
